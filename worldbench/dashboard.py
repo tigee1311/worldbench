@@ -173,85 +173,173 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
   <title>WorldBench Dashboard</title>
   <style>
     :root {{
-      --bg: #f6f8fb;
-      --panel: #ffffff;
-      --ink: #14212b;
-      --muted: #617282;
-      --line: #d8e1ea;
-      --red: #d94c45;
-      --green: #198f5d;
-      --blue: #2563eb;
-      --amber: #b7791f;
+      --bg: #071019;
+      --panel: rgba(10, 20, 31, 0.94);
+      --panel-2: rgba(15, 28, 42, 0.96);
+      --ink: #f6faff;
+      --muted: #91a9bb;
+      --line: #28435a;
+      --soft-line: rgba(88, 125, 153, 0.32);
+      --red: #ff6b5f;
+      --green: #41d38a;
+      --blue: #5fc6eb;
+      --amber: #ffb85c;
     }}
     * {{ box-sizing: border-box; }}
     body {{
       margin: 0;
-      background: var(--bg);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 6% 8%, rgba(35, 92, 122, 0.36), transparent 22rem),
+        radial-gradient(circle at 88% 88%, rgba(29, 135, 91, 0.28), transparent 28rem),
+        linear-gradient(180deg, #071019 0%, #0b1722 100%);
       color: var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.45;
     }}
-    header {{
-      border-bottom: 1px solid var(--line);
-      background: #101820;
-      color: #fff;
-      padding: 28px 32px;
+    body::before {{
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(80, 118, 147, 0.07) 1px, transparent 1px),
+        linear-gradient(78deg, rgba(80, 118, 147, 0.06) 1px, transparent 1px);
+      background-size: 64px 56px, 80px 80px;
+      transform: skewX(-11deg);
+      transform-origin: top left;
+      opacity: 0.42;
     }}
-    header h1 {{ margin: 0; font-size: 32px; letter-spacing: 0; }}
-    header p {{ margin: 6px 0 0; color: #bdd0dd; }}
-    main {{ max-width: 1240px; margin: 0 auto; padding: 28px 24px 56px; }}
+    header {{
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 34px auto 0;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(10, 20, 32, 0.9);
+      color: var(--ink);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.26);
+    }}
+    header h1 {{ margin: 0; font-size: 30px; letter-spacing: 0; line-height: 1.1; }}
+    header p {{ margin: 4px 0 0; color: var(--muted); }}
+    .run-pill {{
+      border: 1px solid rgba(65, 211, 138, 0.62);
+      border-radius: 999px;
+      color: #dff7eb;
+      background: rgba(65, 211, 138, 0.12);
+      padding: 5px 18px;
+      font-size: 12px;
+      white-space: nowrap;
+    }}
+    main {{ position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; padding: 32px 0 64px; }}
     .summary {{
       display: grid;
-      grid-template-columns: 220px minmax(0, 1fr);
-      gap: 16px;
+      grid-template-columns: 252px minmax(0, 1fr);
+      gap: 26px;
       align-items: stretch;
-      margin-bottom: 18px;
+      margin-bottom: 26px;
     }}
     .score, .panel, .metric-card {{
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: 0 1px 2px rgba(16, 24, 32, 0.04);
+      border-radius: 22px;
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(10px);
     }}
-    .score {{ padding: 22px; }}
-    .score .label {{ color: var(--muted); font-size: 13px; text-transform: uppercase; }}
-    .score .value {{ font-size: 48px; font-weight: 760; margin-top: 4px; }}
-    .score .value small {{ font-size: 18px; color: var(--muted); }}
-    .main-failure {{ padding: 22px; }}
-    .main-failure h2, section h2 {{ margin: 0 0 10px; font-size: 18px; }}
-    .main-failure p {{ margin: 0; color: var(--muted); font-size: 16px; }}
+    .score {{ padding: 34px 30px 26px; min-height: 178px; }}
+    .score .label {{ color: var(--muted); font-size: 13px; }}
+    .score .value {{ color: var(--red); font-size: 70px; line-height: 0.95; font-weight: 800; margin-top: 28px; }}
+    .score .value small {{ font-size: 21px; color: var(--muted); margin-left: 6px; }}
+    .main-failure {{ padding: 34px; min-height: 178px; }}
+    .main-failure h2, section h2 {{ margin: 0 0 12px; font-size: 23px; letter-spacing: 0; }}
+    .main-failure p {{ margin: 0; color: #d2e0ea; font-size: 17px; max-width: 880px; }}
     .metrics {{
       display: grid;
       grid-template-columns: repeat(5, minmax(140px, 1fr));
-      gap: 12px;
-      margin: 18px 0;
+      gap: 20px;
+      margin: 0 0 34px;
     }}
-    .metric-card {{ padding: 16px; min-height: 112px; }}
-    .metric-card .name {{ color: var(--muted); font-size: 13px; min-height: 38px; }}
-    .metric-card .metric-score {{ font-size: 28px; font-weight: 720; margin-top: 8px; }}
-    .bar {{ height: 8px; border-radius: 999px; background: #e8edf3; overflow: hidden; margin-top: 10px; }}
+    .metric-card {{ padding: 22px 20px 18px; min-height: 138px; }}
+    .metric-card .name {{ color: var(--muted); font-size: 13px; min-height: 32px; }}
+    .metric-card .metric-score {{ color: var(--ink); font-size: 30px; font-weight: 780; margin-top: 12px; }}
+    .metric-card .metric-score small {{ color: var(--muted); font-size: 12px; font-weight: 500; margin-left: 5px; }}
+    .bar {{ height: 8px; border-radius: 999px; background: #26394a; overflow: hidden; margin-top: 14px; }}
     .bar span {{ display: block; height: 100%; background: var(--blue); }}
-    section {{ margin-top: 18px; }}
-    .panel {{ padding: 18px; }}
+    section {{ margin-top: 24px; }}
+    .panel {{ padding: 28px 30px; }}
     table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
-    th, td {{ text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }}
-    th {{ color: var(--muted); font-size: 12px; text-transform: uppercase; }}
+    th, td {{ text-align: left; padding: 13px 10px; border-bottom: 1px solid var(--soft-line); vertical-align: top; }}
+    th {{ color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }}
+    td {{ color: #dce8f1; }}
     .issues {{ display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }}
-    .issues li {{ border-left: 4px solid var(--amber); background: #fff9eb; padding: 10px 12px; border-radius: 4px; }}
-    .issues li.critical {{ border-left-color: var(--red); background: #fff1f1; }}
-    .issues li.ok {{ border-left-color: var(--green); background: #effaf4; }}
-    .issues li.severity-label {{ margin-top: 12px; padding: 0; border-left: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 760; text-transform: uppercase; }}
+    .issues li {{
+      border-left: 6px solid var(--amber);
+      background: var(--panel-2);
+      border-radius: 10px;
+      border-top: 1px solid var(--soft-line);
+      border-right: 1px solid var(--soft-line);
+      border-bottom: 1px solid var(--soft-line);
+      color: #dce8f1;
+      padding: 10px 14px;
+    }}
+    .issues li.critical {{ border-left-color: var(--red); }}
+    .issues li.ok {{ border-left-color: var(--green); }}
+    .issues li.severity-label {{
+      margin-top: 12px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 760;
+      text-transform: uppercase;
+    }}
     .viewer-controls {{ display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }}
     select, input[type="range"] {{ accent-color: var(--blue); }}
-    select {{ padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: white; }}
+    label {{ color: var(--muted); }}
+    select {{
+      color: var(--ink);
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #0f1c2a;
+    }}
+    input[type="range"] {{ min-width: 220px; }}
+    #frameLabel {{ color: var(--ink); }}
     .frames {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }}
     .frame h3 {{ margin: 0 0 8px; font-size: 14px; color: var(--muted); }}
-    .frame img {{ width: 100%; image-rendering: auto; border-radius: 6px; border: 1px solid var(--line); background: #0e141a; }}
+    .frame img {{
+      width: 100%;
+      image-rendering: auto;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #071019;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }}
     .chart {{ width: 100%; overflow-x: auto; }}
-    .report-link {{ display: inline-block; color: var(--blue); font-weight: 650; margin-top: 10px; text-decoration: none; }}
-    .report-link:hover {{ text-decoration: underline; }}
-    details pre {{ overflow: auto; max-height: 420px; background: #0f1720; color: #dbe9f3; padding: 14px; border-radius: 6px; }}
+    .report-link {{
+      display: inline-block;
+      color: #dff7eb;
+      font-weight: 650;
+      margin-top: 22px;
+      text-decoration: none;
+      border: 1px solid rgba(65, 211, 138, 0.55);
+      border-radius: 999px;
+      padding: 7px 14px;
+      background: rgba(65, 211, 138, 0.1);
+    }}
+    .report-link:hover {{ border-color: var(--green); }}
+    summary {{ cursor: pointer; color: var(--ink); font-weight: 700; }}
+    details pre {{ overflow: auto; max-height: 420px; background: #06101a; color: #dbe9f3; padding: 16px; border: 1px solid var(--soft-line); border-radius: 14px; }}
+    svg text {{ font-family: inherit; }}
     @media (max-width: 900px) {{
+      header {{ margin: 18px 16px 0; align-items: flex-start; gap: 12px; flex-direction: column; }}
+      main {{ padding: 22px 16px 44px; }}
       .summary {{ grid-template-columns: 1fr; }}
       .metrics {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       .frames {{ grid-template-columns: 1fr; }}
@@ -260,8 +348,11 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
 </head>
 <body>
   <header>
-    <h1>WorldBench</h1>
-    <p>Not another world model. The test suite for world models.</p>
+    <div>
+      <h1>WorldBench Dashboard</h1>
+      <p>Local robotics world-model evaluation</p>
+    </div>
+    <div class="run-pill">local run</div>
   </header>
   <main>
     <div class="summary">
@@ -364,11 +455,11 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
 def _metric_card(name: str, score: float) -> str:
     label = html.escape(name.replace("_", " ").title())
     width = max(0, min(100, score))
-    color = "#198f5d" if score >= 85 else "#b7791f" if score >= 60 else "#d94c45"
+    color = "#41d38a" if score >= 85 else "#ffb85c" if score >= 60 else "#ff6b5f"
     return (
         '<div class="metric-card">'
         f'<div class="name">{label}</div>'
-        f'<div class="metric-score">{score:.1f}</div>'
+        f'<div class="metric-score">{score:.1f}<small>/100</small></div>'
         f'<div class="bar"><span style="width:{width:.1f}%; background:{color}"></span></div>'
         "</div>"
     )
@@ -418,18 +509,18 @@ def _timeline_svg(result: EvaluationResult) -> str:
     top = 24
     plot_height = 200
     names = list(result.metrics)
-    colors = ["#2563eb", "#198f5d", "#d94c45", "#b7791f", "#6b46c1"]
+    colors = ["#5fc6eb", "#41d38a", "#ff6b5f", "#ffb85c", "#9b8cff"]
     group_width = (width - left - 24) / max(1, len(result.episodes))
     bar_width = max(10, min(22, group_width / max(1, len(names) + 1)))
     parts = [
         f'<svg width="{width}" height="{height}" role="img" aria-label="Metric timeline">',
-        f'<line x1="{left}" y1="{top + plot_height}" x2="{width - 16}" y2="{top + plot_height}" stroke="#d8e1ea"/>',
-        f'<line x1="{left}" y1="{top}" x2="{left}" y2="{top + plot_height}" stroke="#d8e1ea"/>',
+        f'<line x1="{left}" y1="{top + plot_height}" x2="{width - 16}" y2="{top + plot_height}" stroke="#28435a"/>',
+        f'<line x1="{left}" y1="{top}" x2="{left}" y2="{top + plot_height}" stroke="#28435a"/>',
     ]
     for tick in [0, 25, 50, 75, 100]:
         y = top + plot_height - (tick / 100) * plot_height
-        parts.append(f'<line x1="{left - 4}" y1="{y}" x2="{width - 16}" y2="{y}" stroke="#edf2f7"/>')
-        parts.append(f'<text x="12" y="{y + 4}" font-size="11" fill="#617282">{tick}</text>')
+        parts.append(f'<line x1="{left - 4}" y1="{y}" x2="{width - 16}" y2="{y}" stroke="#182b3c"/>')
+        parts.append(f'<text x="12" y="{y + 4}" font-size="11" fill="#91a9bb">{tick}</text>')
 
     for episode_idx, episode in enumerate(result.episodes):
         base_x = left + episode_idx * group_width + 20
@@ -446,7 +537,7 @@ def _timeline_svg(result: EvaluationResult) -> str:
                 f'height="{bar_height:.1f}" rx="2" fill="{color}"><title>{name}: {metric.score:.1f}</title></rect>'
             )
         parts.append(
-            f'<text x="{base_x:.1f}" y="{height - 26}" font-size="12" fill="#617282">{html.escape(episode.episode)}</text>'
+            f'<text x="{base_x:.1f}" y="{height - 26}" font-size="12" fill="#91a9bb">{html.escape(episode.episode)}</text>'
         )
 
     legend_x = left
@@ -455,7 +546,7 @@ def _timeline_svg(result: EvaluationResult) -> str:
         label = html.escape(name.replace("_", " ").title())
         x = legend_x + idx * 150
         parts.append(f'<rect x="{x}" y="{height - 14}" width="10" height="10" fill="{color}"/>')
-        parts.append(f'<text x="{x + 14}" y="{height - 5}" font-size="11" fill="#617282">{label}</text>')
+        parts.append(f'<text x="{x + 14}" y="{height - 5}" font-size="11" fill="#91a9bb">{label}</text>')
     parts.append("</svg>")
     return "\n".join(parts)
 
