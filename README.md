@@ -2,16 +2,20 @@
 
 ### Evaluate robotics world models with one command.
 
-WorldBench checks whether generated robot futures are action-consistent, physically plausible, temporally stable, object-persistent, and useful for planning.
+[![tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-**Not another world model. The test suite for world models.**
+WorldBench catches when a robot world model looks right but is actually wrong: it checks whether generated futures follow robot actions, contact physics, temporal consistency, and object permanence.
 
 <p align="center">
-  <img src="assets/demo/worldbench_demo.gif" width="850" alt="WorldBench demo showing robotics world-model evaluation" />
+  <img src="assets/demo/worldbench_demo.gif" width="850" alt="WorldBench demo showing robot world-model evaluation" />
 </p>
 
 ```bash
-pip install -e .
+git clone https://github.com/tigee1311/worldbench.git
+cd worldbench
+pip install -e ".[dev,video]"
 worldbench demo
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
 worldbench dashboard .worldbench/runs/latest/result.json
@@ -28,9 +32,7 @@ Main failure:
 The model generates plausible frames but ignores the robot action sequence.
 ```
 
-[![tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+**Not another world model. The test suite for world models.**
 
 Features • Quickstart • CLI • Python SDK • Metrics • Roadmap
 
@@ -39,7 +41,7 @@ Features • Quickstart • CLI • Python SDK • Metrics • Roadmap
 ```bash
 git clone https://github.com/tigee1311/worldbench.git
 cd worldbench
-pip install -e .
+pip install -e ".[dev,video]"
 
 worldbench demo
 worldbench validate examples/demo_dataset

@@ -42,7 +42,7 @@ dependencies = [
 [project.optional-dependencies]
 vision = ["scikit-image>=0.21"]
 dev = ["pytest>=8.0", "ruff>=0.8"]
-video = ["imageio>=2.34", "imageio-ffmpeg>=0.5", "opencv-python>=4.8"]
+video = ["imageio>=2.34", "imageio-ffmpeg>=0.5"]
 
 [project.urls]
 Homepage = "https://github.com/tigee1311/worldbench"
