@@ -25,11 +25,14 @@ classifiers = [
   "Intended Audience :: Developers",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Image Processing",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
   "numpy>=1.23",
@@ -45,6 +48,8 @@ dev = ["pytest>=8.0", "ruff>=0.8"]
 video = ["imageio>=2.34", "imageio-ffmpeg>=0.5"]
 
 [project.urls]
+Changelog = "https://github.com/tigee1311/worldbench/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/tigee1311/worldbench#readme"
 Homepage = "https://github.com/tigee1311/worldbench"
 Issues = "https://github.com/tigee1311/worldbench/issues"
 Repository = "https://github.com/tigee1311/worldbench"

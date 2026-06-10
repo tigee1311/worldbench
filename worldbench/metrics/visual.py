@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 
@@ -94,4 +93,3 @@ def _fallback_ssim(gt: np.ndarray, pred: np.ndarray) -> float:
     if denominator == 0:
         return 1.0
     return float(max(0.0, min(1.0, numerator / denominator)))
-

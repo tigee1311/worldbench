@@ -3,10 +3,10 @@
 ### Evaluate robotics world models with one command.
 
 [![tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://github.com/tigee1311/worldbench)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](https://github.com/tigee1311/worldbench/blob/main/LICENSE)
 
-WorldBench catches when a robot world model looks right but is actually wrong: it checks whether generated futures follow robot actions, contact physics, temporal consistency, and object permanence.
+WorldBench catches when a robot world model looks right but is actually wrong: it checks whether generated futures follow robot actions, contact physics, temporal consistency, and object permanence. It compares predictions against ground truth, detects action mismatch, flags object disappearance, catches object motion before contact, generates Markdown reports, and launches a local dashboard.
 
 <p align="center">
   <img src="assets/demo/worldbench_demo.gif" width="850" alt="WorldBench demo showing robot world-model evaluation" />
@@ -18,6 +18,7 @@ cd worldbench
 pip install -e ".[dev,video]"
 worldbench demo
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
+worldbench compare examples/demo_dataset --models good_model bad_model
 worldbench dashboard .worldbench/runs/latest/result.json
 ```
 
@@ -47,6 +48,7 @@ worldbench demo
 worldbench validate examples/demo_dataset
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
+worldbench compare examples/demo_dataset --models good_model bad_model
 worldbench report .worldbench/runs/latest/result.json
 worldbench dashboard .worldbench/runs/latest/result.json
 ```
@@ -55,20 +57,21 @@ worldbench dashboard .worldbench/runs/latest/result.json
 
 ## What It Does
 
-WorldBench is a Python SDK, CLI, and local dashboard for evaluating robotics world-model rollouts. It takes a robot rollout dataset plus predicted future frames and produces:
+WorldBench is a Python SDK, CLI, and local dashboard for robotics AI teams building or evaluating world models. It takes a robot rollout dataset plus predicted future frames and produces:
 
 - Control-aware metric scores
 - Per-episode failure evidence
-- Good vs bad model comparisons
+- Benchmark-style model comparisons
 - Markdown reports
 - A zero-dependency local HTML dashboard
+- An experimental LeRobot-style local folder import
 - A synthetic demo that works without robots, GPUs, or model training
 
 ## Why WorldBench?
 
 Robotics world models can make futures that look realistic while still being wrong for control. A prediction is not useful if it moves opposite the commanded action, teleports a cube before contact, drops a task object, or flickers across the rollout.
 
-WorldBench focuses on the failure modes that matter when a robot planner consumes generated futures.
+WorldBench focuses on the failure modes that matter when a robot planner consumes generated futures. It is for world-model builders, robotics ML researchers, and evaluation engineers who need more than a pretty-video metric before trusting predictions in planning loops.
 
 ## Why Not Just SSIM/PSNR?
 
@@ -97,11 +100,12 @@ pip install -e ".[dev]"
 pytest
 ```
 
-For regenerating the README demo video:
+For regenerating README demo media:
 
 ```bash
 pip install -e ".[video]"
 python scripts/make_demo_video.py
+python scripts/make_screenshots.py
 ```
 
 `scikit-image` is optional for SSIM:
@@ -119,10 +123,14 @@ worldbench init <path>
 worldbench demo
 worldbench validate <dataset_path>
 worldbench eval <dataset_path> --predictions <predictions_path>
+worldbench compare <dataset_path> --models good_model bad_model
 worldbench compare <run_a/result.json> <run_b/result.json>
+worldbench import-lerobot <input_path> --out <output_path>
+worldbench import-lerobot --demo --out examples/lerobot_push_cube
 worldbench report <result_json>
 worldbench dashboard <result_json_or_dataset_path>
 worldbench make-demo-video
+worldbench make-screenshots
 ```
 
 Example:
@@ -130,9 +138,12 @@ Example:
 ```bash
 worldbench demo
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
+worldbench compare examples/demo_dataset --models good_model bad_model
 worldbench report .worldbench/runs/latest/result.json
 worldbench dashboard .worldbench/runs/latest/result.json
 ```
+
+`worldbench compare examples/demo_dataset --models good_model bad_model` evaluates both model folders, prints the largest metric gaps, and writes `.worldbench/comparisons/latest/comparison.json` plus `.worldbench/comparisons/latest/comparison.md`.
 
 ## Python SDK Usage
 
@@ -233,6 +244,44 @@ or model-run style:
 predictions/episode_001/000.png
 ```
 
+## Experimental Adapters
+
+### LeRobot-Style Import
+
+WorldBench includes an experimental LeRobot-style local folder converter. This is not official LeRobot support; it is a simple bridge for folders shaped like `images/`, `actions.json`, `states.json`, and `metadata.json`.
+
+```bash
+worldbench import-lerobot --demo --out examples/lerobot_push_cube
+worldbench validate examples/lerobot_push_cube
+```
+
+Input:
+
+```text
+input_path/
+  images/
+    000.png
+    001.png
+    002.png
+  actions.json
+  states.json
+  metadata.json
+```
+
+Output:
+
+```text
+output_path/
+  episode_001/
+    frames/
+      000.png
+      001.png
+      002.png
+    actions.json
+    states.json
+    metadata.json
+```
+
 ## Metrics
 
 | Metric | Weight | What it checks |
@@ -261,31 +310,43 @@ Sample reports:
 - [good_model_report.md](examples/sample_reports/good_model_report.md)
 - [bad_model_report.md](examples/sample_reports/bad_model_report.md)
 
+### Dashboard and Report Screenshots
+
+<p align="center">
+  <img src="assets/screenshots/dashboard.png" width="850" alt="WorldBench local dashboard screenshot" />
+</p>
+
+<p align="center">
+  <img src="assets/screenshots/report.png" width="850" alt="WorldBench Markdown report screenshot" />
+</p>
+
 ## Supported Now Vs Roadmap
 
 | Feature | Status |
 | --- | --- |
 | Synthetic demo dataset | Supported |
-| Good vs bad model comparison | Supported |
+| Benchmark-style model comparison | Supported |
 | CLI evaluation | Supported |
 | Markdown reports | Supported |
 | Local dashboard | Supported |
 | Action consistency scoring | Supported |
 | Object permanence scoring | Supported |
 | Contact realism scoring | Supported |
+| Experimental LeRobot-style local import | Experimental |
 | ROS bag import | Planned |
-| LeRobot dataset import | Planned |
+| Official LeRobot dataset support | Planned |
 | ManiSkill/RLBench adapters | Planned |
 | Real robot rollout support | Planned |
 | Cloud run sharing | Planned |
 | Benchmark leaderboard | Planned |
 
-## Demo Video Generation
+## Demo Video and Screenshot Generation
 
 The README animation is generated from code, not an external recording.
 
 ```bash
 python scripts/make_demo_video.py
+python scripts/make_screenshots.py
 ```
 
 Outputs:
@@ -293,8 +354,20 @@ Outputs:
 - `assets/demo/worldbench_demo.mp4`
 - `assets/demo/worldbench_demo.gif`
 - `assets/demo/thumbnail.png`
+- `assets/screenshots/dashboard.png`
+- `assets/screenshots/report.png`
 
 The generator uses Pillow for drawing. It writes MP4 via `imageio` if installed, or a local `ffmpeg` binary if available. If neither is available, it prints a clear error explaining how to install the `video` extra.
+
+## Release and Publishing
+
+Release materials live in:
+
+- [release_checklist.md](docs/release_checklist.md)
+- [release_notes_v0.1.0.md](docs/release_notes_v0.1.0.md)
+- [publishing.md](docs/publishing.md)
+
+The publishing notes include TestPyPI and PyPI commands for maintainers. WorldBench does not require cloud services to run locally.
 
 ## Name Note
 

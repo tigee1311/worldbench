@@ -1,0 +1,7 @@
+{
+  "name": "lerobot_style_push_cube_demo",
+  "robot": "synthetic_2d_arm",
+  "task": "push cube",
+  "fps": 5,
+  "description": "Tiny synthetic source folder for the experimental LeRobot-style WorldBench adapter."
+}

@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 import importlib.util
 from pathlib import Path
+import tempfile
 
 import click
 from rich.console import Console
@@ -12,9 +13,16 @@ from rich.panel import Panel
 from rich.table import Table
 
 from worldbench.backends.demo import DemoBackend
+from worldbench.backends.lerobot import create_lerobot_style_demo_source, import_lerobot_style
 from worldbench.dashboard import launch_dashboard
 from worldbench.dataset import validate_dataset
-from worldbench.runners.comparator import compare_results, load_result
+from worldbench.runners.comparator import (
+    compare_model_folders,
+    compare_result_files,
+    compare_results,
+    load_result,
+    save_comparison_artifacts,
+)
 from worldbench.runners.evaluator import EvaluationRunner
 from worldbench.runners.reporter import save_markdown_report
 
@@ -73,6 +81,50 @@ def validate(dataset_path: Path) -> None:
     raise click.exceptions.Exit(0 if report.is_valid else 1)
 
 
+@app.command("import-lerobot")
+@click.argument("input_path", required=False, type=click.Path(path_type=Path))
+@click.option("--out", "output_path", required=True, type=click.Path(path_type=Path), help="WorldBench dataset output path.")
+@click.option("--demo", is_flag=True, help="Generate and import a tiny synthetic LeRobot-style source folder.")
+def import_lerobot(input_path: Path | None, output_path: Path, demo: bool) -> None:
+    """Import an experimental LeRobot-style local folder into WorldBench format."""
+
+    console.print("[bold]Experimental LeRobot-style import[/bold]")
+    console.print("This is a local folder converter, not official LeRobot support.")
+
+    try:
+        if demo:
+            with tempfile.TemporaryDirectory(prefix="worldbench-lerobot-style-") as tmpdir:
+                source = create_lerobot_style_demo_source(Path(tmpdir) / "source")
+                report = import_lerobot_style(source, output_path)
+        else:
+            if input_path is None:
+                raise click.ClickException("Provide input_path, or use --demo with --out.")
+            report = import_lerobot_style(input_path, output_path)
+    except click.ClickException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        raise click.ClickException(str(exc)) from exc
+
+    if report.is_valid:
+        console.print(
+            f"[bold green]Imported dataset[/bold green]: {output_path} "
+            f"({report.episode_count} episode, {report.frame_count} frame(s))"
+        )
+    else:
+        console.print(f"[bold red]Imported dataset has validation errors[/bold red]: {output_path}")
+
+    if report.issues:
+        table = Table(title="Validation Issues")
+        table.add_column("Level")
+        table.add_column("Path")
+        table.add_column("Message")
+        for issue in report.issues:
+            style = "red" if issue.level == "error" else "yellow"
+            table.add_row(f"[{style}]{issue.level}[/{style}]", issue.path or "", issue.message)
+        console.print(table)
+    raise click.exceptions.Exit(0 if report.is_valid else 1)
+
+
 @app.command(name="eval")
 @click.argument("dataset_path", type=click.Path(path_type=Path))
 @click.option("--predictions", "-p", type=click.Path(path_type=Path), default=None, help="Prediction folder or model run root.")
@@ -94,19 +146,49 @@ def eval_cmd(dataset_path: Path, predictions: Path | None, output_root: Path) ->
 
 
 @app.command()
-@click.argument("run_a", type=click.Path(path_type=Path))
-@click.argument("run_b", type=click.Path(path_type=Path))
-def compare(run_a: Path, run_b: Path) -> None:
-    """Compare two WorldBench result JSON files or run directories."""
+@click.argument("target", type=click.Path(path_type=Path))
+@click.argument("run_b", required=False, type=click.Path(path_type=Path))
+@click.option(
+    "--models",
+    nargs=2,
+    metavar="MODEL_A MODEL_B",
+    help="Compare two prediction folders inside a dataset, e.g. --models good_model bad_model.",
+)
+@click.option(
+    "--output-root",
+    type=click.Path(path_type=Path),
+    default=Path(".worldbench/comparisons"),
+    help="Comparison storage root.",
+)
+def compare(target: Path, run_b: Path | None, models: tuple[str, str] | None, output_root: Path) -> None:
+    """Compare result files or two model folders inside a dataset."""
 
-    comparison = compare_results(run_a, run_b)
+    if models is not None:
+        comparison = compare_model_folders(target, models[0], models[1])
+        saved = save_comparison_artifacts(comparison, output_root)
+        _print_rich_comparison(comparison)
+        console.print(f"[green]Saved comparison:[/green] {saved['json']}")
+        console.print(f"[green]Markdown report:[/green] {saved['markdown']}")
+        return
+
+    if run_b is None:
+        raise click.ClickException("Provide two result JSON files, or use --models MODEL_A MODEL_B with a dataset path.")
+
+    legacy = compare_results(target, run_b)
+    comparison = compare_result_files(target, run_b)
+    saved = save_comparison_artifacts(comparison, output_root)
     table = Table(title="WorldBench Run Comparison")
     table.add_column("Metric", style="cyan")
     table.add_column("Run A", justify="right")
     table.add_column("Run B", justify="right")
     table.add_column("Delta", justify="right")
-    table.add_row("Overall", f"{comparison['run_a_score']:.1f}", f"{comparison['run_b_score']:.1f}", f"{comparison['delta']:+.1f}")
-    for name, values in comparison["metrics"].items():
+    table.add_row(
+        "Overall",
+        f"{legacy['run_a_score']:.1f}",
+        f"{legacy['run_b_score']:.1f}",
+        f"{legacy['delta']:+.1f}",
+    )
+    for name, values in legacy["metrics"].items():
         table.add_row(
             name.replace("_", " ").title(),
             f"{values['run_a']:.1f}",
@@ -114,7 +196,8 @@ def compare(run_a: Path, run_b: Path) -> None:
             f"{values['delta']:+.1f}",
         )
     console.print(table)
-    console.print(f"Winner: [bold]{comparison['winner']}[/bold]")
+    console.print(f"Winner: [bold]{legacy['winner']}[/bold]")
+    console.print(f"[green]Saved comparison:[/green] {saved['json']}")
 
 
 @app.command()
@@ -167,6 +250,34 @@ def make_demo_video(output_dir: Path) -> None:
         console.print(f"  {label}: {path}")
 
 
+@app.command("make-screenshots")
+@click.option(
+    "--output-dir",
+    type=click.Path(path_type=Path),
+    default=Path("assets/screenshots"),
+    help="Screenshot asset output directory.",
+)
+def make_screenshots(output_dir: Path) -> None:
+    """Generate README dashboard and report screenshot assets."""
+
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "make_screenshots.py"
+    if not script_path.is_file():
+        raise click.ClickException(
+            "Could not find scripts/make_screenshots.py. Run this command from the WorldBench repository checkout."
+        )
+    spec = importlib.util.spec_from_file_location("worldbench_make_screenshots", script_path)
+    if spec is None or spec.loader is None:
+        raise click.ClickException(f"Could not load {script_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    build_screenshots = module.make_screenshots
+
+    outputs = build_screenshots(output_dir)
+    console.print("[bold green]Generated screenshot assets[/bold green]")
+    for label, path in outputs.items():
+        console.print(f"  {label}: {path}")
+
+
 def _save_result(result, output_root: Path) -> Path:
     run_dir = output_root / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     result_path = run_dir / "result.json"
@@ -175,6 +286,57 @@ def _save_result(result, output_root: Path) -> Path:
     latest_dir.mkdir(parents=True, exist_ok=True)
     result.save_json(latest_dir / "result.json")
     return result_path
+
+
+def _print_rich_comparison(comparison: dict[str, object]) -> None:
+    label_a = str(comparison["label_a"])
+    label_b = str(comparison["label_b"])
+    overall = comparison["overall"]
+    assert isinstance(overall, dict)
+    metrics = comparison["metrics"]
+    assert isinstance(metrics, list)
+    largest_gaps = comparison["largest_gaps"]
+    assert isinstance(largest_gaps, list)
+
+    winner = str(overall["winner"])
+    loser = str(overall["loser"])
+    if winner == "tie":
+        summary = f"[bold]{label_a}[/bold] and [bold]{label_b}[/bold] are tied."
+    else:
+        summary = (
+            f"[bold]{winner}[/bold] beats [bold]{loser}[/bold] by "
+            f"[bold green]+{float(overall['winner_margin']):.1f}[/bold green] overall points."
+        )
+    console.print(Panel.fit(summary, title="WorldBench Model Comparison"))
+
+    table = Table(title="Metric Deltas")
+    table.add_column("Metric", style="cyan")
+    table.add_column(label_a, justify="right")
+    table.add_column(label_b, justify="right")
+    table.add_column("Delta", justify="right")
+    table.add_row(
+        "Overall",
+        f"{float(overall['score_a']):.1f}",
+        f"{float(overall['score_b']):.1f}",
+        f"{float(overall['delta']):+.1f}",
+    )
+    for metric in metrics:
+        table.add_row(
+            str(metric["label"]),
+            f"{float(metric['score_a']):.1f}",
+            f"{float(metric['score_b']):.1f}",
+            f"{float(metric['delta']):+.1f}",
+        )
+    console.print(table)
+
+    gap_lines = [
+        f"- {metric['label']}: +{float(metric['winner_delta']):.1f}"
+        for metric in largest_gaps
+    ]
+    console.print("[bold]Largest gaps:[/bold]")
+    console.print("\n".join(gap_lines))
+    console.print("\n[bold]Conclusion:[/bold]")
+    console.print(str(comparison["conclusion"]))
 
 
 if __name__ == "__main__":

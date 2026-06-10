@@ -1,0 +1,58 @@
+[
+  {
+    "t": 0,
+    "robot_x": 24,
+    "robot_y": 54,
+    "object_x": 88,
+    "object_y": 54
+  },
+  {
+    "t": 1,
+    "robot_x": 32,
+    "robot_y": 54,
+    "object_x": 88,
+    "object_y": 54
+  },
+  {
+    "t": 2,
+    "robot_x": 40,
+    "robot_y": 54,
+    "object_x": 88,
+    "object_y": 54
+  },
+  {
+    "t": 3,
+    "robot_x": 48,
+    "robot_y": 54,
+    "object_x": 88,
+    "object_y": 54
+  },
+  {
+    "t": 4,
+    "robot_x": 56,
+    "robot_y": 54,
+    "object_x": 88,
+    "object_y": 54
+  },
+  {
+    "t": 5,
+    "robot_x": 64,
+    "robot_y": 54,
+    "object_x": 88,
+    "object_y": 54
+  },
+  {
+    "t": 6,
+    "robot_x": 72,
+    "robot_y": 54,
+    "object_x": 93,
+    "object_y": 54
+  },
+  {
+    "t": 7,
+    "robot_x": 80,
+    "robot_y": 54,
+    "object_x": 98,
+    "object_y": 54
+  }
+]
