@@ -100,14 +100,6 @@ pip install -e ".[dev]"
 pytest
 ```
 
-For regenerating README demo media:
-
-```bash
-pip install -e ".[video]"
-python scripts/make_demo_video.py
-python scripts/make_screenshots.py
-```
-
 `scikit-image` is optional for SSIM:
 
 ```bash
@@ -339,25 +331,6 @@ Sample reports:
 | Real robot rollout support | Planned |
 | Cloud run sharing | Planned |
 | Benchmark leaderboard | Planned |
-
-## Demo Video and Screenshot Generation
-
-The README animation is generated from code, not an external recording.
-
-```bash
-python scripts/make_demo_video.py
-python scripts/make_screenshots.py
-```
-
-Outputs:
-
-- `assets/demo/worldbench_demo.mp4`
-- `assets/demo/worldbench_demo.gif`
-- `assets/demo/thumbnail.png`
-- `assets/screenshots/dashboard.png`
-- `assets/screenshots/report.png`
-
-The generator uses Pillow for drawing. It writes MP4 via `imageio` if installed, or a local `ffmpeg` binary if available. If neither is available, it prints a clear error explaining how to install the `video` extra.
 
 ## Release and Publishing
 
