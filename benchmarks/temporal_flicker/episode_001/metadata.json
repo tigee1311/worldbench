@@ -1,0 +1,7 @@
+{
+  "name": "temporal_flicker",
+  "robot": "synthetic_2d_mobile_manipulator",
+  "task": "push cube",
+  "fps": 5,
+  "description": "Synthetic benchmark scenario: prediction flickers or jumps between frames."
+}

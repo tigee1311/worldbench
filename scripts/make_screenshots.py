@@ -127,16 +127,26 @@ def _draw_report() -> Image.Image:
 
     canvas.text((316, 708), "Evidence", "#f6faff", fonts["panel"])
     evidence = [
-        "move_right actions did not produce rightward visual motion",
+        "move_right commands failed to move right",
         "object moved before contact",
-        "object flicker detected in the prediction window",
+        "object flicker detected",
     ]
     for idx, item in enumerate(evidence):
         yy = 754 + idx * 34
         canvas.ellipse((316, yy - 4, 324, yy + 4), fill="#ff6b5f")
         canvas.text((342, yy), item, "#bed2df", fonts["body"], anchor="lm")
 
-    _mini_sim(canvas, (852, 684, 1152, 814), mode="bad")
+    canvas.rounded((760, 684, 1112, 814), 18, fill=(15, 28, 42, 235), outline=(74, 108, 134, 120))
+    canvas.text((790, 724), "Suggested fixes", "#f6faff", fonts["panel"])
+    fixes = [
+        "strengthen action conditioning",
+        "add contact-rich training data",
+        "evaluate held-out interactions",
+    ]
+    for idx, item in enumerate(fixes):
+        yy = 758 + idx * 28
+        canvas.ellipse((790, yy - 4, 798, yy + 4), fill="#41d38a")
+        canvas.text((812, yy), item, "#bed2df", fonts["small"], anchor="lm")
     return canvas.output()
 
 
@@ -210,7 +220,7 @@ def _frame_comparison(canvas: Canvas, fonts: dict[str, ImageFont.ImageFont]) -> 
 
 def _issue_panel(canvas: Canvas, fonts: dict[str, ImageFont.ImageFont]) -> None:
     canvas.rounded((736, 526, 1392, 726), 22, fill=(10, 20, 31, 238), outline=(64, 96, 124, 145))
-    canvas.text((766, 570), "Issue list", "#f6faff", fonts["panel"])
+    canvas.text((766, 570), "Evidence", "#f6faff", fonts["panel"])
     issues = [
         ("critical", "move_right actions did not produce rightward motion", "#ff6b5f"),
         ("critical", "object moved before contact", "#ff6b5f"),
@@ -227,8 +237,10 @@ def _issue_panel(canvas: Canvas, fonts: dict[str, ImageFont.ImageFont]) -> None:
 
 def _raw_json_panel(canvas: Canvas, fonts: dict[str, ImageFont.ImageFont]) -> None:
     canvas.rounded((736, 752, 1392, 842), 22, fill=(10, 20, 31, 238), outline=(64, 96, 124, 145))
-    canvas.text((766, 790), "Raw JSON", "#f6faff", fonts["panel"])
-    canvas.text((910, 790), "{ score: 42.2, winner: \"good_model\", main_failure: \"contact_realism\" }", "#91a9bb", fonts["tiny"], anchor="lm")
+    canvas.text((766, 790), "Suggested fixes", "#f6faff", fonts["panel"])
+    canvas.text((766, 822), "Strengthen action conditioning   Add contact-rich rollouts", "#bed2df", fonts["tiny"])
+    canvas.rounded((1192, 778, 1362, 808), 14, fill=(15, 28, 42, 235), outline=(64, 96, 124, 110))
+    canvas.text((1277, 793), "Raw JSON/details", "#91a9bb", fonts["tiny"], anchor="mm")
 
 
 def _mini_sim(canvas: Canvas, box: tuple[int, int, int, int], mode: str) -> None:

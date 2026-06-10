@@ -17,17 +17,21 @@ WorldBench v0.1.0 is the first public MVP for local robotics world-model evaluat
 ## Pre-Release Checks
 
 ```bash
-pip install -e ".[dev,video]"
+pip install -e ".[dev]"
+pytest
 worldbench demo
 worldbench validate examples/demo_dataset
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
 worldbench compare examples/demo_dataset --models good_model bad_model
+worldbench benchmark --demo
+worldbench report .worldbench/runs/latest/result.json
+worldbench dashboard .worldbench/runs/latest/result.json
 worldbench import-lerobot --demo --out examples/lerobot_push_cube
 worldbench validate examples/lerobot_push_cube
-worldbench report .worldbench/runs/latest/result.json
-pytest
 ```
+
+Confirm README links and images render on GitHub.
 
 ## GitHub Release
 
@@ -35,12 +39,24 @@ pytest
 2. Confirm the README badges, links, and quickstart point to `https://github.com/tigee1311/worldbench`.
 3. Confirm demo media exists under `assets/demo/`.
 4. Confirm release notes in `docs/release_notes_v0.1.0.md`.
-5. Tag and publish:
+5. Create GitHub release `v0.1.0` with title:
+
+```text
+WorldBench v0.1.0 — Initial public MVP
+```
+
+Suggested release notes:
+
+```text
+WorldBench is a control-aware evaluation toolkit for robotics world models. This first release includes a synthetic robot rollout demo, CLI evaluation, local dashboard, Markdown reports, good/bad model comparison, benchmark scenarios, action consistency scoring, object permanence scoring, contact realism scoring, and an experimental LeRobot-style import path.
+```
+
+Tag and publish:
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
-gh release create v0.1.0 --title "WorldBench v0.1.0" --notes-file docs/release_notes_v0.1.0.md
+gh release create v0.1.0 --title "WorldBench v0.1.0 — Initial public MVP" --notes-file docs/release_notes_v0.1.0.md
 ```
 
 If the tag or release already exists, update the notes instead of recreating history.

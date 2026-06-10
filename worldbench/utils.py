@@ -84,7 +84,7 @@ def detect_robot_centroid(image: np.ndarray) -> tuple[float, float] | None:
 def detect_object_centroid(image: np.ndarray) -> tuple[float, float] | None:
     """Detect the demo object marker, falling back to a non-robot foreground blob."""
 
-    green_mask = (image[..., 1] > 130) & (image[..., 0] < 150) & (image[..., 2] < 180)
+    green_mask = _green_object_mask(image)
     centroid = centroid_from_mask(green_mask)
     if centroid is not None:
         return centroid
@@ -111,8 +111,17 @@ def detect_object_centroid(image: np.ndarray) -> tuple[float, float] | None:
 
 
 def object_area(image: np.ndarray) -> int:
-    mask = (image[..., 1] > 130) & (image[..., 0] < 150) & (image[..., 2] < 180)
-    return int(mask.sum())
+    return int(_green_object_mask(image).sum())
+
+
+def _green_object_mask(image: np.ndarray) -> np.ndarray:
+    """Detect green cube/object pixels while ignoring gray-blue labels and UI text."""
+
+    return (
+        (image[..., 1] > 120)
+        & (image[..., 1] > image[..., 0] + 30)
+        & (image[..., 1] > image[..., 2] + 10)
+    )
 
 
 def vector_norm(dx: float, dy: float) -> float:
@@ -131,4 +140,3 @@ def markdown_table(headers: list[str], rows: list[list[str]]) -> str:
     separator = "| " + " | ".join("---" for _ in headers) + " |"
     body = ["| " + " | ".join(row) + " |" for row in rows]
     return "\n".join([header, separator, *body])
-

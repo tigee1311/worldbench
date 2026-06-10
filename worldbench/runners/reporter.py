@@ -73,11 +73,46 @@ def collect_evidence(result: EvaluationResult) -> list[str]:
     for metric in result.metrics.values():
         evidence.extend(metric.issues)
     for episode in result.episodes:
+        for metric in episode.metrics.values():
+            evidence.extend(_metric_detail_evidence(episode.episode, metric.name, metric.details))
         for issue in episode.issues:
             tagged = f"{episode.episode}: {issue}"
             if tagged not in evidence:
                 evidence.append(tagged)
-    return evidence[:12]
+    return list(dict.fromkeys(evidence))[:16]
+
+
+def _metric_detail_evidence(episode_name: str, metric_name: str, details: dict) -> list[str]:
+    evidence: list[str] = []
+    prefix = f"{episode_name}: "
+    if metric_name == "action_consistency":
+        mismatch = details.get("mismatch_percentage")
+        if isinstance(mismatch, (int, float)) and mismatch > 0:
+            evidence.append(f"{prefix}{mismatch:.0f}% of commanded action steps mismatched predicted visual motion.")
+        failures = details.get("failures")
+        if isinstance(failures, list) and failures:
+            first = failures[0]
+            if isinstance(first, dict):
+                evidence.append(
+                    f"{prefix}first action mismatch at t={first.get('t')}: "
+                    f"command `{first.get('action')}` produced dx={first.get('observed_dx')}, dy={first.get('observed_dy')}."
+                )
+    elif metric_name == "contact_realism":
+        first_motion = details.get("first_object_motion_frame")
+        first_contact = details.get("first_contact_frame")
+        if details.get("moved_before_contact"):
+            evidence.append(f"{prefix}object began moving at frame {first_motion}; estimated contact was frame {first_contact}.")
+    elif metric_name == "object_permanence":
+        missing = details.get("missing_frames")
+        disappearance = details.get("disappearance_percentage")
+        if isinstance(missing, list) and missing:
+            evidence.append(f"{prefix}object missing frames: {missing[:8]} ({float(disappearance or 0):.0f}% disappearance).")
+    elif metric_name == "temporal_stability":
+        flicker = details.get("flicker_frames")
+        largest = details.get("largest_jump_frame")
+        if isinstance(flicker, list) and flicker:
+            evidence.append(f"{prefix}flicker/jump frames: {flicker[:8]}; largest jump at frame {largest}.")
+    return evidence
 
 
 def suggested_next_steps(result: EvaluationResult) -> list[str]:
@@ -100,4 +135,3 @@ def suggested_next_steps(result: EvaluationResult) -> list[str]:
 
 def save_report_json_copy(result: EvaluationResult, output_dir: str | Path) -> Path:
     return write_json(Path(output_dir) / "result.json", result.to_dict())
-

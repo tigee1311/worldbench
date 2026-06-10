@@ -6,30 +6,32 @@ Run `worldbench demo` first to create examples/demo_dataset.
 from rich.console import Console
 from rich.table import Table
 
-from worldbench import WorldBench
+from worldbench.runners.comparator import compare_model_folders, save_comparison_artifacts
 
 
 console = Console()
-bench = WorldBench("examples/demo_dataset")
-
-good = bench.evaluate(predictions="examples/demo_dataset/good_model")
-bad = bench.evaluate(predictions="examples/demo_dataset/bad_model")
+comparison = compare_model_folders("examples/demo_dataset", "good_model", "bad_model")
+saved = save_comparison_artifacts(comparison)
+overall = comparison["overall"]
+metrics = comparison["metrics"]
+assert isinstance(overall, dict)
+assert isinstance(metrics, list)
 
 table = Table(title="WorldBench demo comparison")
-table.add_column("Model")
-table.add_column("Overall", justify="right")
-table.add_column("Action", justify="right")
-table.add_column("Contact", justify="right")
-table.add_column("Object", justify="right")
+table.add_column("Metric")
+table.add_column("good_model", justify="right")
+table.add_column("bad_model", justify="right")
+table.add_column("Delta", justify="right")
 
-for name, result in [("good_model", good), ("bad_model", bad)]:
+table.add_row("Overall", f"{float(overall['score_a']):.1f}", f"{float(overall['score_b']):.1f}", f"{float(overall['delta']):+.1f}")
+for metric in metrics:
     table.add_row(
-        name,
-        f"{result.score:.1f}",
-        f"{result.metrics['action_consistency'].score:.1f}",
-        f"{result.metrics['contact_realism'].score:.1f}",
-        f"{result.metrics['object_permanence'].score:.1f}",
+        str(metric["label"]),
+        f"{float(metric['score_a']):.1f}",
+        f"{float(metric['score_b']):.1f}",
+        f"{float(metric['delta']):+.1f}",
     )
 
 console.print(table)
-console.print(f"good_model beats bad_model: {good.score > bad.score}")
+console.print(comparison["conclusion"])
+console.print(f"Saved comparison report: {saved['markdown']}")

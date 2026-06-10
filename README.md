@@ -19,6 +19,7 @@ pip install -e ".[dev,video]"
 worldbench demo
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
 worldbench compare examples/demo_dataset --models good_model bad_model
+worldbench benchmark --demo
 worldbench dashboard .worldbench/runs/latest/result.json
 ```
 
@@ -49,6 +50,7 @@ worldbench validate examples/demo_dataset
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
 worldbench compare examples/demo_dataset --models good_model bad_model
+worldbench benchmark --demo
 worldbench report .worldbench/runs/latest/result.json
 worldbench dashboard .worldbench/runs/latest/result.json
 ```
@@ -62,10 +64,28 @@ WorldBench is a Python SDK, CLI, and local dashboard for robotics AI teams build
 - Control-aware metric scores
 - Per-episode failure evidence
 - Benchmark-style model comparisons
+- Synthetic benchmark scenario results
 - Markdown reports
 - A zero-dependency local HTML dashboard
 - An experimental LeRobot-style local folder import
 - A synthetic demo that works without robots, GPUs, or model training
+
+## Input and Output
+
+Input:
+
+- robot rollout frames
+- action logs
+- state data
+- predicted future frames
+
+Output:
+
+- control-aware scores
+- failure evidence
+- Markdown reports
+- local dashboard
+- model comparison results
 
 ## Why WorldBench?
 
@@ -117,12 +137,12 @@ worldbench validate <dataset_path>
 worldbench eval <dataset_path> --predictions <predictions_path>
 worldbench compare <dataset_path> --models good_model bad_model
 worldbench compare <run_a/result.json> <run_b/result.json>
+worldbench benchmark --demo
+worldbench benchmark benchmarks/
 worldbench import-lerobot <input_path> --out <output_path>
 worldbench import-lerobot --demo --out examples/lerobot_push_cube
 worldbench report <result_json>
 worldbench dashboard <result_json_or_dataset_path>
-worldbench make-demo-video
-worldbench make-screenshots
 ```
 
 Example:
@@ -131,6 +151,7 @@ Example:
 worldbench demo
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
 worldbench compare examples/demo_dataset --models good_model bad_model
+worldbench benchmark --demo
 worldbench report .worldbench/runs/latest/result.json
 worldbench dashboard .worldbench/runs/latest/result.json
 ```
@@ -274,6 +295,22 @@ output_path/
     metadata.json
 ```
 
+## Benchmarks
+
+WorldBench includes a lightweight synthetic benchmark suite for common robotics world-model failure modes:
+
+- action mismatch
+- pre-contact object motion
+- object disappearance
+- temporal flicker
+- push-cube interaction dynamics
+
+```bash
+worldbench benchmark --demo
+```
+
+`worldbench benchmark --demo` writes `.worldbench/benchmarks/latest/benchmark.json` and `.worldbench/benchmarks/latest/benchmark.md`.
+
 ## Metrics
 
 | Metric | Weight | What it checks |
@@ -302,14 +339,14 @@ Sample reports:
 - [good_model_report.md](examples/sample_reports/good_model_report.md)
 - [bad_model_report.md](examples/sample_reports/bad_model_report.md)
 
-### Dashboard and Report Screenshots
+### Screenshots
 
 <p align="center">
-  <img src="assets/screenshots/dashboard.png" width="850" alt="WorldBench local dashboard screenshot" />
+  <img src="assets/screenshots/dashboard.png" width="750" alt="WorldBench dashboard screenshot" />
 </p>
 
 <p align="center">
-  <img src="assets/screenshots/report.png" width="850" alt="WorldBench Markdown report screenshot" />
+  <img src="assets/screenshots/report.png" width="750" alt="WorldBench report screenshot" />
 </p>
 
 ## Supported Now Vs Roadmap
@@ -317,6 +354,7 @@ Sample reports:
 | Feature | Status |
 | --- | --- |
 | Synthetic demo dataset | Supported |
+| Synthetic benchmark scenarios | Supported |
 | Benchmark-style model comparison | Supported |
 | CLI evaluation | Supported |
 | Markdown reports | Supported |
@@ -331,6 +369,10 @@ Sample reports:
 | Real robot rollout support | Planned |
 | Cloud run sharing | Planned |
 | Benchmark leaderboard | Planned |
+
+## Scaling Path
+
+WorldBench starts with synthetic rollouts so failure modes are easy to see. The next steps are experimental LeRobot-style import improvements, ROS bag import, ManiSkill/RLBench adapters, real robot rollout examples, and benchmark leaderboards.
 
 ## Release and Publishing
 

@@ -1,0 +1,7 @@
+{
+  "name": "object_disappears",
+  "robot": "synthetic_2d_mobile_manipulator",
+  "task": "push cube",
+  "fps": 5,
+  "description": "Synthetic benchmark scenario: object disappears during prediction."
+}

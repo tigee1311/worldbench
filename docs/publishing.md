@@ -1,19 +1,19 @@
-# PyPI and TestPyPI Publishing
+# Publishing
 
-WorldBench is release-ready as a local Python package. These steps document how maintainers can publish package artifacts when ready.
+WorldBench is prepared for PyPI-style packaging. Do not upload automatically; these commands are for maintainers during release.
 
-## Build Locally
+## Build
 
 ```bash
 python -m pip install --upgrade build twine
 python -m build
-python -m twine check dist/*
+twine check dist/*
 ```
 
-## Publish to TestPyPI
+## TestPyPI
 
 ```bash
-python -m twine upload --repository testpypi dist/*
+twine upload --repository testpypi dist/*
 ```
 
 Then verify installation in a fresh environment:
@@ -25,12 +25,22 @@ python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-ur
 worldbench --help
 ```
 
-## Publish to PyPI
+## PyPI
 
 Only publish to PyPI after GitHub CI passes and TestPyPI installation has been checked.
 
 ```bash
-python -m twine upload dist/*
+twine upload dist/*
+```
+
+## Package Name Note
+
+If `worldbench` is unavailable on PyPI, use a package name such as `worldbench-ai` and update:
+
+```text
+pyproject.toml
+README install commands
+release notes
 ```
 
 ## Release Hygiene

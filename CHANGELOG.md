@@ -4,11 +4,11 @@
 
 Initial public MVP:
 
+- Synthetic robotics world-model demo
+- Good vs bad model comparison
+- `worldbench compare` model comparison command
+- Synthetic benchmark scenarios
 - CLI evaluation
-- Synthetic demo dataset
-- Good/bad model comparison
-- Benchmark-style `worldbench compare examples/demo_dataset --models good_model bad_model`
-- Experimental LeRobot-style local import
 - Local dashboard
 - Markdown reports
 - Action consistency metric
@@ -16,5 +16,7 @@ Initial public MVP:
 - Object permanence metric
 - Contact realism metric
 - Demo GIF/video generator
+- Experimental LeRobot-style import
 - Dashboard/report screenshot generator
 - Example reports and SDK examples
+- GitHub Actions test workflow

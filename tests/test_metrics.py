@@ -27,6 +27,8 @@ def test_bad_predictions_fail_action_consistency(tmp_path: Path) -> None:
 
     assert result.score < 60
     assert result.details["failed_steps"] > 0
+    assert result.details["mismatch_percentage"] > 0
+    assert result.details["commanded_vs_predicted"]
 
 
 def test_bad_predictions_penalize_object_permanence(tmp_path: Path) -> None:
@@ -40,4 +42,4 @@ def test_bad_predictions_penalize_object_permanence(tmp_path: Path) -> None:
     good = ObjectPermanenceMetric().evaluate(episode, good_predictions)
 
     assert good.score > bad.score
-
+    assert "disappearance_percentage" in bad.details

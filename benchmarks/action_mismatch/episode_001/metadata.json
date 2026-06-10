@@ -1,0 +1,7 @@
+{
+  "name": "action_mismatch",
+  "robot": "synthetic_2d_mobile_manipulator",
+  "task": "push cube",
+  "fps": 5,
+  "description": "Synthetic benchmark scenario: robot moves opposite the commanded action."
+}

@@ -34,13 +34,17 @@ class ObjectPermanenceMetric:
         reference_area = float(np.median(positive_areas))
         threshold = max(10.0, reference_area * 0.35)
         missing = [idx for idx, area in enumerate(areas) if area < threshold]
+        disappearance_percentage = (len(missing) / len(areas)) * 100.0
         visible_ratio = 1.0 - len(missing) / len(areas)
         area_cv = float(np.std(positive_areas) / max(reference_area, 1.0))
         score = clamp(100.0 * visible_ratio - min(25.0, area_cv * 25.0))
 
         issues = []
         if missing:
-            issues.append(f"Object disappeared or became too small in {len(missing)} frame(s): {missing[:8]}.")
+            issues.append(
+                f"Object disappeared or became too small in {len(missing)} frame(s) "
+                f"({disappearance_percentage:.0f}% of prediction): {missing[:8]}."
+            )
         if area_cv > 0.35:
             issues.append("Object blob size changes abruptly across frames.")
 
@@ -51,9 +55,9 @@ class ObjectPermanenceMetric:
                 "visible_frames": len(areas) - len(missing),
                 "total_frames": len(areas),
                 "missing_frames": missing,
+                "disappearance_percentage": disappearance_percentage,
                 "reference_area": reference_area,
                 "area_cv": area_cv,
             },
             issues=issues,
         )
-

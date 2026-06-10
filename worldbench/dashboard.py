@@ -14,7 +14,9 @@ from urllib.parse import parse_qs, urlparse
 from worldbench.dataset import load_dataset
 from worldbench.runners.comparator import load_result
 from worldbench.runners.evaluator import EvaluationRunner, resolve_prediction_frames
+from worldbench.runners.reporter import suggested_next_steps
 from worldbench.schemas import EvaluationResult
+from worldbench.utils import read_json
 
 
 def launch_dashboard(
@@ -25,10 +27,16 @@ def launch_dashboard(
 ) -> None:
     """Launch a small local HTML dashboard for a result file or dataset."""
 
-    result = load_result_or_evaluate(Path(target))
-    frame_index = build_frame_index(result)
-    html_payload = build_dashboard_html(result, frame_index)
-    result_json = json.dumps(result.to_dict(), indent=2)
+    comparison = load_comparison_if_present(Path(target))
+    frame_index: dict[str, dict[str, list[Path]]] = {}
+    if comparison is not None:
+        html_payload = build_comparison_dashboard_html(comparison)
+        result_json = json.dumps(comparison, indent=2)
+    else:
+        result = load_result_or_evaluate(Path(target))
+        frame_index = build_frame_index(result)
+        html_payload = build_dashboard_html(result, frame_index)
+        result_json = json.dumps(result.to_dict(), indent=2)
 
     class DashboardHandler(BaseHTTPRequestHandler):
         def do_GET(self) -> None:  # noqa: N802
@@ -123,6 +131,19 @@ def load_result_or_evaluate(path: Path) -> EvaluationResult:
     return EvaluationRunner(path).run()
 
 
+def load_comparison_if_present(path: Path) -> dict[str, object] | None:
+    candidate = path / "comparison.json" if path.is_dir() else path
+    if not candidate.is_file():
+        return None
+    try:
+        data = read_json(candidate)
+    except Exception:  # noqa: BLE001
+        return None
+    if isinstance(data, dict) and {"overall", "metrics", "largest_gaps", "label_a", "label_b"}.issubset(data):
+        return data
+    return None
+
+
 def _report_for_target(path: Path) -> Path | None:
     if path.is_file():
         candidate = path.parent / "report.md"
@@ -161,6 +182,7 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
     metric_cards = "\n".join(_metric_card(name, metric.score) for name, metric in result.metrics.items())
     episode_rows = "\n".join(_episode_row(episode) for episode in result.episodes)
     issue_items = _issue_items(result)
+    fix_items = _fix_items(result)
     timeline = _timeline_svg(result)
     raw_json = html.escape(json.dumps(result.to_dict(), indent=2))
     report_link = '<a class="report-link" href="/report.md">Open generated report</a>'
@@ -388,6 +410,11 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
     </section>
 
     <section class="panel">
+      <h2>Suggested Fixes</h2>
+      <ul class="issues">{fix_items}</ul>
+    </section>
+
+    <section class="panel">
       <h2>Frame Viewer</h2>
       <div class="viewer-controls">
         <label>Episode <select id="episodeSelect"></select></label>
@@ -452,6 +479,143 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
 </html>"""
 
 
+def build_comparison_dashboard_html(comparison: dict[str, object]) -> str:
+    label_a = html.escape(str(comparison["label_a"]))
+    label_b = html.escape(str(comparison["label_b"]))
+    overall = comparison["overall"]
+    assert isinstance(overall, dict)
+    metrics = comparison["metrics"]
+    assert isinstance(metrics, list)
+    largest_gaps = comparison["largest_gaps"]
+    assert isinstance(largest_gaps, list)
+    raw_json = html.escape(json.dumps(comparison, indent=2))
+
+    metric_rows = "\n".join(
+        "<tr>"
+        f"<td>{html.escape(str(metric['label']))}</td>"
+        f"<td>{float(metric['score_a']):.1f}/100</td>"
+        f"<td>{float(metric['score_b']):.1f}/100</td>"
+        f"<td>{float(metric['delta']):+.1f}</td>"
+        "</tr>"
+        for metric in metrics
+    )
+    gap_items = "\n".join(
+        f"<li>{html.escape(str(metric['label']))}: +{float(metric['winner_delta']):.1f}</li>"
+        for metric in largest_gaps
+    )
+    winner = html.escape(str(overall["winner"]))
+    loser = html.escape(str(overall["loser"]))
+    summary = (
+        f"{winner} beats {loser} by +{float(overall['winner_margin']):.1f} overall points."
+        if winner != "tie"
+        else f"{label_a} and {label_b} are tied."
+    )
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WorldBench Comparison</title>
+  <style>
+    :root {{ --bg:#071019; --panel:rgba(10,20,31,.94); --ink:#f6faff; --muted:#91a9bb; --line:#28435a; --red:#ff6b5f; --green:#41d38a; --amber:#ffb85c; }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 6% 8%, rgba(35, 92, 122, 0.36), transparent 22rem),
+        radial-gradient(circle at 88% 88%, rgba(29, 135, 91, 0.28), transparent 28rem),
+        linear-gradient(180deg, #071019 0%, #0b1722 100%);
+    }}
+    body::before {{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image: linear-gradient(rgba(80,118,147,.07) 1px, transparent 1px), linear-gradient(78deg, rgba(80,118,147,.06) 1px, transparent 1px);
+      background-size:64px 56px,80px 80px;
+      transform:skewX(-11deg);
+      opacity:.42;
+    }}
+    header, main {{ position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; }}
+    header {{
+      margin-top: 34px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(10,20,32,.9);
+      padding: 16px 28px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }}
+    h1 {{ margin:0; font-size:30px; }}
+    header p, .muted {{ color:var(--muted); }}
+    main {{ padding: 32px 0 64px; }}
+    .grid {{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; }}
+    .panel {{ background:var(--panel); border:1px solid var(--line); border-radius:22px; padding:28px 30px; box-shadow:0 18px 55px rgba(0,0,0,.22); }}
+    .hero {{ grid-column:1/-1; display:flex; justify-content:space-between; gap:28px; align-items:center; }}
+    .score {{ font-size:64px; color:var(--green); font-weight:800; line-height:1; }}
+    .score small {{ font-size:18px; color:var(--muted); }}
+    table {{ width:100%; border-collapse:collapse; font-size:14px; }}
+    th, td {{ text-align:left; padding:13px 10px; border-bottom:1px solid rgba(88,125,153,.32); }}
+    th {{ color:var(--muted); text-transform:uppercase; font-size:12px; letter-spacing:.04em; }}
+    td {{ color:#dce8f1; }}
+    ul {{ margin:0; padding:0; list-style:none; display:grid; gap:10px; }}
+    li {{ border-left:6px solid var(--amber); background:rgba(15,28,42,.96); border-radius:10px; padding:10px 14px; color:#dce8f1; }}
+    pre {{ overflow:auto; max-height:420px; background:#06101a; color:#dbe9f3; padding:16px; border:1px solid rgba(88,125,153,.32); border-radius:14px; }}
+    @media (max-width:900px) {{ header, main {{ margin-left:16px; margin-right:16px; }} .grid {{ grid-template-columns:1fr; }} .hero {{ display:block; }} }}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>WorldBench Model Comparison</h1>
+      <p>{label_a} vs {label_b}</p>
+    </div>
+    <div class="muted">local comparison</div>
+  </header>
+  <main class="grid">
+    <section class="panel hero">
+      <div>
+        <h2>{summary}</h2>
+        <p class="muted">{html.escape(str(comparison["conclusion"]))}</p>
+      </div>
+      <div class="score">+{float(overall['winner_margin']):.1f}<small> overall</small></div>
+    </section>
+    <section class="panel">
+      <h2>Overall</h2>
+      <table>
+        <tbody>
+          <tr><td>{label_a}</td><td>{float(overall['score_a']):.1f}/100</td></tr>
+          <tr><td>{label_b}</td><td>{float(overall['score_b']):.1f}/100</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="panel">
+      <h2>Largest gaps</h2>
+      <ul>{gap_items}</ul>
+    </section>
+    <section class="panel" style="grid-column:1/-1">
+      <h2>Metric deltas</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>{label_a}</th><th>{label_b}</th><th>Delta</th></tr></thead>
+        <tbody>{metric_rows}</tbody>
+      </table>
+    </section>
+    <section class="panel" style="grid-column:1/-1">
+      <details>
+        <summary>Raw JSON</summary>
+        <pre>{raw_json}</pre>
+      </details>
+    </section>
+  </main>
+</body>
+</html>"""
+
+
 def _metric_card(name: str, score: float) -> str:
     label = html.escape(name.replace("_", " ").title())
     width = max(0, min(100, score))
@@ -497,6 +661,13 @@ def _issue_items(result: EvaluationResult) -> str:
         parts.append('<li class="severity-label">Warnings</li>')
         parts.extend(f"<li>{html.escape(issue)}</li>" for issue in warnings[:10])
     return "\n".join(parts)
+
+
+def _fix_items(result: EvaluationResult) -> str:
+    fixes = suggested_next_steps(result)[:5]
+    if not fixes:
+        return '<li class="ok">No suggested fixes for this run.</li>'
+    return "\n".join(f"<li>{html.escape(item)}</li>" for item in fixes)
 
 
 def _timeline_svg(result: EvaluationResult) -> str:

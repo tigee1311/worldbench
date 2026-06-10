@@ -28,6 +28,7 @@ class TemporalStabilityMetric:
         std_diff = float(np.std(diffs))
         jump_threshold = max(18.0, median_diff * 3.0 + 8.0)
         jump_indices = [idx for idx, diff in enumerate(diffs) if diff > jump_threshold]
+        largest_jump_frame = int(np.argmax(diffs)) if diffs else None
 
         jump_penalty = min(60.0, len(jump_indices) * 20.0 + max(0.0, max_diff - jump_threshold) * 0.8)
         variance_penalty = min(35.0, std_diff * 1.8)
@@ -50,7 +51,9 @@ class TemporalStabilityMetric:
                 "max_frame_delta": max_diff,
                 "std_frame_delta": std_diff,
                 "jump_indices": jump_indices,
+                "flicker_frames": jump_indices,
+                "largest_jump_frame": largest_jump_frame,
+                "largest_jump_delta": max_diff,
             },
             issues=issues,
         )
-

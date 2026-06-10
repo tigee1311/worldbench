@@ -1,0 +1,7 @@
+{
+  "name": "pre_contact_motion",
+  "robot": "synthetic_2d_mobile_manipulator",
+  "task": "push cube",
+  "fps": 5,
+  "description": "Synthetic benchmark scenario: object moves before robot/object contact."
+}

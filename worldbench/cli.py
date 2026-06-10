@@ -12,10 +12,12 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from worldbench.backends.benchmark import BenchmarkBackend
 from worldbench.backends.demo import DemoBackend
 from worldbench.backends.lerobot import create_lerobot_style_demo_source, import_lerobot_style
 from worldbench.dashboard import launch_dashboard
 from worldbench.dataset import validate_dataset
+from worldbench.runners.benchmark import run_benchmark_suite, save_benchmark_artifacts
 from worldbench.runners.comparator import (
     compare_model_folders,
     compare_result_files,
@@ -79,6 +81,31 @@ def validate(dataset_path: Path) -> None:
         console.print(table)
 
     raise click.exceptions.Exit(0 if report.is_valid else 1)
+
+
+@app.command()
+@click.argument("benchmark_path", required=False, type=click.Path(path_type=Path))
+@click.option("--demo", is_flag=True, help="Generate the lightweight synthetic benchmark suite before running it.")
+@click.option(
+    "--output-root",
+    type=click.Path(path_type=Path),
+    default=Path(".worldbench/benchmarks"),
+    help="Benchmark result storage root.",
+)
+def benchmark(benchmark_path: Path | None, demo: bool, output_root: Path) -> None:
+    """Run WorldBench benchmark scenarios."""
+
+    root = benchmark_path or Path("benchmarks")
+    if demo:
+        root = BenchmarkBackend().create(root)
+    if not root.exists():
+        raise click.ClickException(f"Benchmark path does not exist: {root}. Use --demo to generate synthetic scenarios.")
+
+    payload = run_benchmark_suite(root)
+    saved = save_benchmark_artifacts(payload, output_root)
+    _print_benchmark_summary(payload)
+    console.print(f"[green]Saved benchmark:[/green] {saved['json']}")
+    console.print(f"[green]Markdown report:[/green] {saved['markdown']}")
 
 
 @app.command("import-lerobot")
@@ -337,6 +364,39 @@ def _print_rich_comparison(comparison: dict[str, object]) -> None:
     console.print("\n".join(gap_lines))
     console.print("\n[bold]Conclusion:[/bold]")
     console.print(str(comparison["conclusion"]))
+
+
+def _print_benchmark_summary(payload: dict[str, object]) -> None:
+    console.print(Panel.fit("[bold]WorldBench Demo Benchmark[/bold]"))
+    console.print(f"[bold]good_model average:[/bold] {float(payload['good_model_average']):.1f}/100")
+    console.print(f"[bold]bad_model average:[/bold] {float(payload['bad_model_average']):.1f}/100")
+    console.print(f"[bold]overall delta:[/bold] +{float(payload['overall_delta']):.1f}")
+
+    scenarios = payload["scenarios"]
+    assert isinstance(scenarios, list)
+    table = Table(title="Benchmark Scenarios")
+    table.add_column("Scenario", style="cyan")
+    table.add_column("good_model", justify="right")
+    table.add_column("bad_model", justify="right")
+    table.add_column("Delta", justify="right")
+    for scenario in scenarios:
+        assert isinstance(scenario, dict)
+        good = scenario["good_model"]
+        bad = scenario["bad_model"]
+        assert isinstance(good, dict)
+        assert isinstance(bad, dict)
+        table.add_row(
+            str(scenario["name"]),
+            f"{float(good['score']):.1f}",
+            f"{float(bad['score']):.1f}",
+            f"{float(scenario['delta']):+.1f}",
+        )
+    console.print(table)
+
+    failure_modes = payload["largest_failure_modes"]
+    assert isinstance(failure_modes, list)
+    console.print("[bold]Largest failure modes:[/bold]")
+    console.print("\n".join(f"- {item}" for item in failure_modes))
 
 
 if __name__ == "__main__":

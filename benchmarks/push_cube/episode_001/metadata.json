@@ -1,0 +1,7 @@
+{
+  "name": "push_cube",
+  "robot": "synthetic_2d_mobile_manipulator",
+  "task": "push cube",
+  "fps": 5,
+  "description": "Synthetic benchmark scenario: combined control/contact failures."
+}
