@@ -29,9 +29,13 @@ worldbench report .worldbench/runs/latest/result.json
 worldbench dashboard .worldbench/runs/latest/result.json
 worldbench import-lerobot --demo --out examples/lerobot_push_cube
 worldbench validate examples/lerobot_push_cube
+python -m build
+twine check dist/*
 ```
 
 Confirm README links and images render on GitHub.
+Confirm the README hero GIF and screenshots render on GitHub.
+Use `docs/demo_video_guide.md` if recording a short Loom or release demo.
 
 ## GitHub Release
 
@@ -39,7 +43,8 @@ Confirm README links and images render on GitHub.
 2. Confirm the README badges, links, and quickstart point to `https://github.com/tigee1311/worldbench`.
 3. Confirm demo media exists under `assets/demo/`.
 4. Confirm release notes in `docs/release_notes_v0.1.0.md`.
-5. Create GitHub release `v0.1.0` with title:
+5. Confirm package build artifacts pass `twine check`.
+6. Create GitHub release `v0.1.0` with title:
 
 ```text
 WorldBench v0.1.0 — Initial public MVP

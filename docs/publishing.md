@@ -1,13 +1,30 @@
 # Publishing
 
-WorldBench is prepared for PyPI-style packaging. Do not upload automatically; these commands are for maintainers during release.
+WorldBench is prepared for PyPI-style packaging. These notes are for maintainers; do not upload release artifacts until CI passes and the release checklist is complete.
 
 ## Build
 
 ```bash
+rm -rf dist build *.egg-info
 python -m pip install --upgrade build twine
 python -m build
 twine check dist/*
+```
+
+The build should produce:
+
+```text
+dist/worldbench-0.1.0.tar.gz
+dist/worldbench-0.1.0-py3-none-any.whl
+```
+
+## Local Wheel Smoke Test
+
+```bash
+python -m venv /tmp/worldbench-wheel-test
+source /tmp/worldbench-wheel-test/bin/activate
+python -m pip install dist/worldbench-0.1.0-py3-none-any.whl
+worldbench --help
 ```
 
 ## TestPyPI
@@ -27,10 +44,19 @@ worldbench --help
 
 ## PyPI
 
-Only publish to PyPI after GitHub CI passes and TestPyPI installation has been checked.
+Only publish to PyPI after GitHub CI passes, TestPyPI installation has been checked, and the GitHub release notes are ready.
 
 ```bash
 twine upload dist/*
+```
+
+After publishing:
+
+```bash
+python -m venv /tmp/worldbench-pypi-test
+source /tmp/worldbench-pypi-test/bin/activate
+python -m pip install worldbench
+worldbench --help
 ```
 
 ## Package Name Note
@@ -42,6 +68,8 @@ pyproject.toml
 README install commands
 release notes
 ```
+
+Then rebuild the package from a clean `dist/` directory before uploading.
 
 ## Release Hygiene
 
