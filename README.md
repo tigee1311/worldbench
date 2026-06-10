@@ -2,16 +2,12 @@
 
 ### Evaluate robotics world models with one command.
 
-[![tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
-
-WorldBench scores whether generated robot futures are action-consistent, physically plausible, temporally stable, object-persistent, and useful for planning.
+WorldBench checks whether generated robot futures are action-consistent, physically plausible, temporally stable, object-persistent, and useful for planning.
 
 **Not another world model. The test suite for world models.**
 
 <p align="center">
-  <img src="assets/demo/worldbench_demo.gif" width="850" alt="WorldBench demo showing robot world-model evaluation" />
+  <img src="assets/demo/worldbench_demo.gif" width="850" alt="WorldBench demo showing robotics world-model evaluation" />
 </p>
 
 ```bash
@@ -31,6 +27,12 @@ Object Permanence: 55/100
 Main failure:
 The model generates plausible frames but ignores the robot action sequence.
 ```
+
+[![tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+
+Features • Quickstart • CLI • Python SDK • Metrics • Roadmap
 
 ## Quickstart
 
