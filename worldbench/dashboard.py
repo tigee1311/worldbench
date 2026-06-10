@@ -39,6 +39,13 @@ def launch_dashboard(
             if parsed.path == "/result.json":
                 self._send_text(result_json, "application/json; charset=utf-8")
                 return
+            if parsed.path == "/report.md":
+                report_path = _report_for_target(Path(target))
+                if report_path is None:
+                    self.send_error(404, "Report not found")
+                    return
+                self._send_bytes(report_path.read_bytes(), "text/markdown; charset=utf-8")
+                return
             if parsed.path == "/frame":
                 self._send_frame(parsed.query)
                 return
@@ -57,6 +64,13 @@ def launch_dashboard(
             self.send_header("Content-Length", str(len(encoded)))
             self.end_headers()
             self.wfile.write(encoded)
+
+        def _send_bytes(self, payload: bytes, content_type: str) -> None:
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
 
         def _send_frame(self, query: str) -> None:
             params = parse_qs(query)
@@ -109,6 +123,14 @@ def load_result_or_evaluate(path: Path) -> EvaluationResult:
     return EvaluationRunner(path).run()
 
 
+def _report_for_target(path: Path) -> Path | None:
+    if path.is_file():
+        candidate = path.parent / "report.md"
+    else:
+        candidate = path / "report.md"
+    return candidate if candidate.is_file() else None
+
+
 def build_frame_index(result: EvaluationResult) -> dict[str, dict[str, list[Path]]]:
     try:
         dataset = load_dataset(result.dataset_path)
@@ -141,6 +163,7 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
     issue_items = _issue_items(result)
     timeline = _timeline_svg(result)
     raw_json = html.escape(json.dumps(result.to_dict(), indent=2))
+    report_link = '<a class="report-link" href="/report.md">Open generated report</a>'
 
     return f"""<!doctype html>
 <html lang="en">
@@ -215,6 +238,9 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
     th {{ color: var(--muted); font-size: 12px; text-transform: uppercase; }}
     .issues {{ display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }}
     .issues li {{ border-left: 4px solid var(--amber); background: #fff9eb; padding: 10px 12px; border-radius: 4px; }}
+    .issues li.critical {{ border-left-color: var(--red); background: #fff1f1; }}
+    .issues li.ok {{ border-left-color: var(--green); background: #effaf4; }}
+    .issues li.severity-label {{ margin-top: 12px; padding: 0; border-left: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 760; text-transform: uppercase; }}
     .viewer-controls {{ display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }}
     select, input[type="range"] {{ accent-color: var(--blue); }}
     select {{ padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: white; }}
@@ -222,6 +248,8 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
     .frame h3 {{ margin: 0 0 8px; font-size: 14px; color: var(--muted); }}
     .frame img {{ width: 100%; image-rendering: auto; border-radius: 6px; border: 1px solid var(--line); background: #0e141a; }}
     .chart {{ width: 100%; overflow-x: auto; }}
+    .report-link {{ display: inline-block; color: var(--blue); font-weight: 650; margin-top: 10px; text-decoration: none; }}
+    .report-link:hover {{ text-decoration: underline; }}
     details pre {{ overflow: auto; max-height: 420px; background: #0f1720; color: #dbe9f3; padding: 14px; border-radius: 6px; }}
     @media (max-width: 900px) {{
       .summary {{ grid-template-columns: 1fr; }}
@@ -244,6 +272,7 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
       <div class="panel main-failure">
         <h2>Main Failure</h2>
         <p>{html.escape(result.main_failure)}</p>
+        {report_link}
       </div>
     </div>
 
@@ -364,8 +393,19 @@ def _issue_items(result: EvaluationResult) -> str:
     for episode in result.episodes:
         issues.extend(f"{episode.episode}: {issue}" for issue in episode.issues)
     if not issues:
-        return "<li>No major issues detected.</li>"
-    return "\n".join(f"<li>{html.escape(issue)}</li>" for issue in issues[:20])
+        return '<li class="ok">No major issues detected.</li>'
+
+    critical_terms = ("contact", "mismatch", "disappear", "missing", "opposite")
+    critical = [issue for issue in issues if any(term in issue.lower() for term in critical_terms)]
+    warnings = [issue for issue in issues if issue not in critical]
+    parts: list[str] = []
+    if critical:
+        parts.append('<li class="severity-label">Critical</li>')
+        parts.extend(f'<li class="critical">{html.escape(issue)}</li>' for issue in critical[:10])
+    if warnings:
+        parts.append('<li class="severity-label">Warnings</li>')
+        parts.extend(f"<li>{html.escape(issue)}</li>" for issue in warnings[:10])
+    return "\n".join(parts)
 
 
 def _timeline_svg(result: EvaluationResult) -> str:

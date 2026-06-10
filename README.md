@@ -1,65 +1,142 @@
 # WorldBench
 
+### Evaluate robotics world models with one command.
+
+[![tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+
+WorldBench scores whether generated robot futures are action-consistent, physically plausible, temporally stable, object-persistent, and useful for planning.
+
 **Not another world model. The test suite for world models.**
 
-WorldBench evaluates robotics world models for action consistency, temporal stability, object permanence, contact realism, and visual prediction quality.
-
-World models can generate realistic-looking futures, but robot teams need to know whether those futures are useful for decision-making. WorldBench turns generated robot rollouts into control-relevant scores, evidence, reports, and a local dashboard that runs on a normal laptop.
-
-## Why World-Model Eval Matters
-
-Robotics world models are increasingly used to predict how a scene will evolve under candidate actions. A video can look plausible while still being wrong in the ways that matter for control: the robot moves opposite the command, objects teleport before contact, the scene flickers, or state/action logs no longer match the generated frames.
-
-WorldBench is built around the idea that a robotics world model should be:
-
-- **Action-consistent:** visual motion should follow logged robot actions.
-- **Temporally stable:** futures should not flicker or jump without cause.
-- **Physically plausible:** contact and object motion should respect simple interaction constraints.
-- **Object-persistent:** task-relevant objects should remain trackable.
-- **Visually faithful:** predictions should still match held-out future frames.
-
-## Install
-
-```bash
-git clone https://github.com/worldbench/worldbench.git
-cd worldbench
-pip install -e .
-```
-
-For development:
-
-```bash
-pip install -e ".[dev,vision]"
-pytest
-```
-
-`scikit-image` is optional. If it is installed, WorldBench uses SSIM from `skimage`; otherwise it falls back to a lightweight NumPy implementation.
-
-## Quickstart
+<p align="center">
+  <img src="assets/demo/worldbench_demo.gif" width="850" alt="WorldBench demo showing robot world-model evaluation" />
+</p>
 
 ```bash
 pip install -e .
 worldbench demo
+worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
+worldbench dashboard .worldbench/runs/latest/result.json
+```
+
+```text
+WorldBench Report
+Overall Score: 42/100
+Action Consistency: 31/100
+Contact Realism: 20/100
+Object Permanence: 55/100
+
+Main failure:
+The model generates plausible frames but ignores the robot action sequence.
+```
+
+## Quickstart
+
+```bash
+git clone https://github.com/tigee1311/worldbench.git
+cd worldbench
+pip install -e .
+
+worldbench demo
 worldbench validate examples/demo_dataset
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
-worldbench dashboard .worldbench/runs/<run>/result.json
+worldbench report .worldbench/runs/latest/result.json
+worldbench dashboard .worldbench/runs/latest/result.json
 ```
 
-The demo creates two synthetic model outputs:
+`worldbench eval` writes timestamped runs under `.worldbench/runs/` and also updates `.worldbench/runs/latest/result.json` for quick iteration.
 
-- `good_model`: follows the robot actions and contact sequence.
-- `bad_model`: looks superficially similar but moves the robot in the wrong direction, moves objects before contact, drops an object, and flickers.
+## What It Does
 
-The good model should score higher than the bad model.
+WorldBench is a Python SDK, CLI, and local dashboard for evaluating robotics world-model rollouts. It takes a robot rollout dataset plus predicted future frames and produces:
 
-## Python SDK
+- Control-aware metric scores
+- Per-episode failure evidence
+- Good vs bad model comparisons
+- Markdown reports
+- A zero-dependency local HTML dashboard
+- A synthetic demo that works without robots, GPUs, or model training
+
+## Why WorldBench?
+
+Robotics world models can make futures that look realistic while still being wrong for control. A prediction is not useful if it moves opposite the commanded action, teleports a cube before contact, drops a task object, or flickers across the rollout.
+
+WorldBench focuses on the failure modes that matter when a robot planner consumes generated futures.
+
+## Why Not Just SSIM/PSNR?
+
+Traditional video metrics can say a prediction is good even when it is useless for robotics.
+
+A world model can score high visually while:
+
+- moving the robot opposite the commanded action
+- teleporting objects before contact
+- dropping task-relevant objects
+- flickering across frames
+- breaking state/action alignment
+
+WorldBench adds control-aware metrics for robotics world models.
+
+## Installation
+
+```bash
+pip install -e .
+```
+
+For tests and local development:
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
+
+For regenerating the README demo video:
+
+```bash
+pip install -e ".[video]"
+python scripts/make_demo_video.py
+```
+
+`scikit-image` is optional for SSIM:
+
+```bash
+pip install -e ".[vision]"
+```
+
+If `scikit-image` is not installed, WorldBench uses a lightweight NumPy fallback.
+
+## CLI Usage
+
+```bash
+worldbench init <path>
+worldbench demo
+worldbench validate <dataset_path>
+worldbench eval <dataset_path> --predictions <predictions_path>
+worldbench compare <run_a/result.json> <run_b/result.json>
+worldbench report <result_json>
+worldbench dashboard <result_json_or_dataset_path>
+worldbench make-demo-video
+```
+
+Example:
+
+```bash
+worldbench demo
+worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
+worldbench report .worldbench/runs/latest/result.json
+worldbench dashboard .worldbench/runs/latest/result.json
+```
+
+## Python SDK Usage
 
 ```python
 from worldbench import WorldBench, WorldModelRun
 
 bench = WorldBench(dataset="examples/demo_dataset")
-result = bench.evaluate(predictions="examples/demo_dataset/episode_001/predictions")
+result = bench.evaluate(predictions="examples/demo_dataset/good_model")
 result.print_summary()
 result.save_report("report.md")
 ```
@@ -67,14 +144,14 @@ result.save_report("report.md")
 Convenience API:
 
 ```python
-from worldbench import load_dataset, evaluate
+from worldbench import evaluate, load_dataset
 
 dataset = load_dataset("examples/demo_dataset")
 result = evaluate(dataset)
 print(result.score)
 ```
 
-Cadenza-style composable metrics:
+Composable metrics:
 
 ```python
 from worldbench import Metrics, WorldBench
@@ -90,39 +167,7 @@ result = bench.run(
 )
 ```
 
-Named model runs:
-
-```python
-from worldbench import WorldBench, WorldModelRun
-
-bench = WorldBench("examples/demo_dataset")
-good = WorldModelRun("examples/demo_dataset/good_model", name="good_model")
-result = bench.evaluate(good)
-```
-
-## CLI Usage
-
-```bash
-worldbench init <path>
-worldbench demo
-worldbench validate <dataset_path>
-worldbench eval <dataset_path> --predictions <predictions_path>
-worldbench compare <run_a/result.json> <run_b/result.json>
-worldbench report <result_json>
-worldbench dashboard <result_json_or_dataset_path>
-```
-
-Evaluation results are saved to:
-
-```text
-.worldbench/runs/<timestamp>/result.json
-```
-
-Reports are Markdown files suitable for experiment notes, pull requests, or benchmark artifacts.
-
 ## Dataset Format
-
-WorldBench expects rollout episodes with aligned image frames, actions, states, and metadata:
 
 ```text
 dataset/
@@ -172,88 +217,102 @@ dataset/
 }
 ```
 
-Prediction folders can be either per-episode:
-
-```text
-predictions/episode_001/000.png
-```
-
-or the dataset-native:
+Prediction folders can be dataset-native:
 
 ```text
 episode_001/predictions/000.png
 ```
 
+or model-run style:
+
+```text
+predictions/episode_001/000.png
+```
+
 ## Metrics
 
-WorldBench computes a weighted score from five MVP evaluators:
-
 | Metric | Weight | What it checks |
-| --- | --- | --- |
-| Visual Similarity | 25% | MSE, PSNR, and SSIM-style structural similarity against ground-truth frames. |
-| Action Consistency | 30% | Whether visual robot motion follows action logs such as `move_right`, `move_left`, or stationary commands. |
-| Temporal Stability | 20% | Frame-to-frame flicker, sudden jumps, and high variance in generated futures. |
-| Object Permanence | 15% | Whether the main task object remains visible and stable across predicted frames. |
-| Contact Realism | 10% | Whether object motion occurs before plausible robot/object contact. |
+| --- | ---: | --- |
+| Visual similarity | 25% | MSE, PSNR, and SSIM-style structure against ground-truth frames. |
+| Action consistency | 30% | Whether visual robot motion follows action logs such as `move_right` or `move_left`. |
+| Temporal stability | 20% | Flicker, sudden jumps, and unstable frame-to-frame deltas. |
+| Object permanence | 15% | Whether the main task object remains visible and stable. |
+| Contact realism | 10% | Whether object motion starts before plausible robot/object contact. |
 
-The default overall score is:
+The default overall score is a weighted average across these metrics.
 
-```text
-0.25 * visual_similarity
-+ 0.30 * action_consistency
-+ 0.20 * temporal_stability
-+ 0.15 * object_permanence
-+ 0.10 * contact_realism
-```
+## Example Outputs
 
-The MVP implementation uses simple image processing so the project works immediately without GPUs, cloud services, model training, or large datasets. The metric modules are intentionally small and replaceable for teams that want to add optical flow, segmentation, pose estimation, ROS logs, or simulator-specific contacts.
+### Example Benchmark
 
-## Dashboard
+| Model | Overall | Action consistency | Contact realism | Object permanence |
+| --- | ---: | ---: | ---: | ---: |
+| `good_model` | 88 | 91 | 84 | 95 |
+| `bad_model` | 42 | 31 | 20 | 55 |
+
+This toy benchmark is generated by `worldbench demo`, but it shows the type of failure WorldBench is designed to catch: realistic-looking predictions that do not follow robot actions or contact physics.
+
+Sample reports:
+
+- [good_model_report.md](examples/sample_reports/good_model_report.md)
+- [bad_model_report.md](examples/sample_reports/bad_model_report.md)
+
+## Supported Now Vs Roadmap
+
+| Feature | Status |
+| --- | --- |
+| Synthetic demo dataset | Supported |
+| Good vs bad model comparison | Supported |
+| CLI evaluation | Supported |
+| Markdown reports | Supported |
+| Local dashboard | Supported |
+| Action consistency scoring | Supported |
+| Object permanence scoring | Supported |
+| Contact realism scoring | Supported |
+| ROS bag import | Planned |
+| LeRobot dataset import | Planned |
+| ManiSkill/RLBench adapters | Planned |
+| Real robot rollout support | Planned |
+| Cloud run sharing | Planned |
+| Benchmark leaderboard | Planned |
+
+## Demo Video Generation
+
+The README animation is generated from code, not an external recording.
 
 ```bash
-worldbench dashboard .worldbench/runs/<run>/result.json
+python scripts/make_demo_video.py
 ```
 
-The local dashboard is served by a lightweight standard-library HTTP server and shows:
+Outputs:
 
-- Overall score and metric cards
-- Per-episode score table
-- Issue list
-- Ground-truth vs prediction frame viewer
-- Metric timeline chart
-- Main failure summary
-- Raw JSON payload
+- `assets/demo/worldbench_demo.mp4`
+- `assets/demo/worldbench_demo.gif`
+- `assets/demo/thumbnail.png`
 
-## Repository Layout
+The generator uses Pillow for drawing. It writes MP4 via `imageio` if installed, or a local `ffmpeg` binary if available. If neither is available, it prints a clear error explaining how to install the `video` extra.
 
-```text
-worldbench/
-  worldbench/
-    cli.py
-    core.py
-    dataset.py
-    schemas.py
-    metrics/
-    runners/
-    backends/
-    dashboard.py
-  examples/
-  tests/
+## Name Note
+
+WorldBench is currently an open-source robotics world-model evaluation toolkit in this repository. The name may overlap with research benchmarks using the same name, and the project may be renamed later if needed.
+
+## Contributing
+
+WorldBench is intentionally small and easy to inspect. Useful contributions include:
+
+- New control-aware metrics
+- Dataset import adapters
+- Better synthetic rollout scenarios
+- Dashboard/report polish
+- Tests for metric edge cases
+
+Before opening a PR:
+
+```bash
+pip install -e ".[dev]"
+pytest
 ```
-
-The package is organized like a robotics SDK: clean top-level imports, backend modules, CLI commands, synthetic demo mode, examples, and evaluation runners that can be embedded into larger experiment stacks.
-
-## Roadmap
-
-1. Real robot rollout support
-2. ROS bag import
-3. LeRobot dataset import
-4. RLBench/ManiSkill support
-5. Cosmos-style video prediction eval adapter
-6. Multi-model benchmark leaderboard
-7. Cloud run sharing
-8. Training-loop orchestration
 
 ## License
 
-Apache-2.0
+Apache-2.0. See [LICENSE](LICENSE).

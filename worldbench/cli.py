@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import importlib.util
 from pathlib import Path
 
 import click
@@ -89,6 +90,7 @@ def eval_cmd(dataset_path: Path, predictions: Path | None, output_root: Path) ->
     result_path = _save_result(result, output_root)
     result.print_summary()
     console.print(f"[green]Saved result:[/green] {result_path}")
+    console.print(f"[green]Latest alias:[/green] {output_root / 'latest' / 'result.json'}")
 
 
 @app.command()
@@ -142,10 +144,36 @@ def dashboard(result_json_or_dataset_path: Path, host: str, port: int, no_open: 
         raise click.ClickException(str(exc)) from exc
 
 
+@app.command("make-demo-video")
+@click.option("--output-dir", type=click.Path(path_type=Path), default=Path("assets/demo"), help="Demo asset output directory.")
+def make_demo_video(output_dir: Path) -> None:
+    """Generate README demo MP4, GIF, and thumbnail assets."""
+
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "make_demo_video.py"
+    if not script_path.is_file():
+        raise click.ClickException(
+            "Could not find scripts/make_demo_video.py. Run this command from the WorldBench repository checkout."
+        )
+    spec = importlib.util.spec_from_file_location("worldbench_make_demo_video", script_path)
+    if spec is None or spec.loader is None:
+        raise click.ClickException(f"Could not load {script_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    build_demo_video = module.make_demo_video
+
+    outputs = build_demo_video(output_dir)
+    console.print("[bold green]Generated demo assets[/bold green]")
+    for label, path in outputs.items():
+        console.print(f"  {label}: {path}")
+
+
 def _save_result(result, output_root: Path) -> Path:
     run_dir = output_root / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     result_path = run_dir / "result.json"
     result.save_json(result_path)
+    latest_dir = output_root / "latest"
+    latest_dir.mkdir(parents=True, exist_ok=True)
+    result.save_json(latest_dir / "result.json")
     return result_path
 
 

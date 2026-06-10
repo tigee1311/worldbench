@@ -104,9 +104,12 @@ class EvaluationRunner:
     def run_and_save(self, output_root: str | Path = ".worldbench/runs") -> Path:
         result = self.run()
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
-        output_dir = Path(output_root) / timestamp
+        root = Path(output_root)
+        output_dir = root / timestamp
         output_path = output_dir / "result.json"
         write_json(output_path, result.to_dict())
+        latest_dir = root / "latest"
+        write_json(latest_dir / "result.json", result.to_dict())
         return output_path
 
     def _episodes_to_evaluate(self) -> list[Episode]:
