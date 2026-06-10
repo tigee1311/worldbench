@@ -17,24 +17,44 @@ Do not claim official LeRobot support, ROS support, real robot support, cloud sh
 ## Recording Outline
 
 1. Open the README and show the GIF for 5-10 seconds.
-2. Run the quickstart commands:
+2. Confirm the repo and environment:
+
+```bash
+cd ~/worldbench
+source .venv/bin/activate
+python --version
+which python
+python -m pip --version
+worldbench --help
+```
+
+If `worldbench` is not found, reinstall into the active virtual environment:
+
+```bash
+python -m pip install -e ".[dev,video]"
+worldbench --help
+```
+
+3. Run the demo commands:
 
 ```bash
 worldbench demo
+worldbench validate examples/demo_dataset
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
+worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
 worldbench compare examples/demo_dataset --models good_model bad_model
 worldbench benchmark --demo
 worldbench report .worldbench/runs/latest/result.json
 worldbench dashboard .worldbench/runs/latest/result.json
 ```
 
-3. Point out the main failure:
+4. Point out the main failure:
 
 ```text
 bad_model produces plausible frames but violates robot action/contact dynamics.
 ```
 
-4. Open the dashboard and show:
+5. Open the dashboard and show:
 
 - overall score
 - metric cards
@@ -42,7 +62,7 @@ bad_model produces plausible frames but violates robot action/contact dynamics.
 - suggested fixes
 - frame comparison
 
-5. Close with the positioning:
+6. Close with the positioning:
 
 ```text
 WorldBench catches when a robot world model looks right but is actually wrong.
@@ -64,6 +84,7 @@ The comparison command turns this into a benchmark-style result: the good model 
 - Keep the dashboard at 100% browser zoom
 - Hide unrelated desktop windows
 - Do not show credentials, tokens, or private repos
+- Start from the repository root, not from a nested `worldbench/` package folder
 
 ## Where To Link It
 

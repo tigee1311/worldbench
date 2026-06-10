@@ -17,8 +17,12 @@ WorldBench v0.1.0 is the first public MVP for local robotics world-model evaluat
 ## Pre-Release Checks
 
 ```bash
-pip install -e ".[dev]"
-pytest
+python3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,video]"
+python -m pytest
 worldbench demo
 worldbench validate examples/demo_dataset
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
@@ -29,6 +33,7 @@ worldbench report .worldbench/runs/latest/result.json
 worldbench dashboard .worldbench/runs/latest/result.json
 worldbench import-lerobot --demo --out examples/lerobot_push_cube
 worldbench validate examples/lerobot_push_cube
+python -m pip install --upgrade build twine
 python -m build
 twine check dist/*
 ```

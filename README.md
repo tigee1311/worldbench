@@ -15,7 +15,12 @@ WorldBench catches when a robot world model looks right but is actually wrong: i
 ```bash
 git clone https://github.com/tigee1311/worldbench.git
 cd worldbench
-pip install -e ".[dev,video]"
+python3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,video]"
+worldbench --help
 worldbench demo
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
 worldbench compare examples/demo_dataset --models good_model bad_model
@@ -43,7 +48,15 @@ Features • Quickstart • CLI • Python SDK • Metrics • Roadmap
 ```bash
 git clone https://github.com/tigee1311/worldbench.git
 cd worldbench
-pip install -e ".[dev,video]"
+
+python3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,video]"
+
+worldbench --help
 
 worldbench demo
 worldbench validate examples/demo_dataset
@@ -56,6 +69,10 @@ worldbench dashboard .worldbench/runs/latest/result.json
 ```
 
 `worldbench eval` writes timestamped runs under `.worldbench/runs/` and also updates `.worldbench/runs/latest/result.json` for quick iteration.
+
+WorldBench requires Python 3.10+. If your system `python3` is Python 3.9 or lower, install Python 3.11 and create the virtual environment with `python3.11 -m venv .venv`.
+
+Use `python -m pip` instead of `pip` so the package installs into the active virtual environment. This avoids `pip: command not found` and prevents installing into the wrong Python.
 
 ## What It Does
 
@@ -109,34 +126,163 @@ WorldBench adds control-aware metrics for robotics world models.
 
 ## Installation
 
-From a source checkout:
+WorldBench is currently installed from a source checkout:
 
 ```bash
-pip install -e .
+git clone https://github.com/tigee1311/worldbench.git
+cd worldbench
+python3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,video]"
+worldbench --help
 ```
 
-After a package is published:
+Future PyPI releases may support:
 
 ```bash
-pip install worldbench
+python -m pip install worldbench
 ```
 
-If the `worldbench` package name is unavailable on PyPI, the package may ship as `worldbench-ai`.
+WorldBench is not assumed to be published on PyPI yet. If the `worldbench` package name is unavailable on PyPI, the package may ship as `worldbench-ai`.
 
 For tests and local development:
 
 ```bash
-pip install -e ".[dev]"
-pytest
+python -m pip install -e ".[dev]"
+python -m pytest
 ```
 
 `scikit-image` is optional for SSIM:
 
 ```bash
-pip install -e ".[vision]"
+python -m pip install -e ".[vision]"
 ```
 
 If `scikit-image` is not installed, WorldBench uses a lightweight NumPy fallback.
+
+### macOS Setup
+
+If `python3 --version` shows Python 3.9 or older, install Python 3.11:
+
+```bash
+brew install python@3.11
+```
+
+Then recreate the virtual environment:
+
+```bash
+rm -rf .venv
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,video]"
+worldbench --help
+```
+
+If Homebrew is unavailable, install Python 3.11 from [python.org](https://www.python.org/downloads/), then create the virtual environment with that Python.
+
+### Environment Check
+
+Run these from the repository root after activating `.venv`:
+
+```bash
+python --version
+which python
+python -m pip --version
+worldbench --help
+```
+
+If Python is below 3.10, recreate the virtual environment with Python 3.11.
+
+### Troubleshooting
+
+`zsh: command not found: pip`
+
+Use:
+
+```bash
+python3 -m pip --version
+python3 -m pip install --upgrade pip
+```
+
+Inside the virtual environment, use:
+
+```bash
+python -m pip install -e ".[dev,video]"
+```
+
+`zsh: command not found: worldbench`
+
+This means WorldBench was not installed into your active environment. Run:
+
+```bash
+source .venv/bin/activate
+python -m pip install -e ".[dev,video]"
+worldbench --help
+```
+
+`requires a different Python: 3.9.6 not in >=3.10`
+
+Install Python 3.11, then recreate the virtual environment:
+
+```bash
+brew install python@3.11
+rm -rf .venv
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev,video]"
+```
+
+`does not appear to be a Python project: neither setup.py nor pyproject.toml found`
+
+You are in the wrong folder. Go to the repo root, where `pyproject.toml` exists:
+
+```bash
+cd ~/worldbench
+ls
+```
+
+You should see:
+
+```text
+README.md
+pyproject.toml
+worldbench/
+examples/
+scripts/
+```
+
+Then install again:
+
+```bash
+python -m pip install -e ".[dev,video]"
+```
+
+## Live Demo Flow
+
+Use these commands after installation:
+
+```bash
+worldbench demo
+worldbench validate examples/demo_dataset
+worldbench eval examples/demo_dataset --predictions examples/demo_dataset/bad_model
+worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
+worldbench compare examples/demo_dataset --models good_model bad_model
+worldbench report .worldbench/runs/latest/result.json
+worldbench dashboard .worldbench/runs/latest/result.json
+```
+
+What each command does:
+
+- `worldbench demo` creates a synthetic rollout with good and bad predictions.
+- `worldbench validate examples/demo_dataset` checks that frames, actions, states, and metadata exist.
+- `worldbench eval ... bad_model` scores the bad prediction.
+- `worldbench eval ... good_model` scores the good prediction.
+- `worldbench compare ...` shows why the good model is more reliable.
+- `worldbench report ...` writes a Markdown report for the latest run.
+- `worldbench dashboard ...` opens a local debugging view.
 
 ## CLI Usage
 
@@ -411,8 +557,8 @@ WorldBench is intentionally small and easy to inspect. Useful contributions incl
 Before opening a PR:
 
 ```bash
-pip install -e ".[dev]"
-pytest
+python -m pip install -e ".[dev]"
+python -m pytest
 ```
 
 ## License

@@ -686,7 +686,7 @@ def _write_mp4(frame_dir: Path, output_path: Path) -> bool:
         except Exception:
             pass
 
-    print('MP4 export skipped. Install video dependencies with: pip install -e ".[video]"')
+    print('MP4 export skipped. Install video dependencies with: python -m pip install -e ".[video]"')
     return False
 
 
@@ -762,7 +762,7 @@ def _write_gif(frame_dir: Path, output_path: Path) -> None:
 
 
 def _write_gif_with_pillow(frame_dir: Path, output_path: Path) -> None:
-    print('GIF fallback is using Pillow. For faster export, install: pip install -e ".[video]"')
+    print('GIF fallback is using Pillow. For faster export, install: python -m pip install -e ".[video]"')
     step = max(1, FPS // GIF_FPS)
     frames = [
         Image.open(frame_dir / f"frame_{idx:04d}.png")
