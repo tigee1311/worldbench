@@ -1,0 +1,72 @@
+[
+  {
+    "t": 0,
+    "robot_x": 58,
+    "robot_y": 18,
+    "object_x": 58,
+    "object_y": 68
+  },
+  {
+    "t": 1,
+    "robot_x": 58,
+    "robot_y": 25,
+    "object_x": 58,
+    "object_y": 68
+  },
+  {
+    "t": 2,
+    "robot_x": 58,
+    "robot_y": 32,
+    "object_x": 58,
+    "object_y": 68
+  },
+  {
+    "t": 3,
+    "robot_x": 58,
+    "robot_y": 39,
+    "object_x": 58,
+    "object_y": 68
+  },
+  {
+    "t": 4,
+    "robot_x": 58,
+    "robot_y": 46,
+    "object_x": 58,
+    "object_y": 68
+  },
+  {
+    "t": 5,
+    "robot_x": 58,
+    "robot_y": 53,
+    "object_x": 58,
+    "object_y": 68
+  },
+  {
+    "t": 6,
+    "robot_x": 58,
+    "robot_y": 60,
+    "object_x": 58,
+    "object_y": 75
+  },
+  {
+    "t": 7,
+    "robot_x": 58,
+    "robot_y": 67,
+    "object_x": 58,
+    "object_y": 82
+  },
+  {
+    "t": 8,
+    "robot_x": 58,
+    "robot_y": 67,
+    "object_x": 58,
+    "object_y": 82
+  },
+  {
+    "t": 9,
+    "robot_x": 58,
+    "robot_y": 74,
+    "object_x": 58,
+    "object_y": 89
+  }
+]

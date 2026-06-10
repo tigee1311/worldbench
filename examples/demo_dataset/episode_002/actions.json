@@ -1,0 +1,65 @@
+[
+  {
+    "t": 0,
+    "action": "move_down",
+    "dx": 0.0,
+    "dy": 1.0,
+    "gripper": "open"
+  },
+  {
+    "t": 1,
+    "action": "move_down",
+    "dx": 0.0,
+    "dy": 1.0,
+    "gripper": "open"
+  },
+  {
+    "t": 2,
+    "action": "move_down",
+    "dx": 0.0,
+    "dy": 1.0,
+    "gripper": "open"
+  },
+  {
+    "t": 3,
+    "action": "move_down",
+    "dx": 0.0,
+    "dy": 1.0,
+    "gripper": "open"
+  },
+  {
+    "t": 4,
+    "action": "move_down",
+    "dx": 0.0,
+    "dy": 1.0,
+    "gripper": "open"
+  },
+  {
+    "t": 5,
+    "action": "move_down",
+    "dx": 0.0,
+    "dy": 1.0,
+    "gripper": "open"
+  },
+  {
+    "t": 6,
+    "action": "move_down",
+    "dx": 0.0,
+    "dy": 1.0,
+    "gripper": "open"
+  },
+  {
+    "t": 7,
+    "action": "close_gripper",
+    "dx": 0.0,
+    "dy": 0.0,
+    "gripper": "closed"
+  },
+  {
+    "t": 8,
+    "action": "move_down",
+    "dx": 0.0,
+    "dy": 1.0,
+    "gripper": "open"
+  }
+]

@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "worldbench"
+version = "0.1.0"
+description = "Evaluation and orchestration toolkit for robotics world models."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "WorldBench contributors" }
+]
+keywords = [
+  "robotics",
+  "world-models",
+  "evaluation",
+  "benchmarking",
+  "simulation",
+  "computer-vision",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.23",
+  "pillow>=9.5",
+  "pydantic>=2.0",
+  "rich>=13.0",
+  "click>=8.0",
+]
+
+[project.optional-dependencies]
+vision = ["scikit-image>=0.21"]
+dev = ["pytest>=8.0"]
+
+[project.urls]
+Homepage = "https://github.com/worldbench/worldbench"
+Issues = "https://github.com/worldbench/worldbench/issues"
+
+[project.scripts]
+worldbench = "worldbench.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["worldbench*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

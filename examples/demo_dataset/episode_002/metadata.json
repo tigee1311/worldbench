@@ -1,0 +1,7 @@
+{
+  "name": "episode_002",
+  "robot": "synthetic_2d_arm",
+  "task": "push cube down",
+  "fps": 5,
+  "description": "Synthetic robot rollout for world-model evaluation."
+}
