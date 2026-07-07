@@ -12,8 +12,8 @@ def generate_markdown_report(result: EvaluationResult) -> str:
     metric_rows = [
         [
             name.replace("_", " ").title(),
-            f"{metric.score:.1f}/100",
-            f"{result.weights.get(name, 0.0):.0%}",
+            f"{metric.score:.1f}/100" if metric.is_available and metric.score is not None else "N/A",
+            f"{result.weights.get(name, 0.0):.0%}" if metric.is_available else "N/A",
         ]
         for name, metric in result.metrics.items()
     ]
@@ -21,7 +21,10 @@ def generate_markdown_report(result: EvaluationResult) -> str:
         [
             episode.episode,
             f"{episode.score:.1f}/100",
-            ", ".join(f"{name}={metric.score:.1f}" for name, metric in episode.metrics.items()),
+            ", ".join(
+                f"{name}={metric.score:.1f}" if metric.is_available and metric.score is not None else f"{name}=N/A"
+                for name, metric in episode.metrics.items()
+            ),
         ]
         for episode in result.episodes
     ]
@@ -71,6 +74,8 @@ def save_markdown_report(result: EvaluationResult, path: str | Path) -> Path:
 def collect_evidence(result: EvaluationResult) -> list[str]:
     evidence: list[str] = []
     for metric in result.metrics.values():
+        if metric.reason:
+            evidence.append(metric.reason)
         evidence.extend(metric.issues)
     for episode in result.episodes:
         for metric in episode.metrics.values():
@@ -116,9 +121,12 @@ def _metric_detail_evidence(episode_name: str, metric_name: str, details: dict) 
 
 
 def suggested_next_steps(result: EvaluationResult) -> list[str]:
-    ordered = sorted(result.metrics.values(), key=lambda metric: metric.score)
+    ordered = sorted(result.metrics.values(), key=lambda metric: metric.score if metric.is_available and metric.score is not None else 101.0)
     suggestions: list[str] = []
     for metric in ordered[:3]:
+        if not metric.is_available:
+            suggestions.append(f"Review {metric.name.replace('_', ' ')} support for the current action format.")
+            continue
         if metric.name == "action_consistency":
             suggestions.append("Add stronger action conditioning and evaluate held-out action sequences.")
         elif metric.name == "contact_realism":

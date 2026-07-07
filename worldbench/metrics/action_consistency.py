@@ -18,7 +18,37 @@ class ActionConsistencyMetric:
 
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
         if len(prediction_frames) < 2:
-            return MetricResult(name=self.name, score=0.0, issues=["Need at least two predicted frames."])
+            return MetricResult(
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason="Need at least two predicted frames.",
+                issues=["Need at least two predicted frames."],
+            )
+
+        unsupported_actions = [action for action in episode.actions if not _supports_motion_adapter(action)]
+        if unsupported_actions:
+            reason = "unsupported raw numeric action vectors require an action adapter."
+            return MetricResult(
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason=reason,
+                details={
+                    "unsupported_steps": len(unsupported_actions),
+                    "total_steps": len(episode.actions),
+                    "unsupported_examples": [
+                        {
+                            "t": action.t,
+                            "action": action.action,
+                            "dx": action.dx,
+                            "dy": action.dy,
+                        }
+                        for action in unsupported_actions[:5]
+                    ],
+                },
+                issues=[reason],
+            )
 
         centroids = [detect_robot_centroid(load_rgb(path)) for path in prediction_frames]
         step_scores: list[float] = []
@@ -68,7 +98,13 @@ class ActionConsistencyMetric:
                 )
 
         if not step_scores:
-            return MetricResult(name=self.name, score=0.0, issues=["No actions aligned to predicted frames."])
+            return MetricResult(
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason="No actions aligned to predicted frames.",
+                issues=["No actions aligned to predicted frames."],
+            )
 
         score = clamp(float(np.mean(step_scores)))
         failure_rate = len(failures) / len(step_scores)
@@ -82,6 +118,7 @@ class ActionConsistencyMetric:
         return MetricResult(
             name=self.name,
             score=score,
+            status="available",
             details={
                 "steps": len(step_scores),
                 "failed_steps": len(failures),
@@ -111,6 +148,12 @@ def _expected_motion(action: ActionRecord) -> tuple[float, float]:
         dx = 0.0
         dy = 0.0
     return float(dx), float(dy)
+
+
+def _supports_motion_adapter(action: ActionRecord) -> bool:
+    if isinstance(action.action, str):
+        return True
+    return abs(action.dx) > 0.0 or abs(action.dy) > 0.0
 
 
 def _score_motion(expected: tuple[float, float], observed: tuple[float, float]) -> float:

@@ -179,7 +179,7 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
         },
     }
     payload = json.dumps(data).replace("</", "<\\/")
-    metric_cards = "\n".join(_metric_card(name, metric.score) for name, metric in result.metrics.items())
+    metric_cards = "\n".join(_metric_card(name, metric.score, metric.is_available) for name, metric in result.metrics.items())
     episode_rows = "\n".join(_episode_row(episode) for episode in result.episodes)
     issue_items = _issue_items(result)
     fix_items = _fix_items(result)
@@ -378,9 +378,9 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
   </header>
   <main>
     <div class="summary">
-      <div class="score">
+    <div class="score">
         <div class="label">Overall Score</div>
-        <div class="value">{result.score:.1f}<small>/100</small></div>
+      <div class="value">{result.score:.1f}<small>/100</small></div>
       </div>
       <div class="panel main-failure">
         <h2>Main Failure</h2>
@@ -493,9 +493,9 @@ def build_comparison_dashboard_html(comparison: dict[str, object]) -> str:
     metric_rows = "\n".join(
         "<tr>"
         f"<td>{html.escape(str(metric['label']))}</td>"
-        f"<td>{float(metric['score_a']):.1f}/100</td>"
-        f"<td>{float(metric['score_b']):.1f}/100</td>"
-        f"<td>{float(metric['delta']):+.1f}</td>"
+        f"<td>{_format_optional_score(metric['score_a'])}</td>"
+        f"<td>{_format_optional_score(metric['score_b'])}</td>"
+        f"<td>{_format_optional_delta(metric['delta'])}</td>"
         "</tr>"
         for metric in metrics
     )
@@ -589,8 +589,8 @@ def build_comparison_dashboard_html(comparison: dict[str, object]) -> str:
       <h2>Overall</h2>
       <table>
         <tbody>
-          <tr><td>{label_a}</td><td>{float(overall['score_a']):.1f}/100</td></tr>
-          <tr><td>{label_b}</td><td>{float(overall['score_b']):.1f}/100</td></tr>
+          <tr><td>{label_a}</td><td>{_format_optional_score(overall['score_a'])}</td></tr>
+          <tr><td>{label_b}</td><td>{_format_optional_score(overall['score_b'])}</td></tr>
         </tbody>
       </table>
     </section>
@@ -616,14 +616,15 @@ def build_comparison_dashboard_html(comparison: dict[str, object]) -> str:
 </html>"""
 
 
-def _metric_card(name: str, score: float) -> str:
+def _metric_card(name: str, score: float | None, available: bool = True) -> str:
     label = html.escape(name.replace("_", " ").title())
-    width = max(0, min(100, score))
-    color = "#41d38a" if score >= 85 else "#ffb85c" if score >= 60 else "#ff6b5f"
+    display = "N/A" if score is None else f"{score:.1f}"
+    width = 0 if score is None else max(0, min(100, score))
+    color = "#7f8c99" if score is None else "#41d38a" if score >= 85 else "#ffb85c" if score >= 60 else "#ff6b5f"
     return (
         '<div class="metric-card">'
         f'<div class="name">{label}</div>'
-        f'<div class="metric-score">{score:.1f}<small>/100</small></div>'
+        f'<div class="metric-score">{display}<small>{"/100" if score is not None else ""}</small></div>'
         f'<div class="bar"><span style="width:{width:.1f}%; background:{color}"></span></div>'
         "</div>"
     )
@@ -631,7 +632,7 @@ def _metric_card(name: str, score: float) -> str:
 
 def _episode_row(episode) -> str:
     breakdown = ", ".join(
-        f"{html.escape(name.replace('_', ' ').title())}: {metric.score:.1f}"
+        f"{html.escape(name.replace('_', ' ').title())}: {metric.score:.1f}" if metric.is_available and metric.score is not None else f"{html.escape(name.replace('_', ' ').title())}: N/A"
         for name, metric in episode.metrics.items()
     )
     return (
@@ -699,6 +700,8 @@ def _timeline_svg(result: EvaluationResult) -> str:
             metric = episode.metrics.get(name)
             if metric is None:
                 continue
+            if not metric.is_available or metric.score is None:
+                continue
             bar_height = (metric.score / 100) * plot_height
             x = base_x + metric_idx * (bar_width + 4)
             y = top + plot_height - bar_height
@@ -720,6 +723,14 @@ def _timeline_svg(result: EvaluationResult) -> str:
         parts.append(f'<text x="{x + 14}" y="{height - 5}" font-size="11" fill="#91a9bb">{label}</text>')
     parts.append("</svg>")
     return "\n".join(parts)
+
+
+def _format_optional_score(score: float | None) -> str:
+    return "N/A" if score is None else f"{float(score):.1f}/100"
+
+
+def _format_optional_delta(delta: float | None) -> str:
+    return "N/A" if delta is None else f"{float(delta):+.1f}"
 
 
 if __name__ == "__main__":

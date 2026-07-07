@@ -80,6 +80,9 @@ class EvaluationRunner:
                 result = metric.evaluate(episode, prediction_frames)
                 metric_results[metric.name] = result
                 episode_issues.extend(result.issues)
+                if not result.is_available and result.reason:
+                    episode_issues.append(result.reason)
+                    global_issues.append(f"{episode.name}: {result.reason}")
 
             episode_score = weighted_score(metric_results, selected_weights)
             episode_results.append(
@@ -152,10 +155,21 @@ def resolve_prediction_frames(episode: Episode, predictions: Path | None) -> lis
 
 
 def weighted_score(results: dict[str, MetricResult], weights: dict[str, float]) -> float:
-    total_weight = sum(weight for name, weight in weights.items() if name in results)
+    total_weight = sum(
+        weight
+        for name, weight in weights.items()
+        if name in results and results[name].is_available
+    )
     if total_weight <= 0:
         return 0.0
-    return clamp(sum(results[name].score * weights[name] for name in results if name in weights) / total_weight)
+    return clamp(
+        sum(
+            float(results[name].score) * weights[name]
+            for name in results
+            if name in weights and results[name].is_available and results[name].score is not None
+        )
+        / total_weight
+    )
 
 
 def aggregate_metric_results(
@@ -163,9 +177,22 @@ def aggregate_metric_results(
 ) -> dict[str, MetricResult]:
     aggregate: dict[str, MetricResult] = {}
     for metric in metrics:
-        values = [episode.metrics[metric.name].score for episode in episode_results if metric.name in episode.metrics]
-        if not values:
-            aggregate[metric.name] = MetricResult(name=metric.name, score=0.0)
+        metric_results = [episode.metrics[metric.name] for episode in episode_results if metric.name in episode.metrics]
+        values = [result.score for result in metric_results if result.is_available and result.score is not None]
+        if not values or any(not result.is_available for result in metric_results):
+            reasons = []
+            for episode in episode_results:
+                metric_result = episode.metrics.get(metric.name)
+                if metric_result is not None and not metric_result.is_available and metric_result.reason:
+                    reasons.append(f"{episode.episode}: {metric_result.reason}")
+            aggregate[metric.name] = MetricResult(
+                name=metric.name,
+                score=None,
+                status="unsupported",
+                reason=reasons[0].split(": ", 1)[1] if reasons else "Unsupported metric for one or more episodes.",
+                details={"available_episode_scores": values, "unsupported_episodes": reasons},
+                issues=reasons[:20],
+            )
             continue
         issues = []
         for episode in episode_results:
@@ -175,6 +202,7 @@ def aggregate_metric_results(
         aggregate[metric.name] = MetricResult(
             name=metric.name,
             score=clamp(float(np.mean(values))),
+            status="available",
             details={"episode_scores": values},
             issues=issues[:20],
         )
@@ -184,8 +212,11 @@ def aggregate_metric_results(
 def infer_main_failure(metrics: dict[str, MetricResult]) -> str:
     if not metrics:
         return "No metrics were run."
-    lowest = min(metrics.values(), key=lambda result: result.score)
-    if lowest.score >= 85:
+    available_metrics = [result for result in metrics.values() if result.is_available and result.score is not None]
+    if not available_metrics:
+        return "No available metrics were scored."
+    lowest = min(available_metrics, key=lambda result: result.score)
+    if float(lowest.score) >= 85:
         return "No dominant failure detected; the run is strong across core world-model checks."
     messages = {
         "visual_similarity": "The model does not visually match held-out future frames closely enough.",

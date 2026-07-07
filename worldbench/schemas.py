@@ -85,9 +85,19 @@ class MetricResult(BaseModel):
     """Score and supporting evidence for one metric."""
 
     name: str
-    score: float = Field(ge=0.0, le=100.0)
+    score: float | None = None
+    status: Literal["available", "unsupported"] = "available"
+    reason: str | None = None
     details: dict[str, Any] = Field(default_factory=dict)
     issues: list[str] = Field(default_factory=list)
+
+    @property
+    def is_available(self) -> bool:
+        return self.status == "available" and self.score is not None
+
+    @property
+    def display_score(self) -> str:
+        return "N/A" if not self.is_available else f"{self.score:.1f}"
 
 
 class EpisodeResult(BaseModel):
@@ -151,5 +161,9 @@ class EvaluationResult(BaseModel):
         table.add_column("Score", justify="right")
         table.add_column("Weight", justify="right")
         for name, result in self.metrics.items():
-            table.add_row(name.replace("_", " ").title(), f"{result.score:.1f}", f"{self.weights.get(name, 0):.0%}")
+            weight = "N/A" if not result.is_available else f"{self.weights.get(name, 0):.0%}"
+            table.add_row(name.replace("_", " ").title(), result.display_score, weight)
         console.print(table)
+        unavailable = [f"{name.replace('_', ' ').title()}: {result.reason}" for name, result in self.metrics.items() if not result.is_available and result.reason]
+        if unavailable:
+            console.print("\n".join(unavailable))

@@ -10,5 +10,6 @@ dist/
 build/
 .worldbench/
 examples/yaskawa_*/
+examples/corruption_benchmark/
 quickstart_report.md
 .DS_Store

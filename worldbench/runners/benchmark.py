@@ -47,7 +47,8 @@ def run_benchmark_suite(benchmark_root: str | Path) -> dict[str, object]:
         good_scores.append(good.score)
         bad_scores.append(bad.score)
         for name, metric in bad.metrics.items():
-            failure_scores.setdefault(name, []).append(metric.score)
+            if metric.is_available and metric.score is not None:
+                failure_scores.setdefault(name, []).append(metric.score)
         scenarios.append(
             {
                 "name": scenario_dir.name,
@@ -140,7 +141,7 @@ def _largest_failure_modes(scenarios: list[dict[str, object]], failure_scores: d
         metrics = bad_model["metrics"]
         assert isinstance(metrics, dict)
         metric = metrics.get(metric_name)
-        if isinstance(metric, dict):
+        if isinstance(metric, dict) and metric.get("score") is not None:
             scenario_rankings.append((FAILURE_MODE_LABELS[metric_name], float(metric["score"])))
 
     if scenario_rankings:

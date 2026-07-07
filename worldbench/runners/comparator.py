@@ -23,9 +23,12 @@ def compare_results(run_a: str | Path | EvaluationResult, run_b: str | Path | Ev
     b = load_result(run_b) if not isinstance(run_b, EvaluationResult) else run_b
     metrics: dict[str, dict[str, float]] = {}
     for name in sorted(set(a.metrics) | set(b.metrics)):
-        score_a = a.metrics[name].score if name in a.metrics else 0.0
-        score_b = b.metrics[name].score if name in b.metrics else 0.0
-        metrics[name] = {"run_a": score_a, "run_b": score_b, "delta": score_b - score_a}
+        metric_a = a.metrics.get(name)
+        metric_b = b.metrics.get(name)
+        score_a = metric_a.score if metric_a is not None and metric_a.is_available else None
+        score_b = metric_b.score if metric_b is not None and metric_b.is_available else None
+        delta = None if score_a is None or score_b is None else score_b - score_a
+        metrics[name] = {"run_a": score_a, "run_b": score_b, "delta": delta}
     return {
         "run_a_score": a.score,
         "run_b_score": b.score,
@@ -81,16 +84,18 @@ def build_comparison(
 
     metrics = []
     for name in sorted(set(result_a.metrics) | set(result_b.metrics)):
-        score_a = result_a.metrics[name].score if name in result_a.metrics else 0.0
-        score_b = result_b.metrics[name].score if name in result_b.metrics else 0.0
+        metric_a = result_a.metrics.get(name)
+        metric_b = result_b.metrics.get(name)
+        score_a = metric_a.score if metric_a is not None and metric_a.is_available else None
+        score_b = metric_b.score if metric_b is not None and metric_b.is_available else None
         metrics.append(
             {
                 "name": name,
                 "label": _display_name(name),
                 "score_a": score_a,
                 "score_b": score_b,
-                "delta": _signed_delta(score_a, score_b, delta_direction),
-                "winner_delta": abs(score_a - score_b),
+                "delta": None if score_a is None or score_b is None else _signed_delta(score_a, score_b, delta_direction),
+                "winner_delta": None if score_a is None or score_b is None else abs(score_a - score_b),
             }
         )
 
@@ -108,6 +113,7 @@ def build_comparison(
         winner_margin = 0.0
 
     weakest_loser_metrics = _weakest_metrics(result_a if loser == label_a else result_b if loser == label_b else result_b)
+    comparable_metrics = [metric for metric in metrics if metric["winner_delta"] is not None]
     comparison = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "source": source,
@@ -124,7 +130,7 @@ def build_comparison(
             "winner_margin": winner_margin,
         },
         "metrics": metrics,
-        "largest_gaps": sorted(metrics, key=lambda item: item["winner_delta"], reverse=True)[:3],
+        "largest_gaps": sorted(comparable_metrics, key=lambda item: float(item["winner_delta"]), reverse=True)[:3],
         "conclusion": _comparison_conclusion(loser, weakest_loser_metrics),
         "results": {
             "a": result_a.to_dict(),
@@ -169,11 +175,12 @@ def generate_comparison_markdown(comparison: dict[str, object]) -> str:
     rows = [
         [
             str(metric["label"]),
-            f"{float(metric['score_a']):.1f}/100",
-            f"{float(metric['score_b']):.1f}/100",
-            f"{float(metric['delta']):+.1f}",
+            "N/A" if metric["score_a"] is None else f"{float(metric['score_a']):.1f}/100",
+            "N/A" if metric["score_b"] is None else f"{float(metric['score_b']):.1f}/100",
+            "N/A" if metric["delta"] is None else f"{float(metric['delta']):+.1f}",
         ]
         for metric in metrics
+        if metric["delta"] is not None or metric["score_a"] is not None or metric["score_b"] is not None
     ]
     gap_rows = [
         [str(metric["label"]), f"{float(metric['winner_delta']):.1f}"]
@@ -197,8 +204,8 @@ def generate_comparison_markdown(comparison: dict[str, object]) -> str:
             markdown_table(
                 ["Run", "Overall"],
                 [
-                    [label_a, f"{float(overall['score_a']):.1f}/100"],
-                    [label_b, f"{float(overall['score_b']):.1f}/100"],
+                    [label_a, _format_optional_score(overall["score_a"])],
+                    [label_b, _format_optional_score(overall["score_b"])],
                 ],
             ),
             "",
@@ -227,7 +234,7 @@ def _display_name(metric_name: str) -> str:
 
 
 def _weakest_metrics(result: EvaluationResult) -> set[str]:
-    return {name for name, metric in result.metrics.items() if metric.score < 60.0}
+    return {name for name, metric in result.metrics.items() if metric.is_available and metric.score is not None and metric.score < 60.0}
 
 
 def _comparison_conclusion(loser: str, weak_metrics: set[str]) -> str:
@@ -242,3 +249,7 @@ def _comparison_conclusion(loser: str, weak_metrics: set[str]) -> str:
     if "visual_similarity" in weak_metrics:
         return f"{loser} does not visually match the held-out future frames closely enough."
     return f"{loser} trails on aggregate score; inspect the metric deltas for the dominant gap."
+
+
+def _format_optional_score(score: float | None) -> str:
+    return "N/A" if score is None else f"{float(score):.1f}/100"
