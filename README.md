@@ -296,6 +296,7 @@ worldbench compare <run_a/result.json> <run_b/result.json>
 worldbench benchmark --demo
 worldbench benchmark benchmarks/
 worldbench import-lerobot <input_path> --out <output_path>
+worldbench import-lerobot --repo-id <user/dataset> --episodes 0:1 --camera <camera_key> --timeline video --out <output_path>
 worldbench import-lerobot --demo --out examples/lerobot_push_cube
 worldbench report <result_json>
 worldbench dashboard <result_json_or_dataset_path>
@@ -415,9 +416,22 @@ predictions/episode_001/000.png
 
 ## Experimental Adapters
 
-### LeRobot-Style Import
+### LeRobot Import
 
-WorldBench includes an experimental LeRobot-style local folder converter. This is not official LeRobot support; it is a simple bridge for folders shaped like `images/`, `actions.json`, `states.json`, and `metadata.json`.
+WorldBench can import selected episodes from native LeRobot datasets on Hugging Face:
+
+```bash
+worldbench import-lerobot \
+  --repo-id chocolat-nya/yaskawa-untangle-dataset \
+  --episodes 0:1 \
+  --camera observation.images.fixed_cam1 \
+  --timeline video \
+  --out ./robot_data
+```
+
+`--timeline video` is the default and exports one WorldBench timestep per unique camera frame. `--timeline control` exports one timestep per source robot control row, which may repeat camera frames when control runs faster than video.
+
+WorldBench also keeps the legacy experimental LeRobot-style local folder converter for folders shaped like `images/`, `actions.json`, `states.json`, and `metadata.json`.
 
 ```bash
 worldbench import-lerobot --demo --out examples/lerobot_push_cube

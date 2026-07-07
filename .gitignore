@@ -9,5 +9,6 @@ venv/
 dist/
 build/
 .worldbench/
+examples/yaskawa_*/
 quickstart_report.md
 .DS_Store

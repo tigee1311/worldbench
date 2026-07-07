@@ -14,7 +14,12 @@ from rich.table import Table
 
 from worldbench.backends.benchmark import BenchmarkBackend
 from worldbench.backends.demo import DemoBackend
-from worldbench.backends.lerobot import create_lerobot_style_demo_source, import_lerobot_style
+from worldbench.backends.lerobot import (
+    create_lerobot_style_demo_source,
+    import_lerobot_repo,
+    import_lerobot_style,
+    parse_episode_selection,
+)
 from worldbench.dashboard import launch_dashboard
 from worldbench.dataset import validate_dataset
 from worldbench.runners.benchmark import run_benchmark_suite, save_benchmark_artifacts
@@ -110,22 +115,75 @@ def benchmark(benchmark_path: Path | None, demo: bool, output_root: Path) -> Non
 
 @app.command("import-lerobot")
 @click.argument("input_path", required=False, type=click.Path(path_type=Path))
-@click.option("--out", "output_path", required=True, type=click.Path(path_type=Path), help="WorldBench dataset output path.")
-@click.option("--demo", is_flag=True, help="Generate and import a tiny synthetic LeRobot-style source folder.")
-def import_lerobot(input_path: Path | None, output_path: Path, demo: bool) -> None:
-    """Import an experimental LeRobot-style local folder into WorldBench format."""
+@click.option(
+    "--out",
+    "output_path",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="WorldBench dataset output path.",
+)
+@click.option(
+    "--demo",
+    is_flag=True,
+    help="Generate and import a tiny synthetic LeRobot-style source folder.",
+)
+@click.option(
+    "--repo-id",
+    default=None,
+    help="Hugging Face LeRobot dataset repo id, e.g. username/dataset.",
+)
+@click.option("--episodes", default=None, help="Episode selection, e.g. 0,2,4 or 0:5.")
+@click.option(
+    "--camera",
+    "camera_key",
+    default=None,
+    help="LeRobot camera key, e.g. observation.images.front.",
+)
+@click.option(
+    "--timeline",
+    type=click.Choice(["video", "control"]),
+    default="video",
+    show_default=True,
+    help="LeRobot timeline: video exports unique camera frames; control exports source control rows.",
+)
+def import_lerobot(
+    input_path: Path | None,
+    output_path: Path,
+    demo: bool,
+    repo_id: str | None,
+    episodes: str | None,
+    camera_key: str | None,
+    timeline: str,
+) -> None:
+    """Import LeRobot data into WorldBench format."""
 
-    console.print("[bold]Experimental LeRobot-style import[/bold]")
-    console.print("This is a local folder converter, not official LeRobot support.")
+    console.print("[bold]LeRobot import[/bold]")
+    console.print(
+        "Experimental LeRobot-style import remains available for local folders and --demo."
+    )
 
     try:
         if demo:
+            if repo_id is not None:
+                raise click.ClickException("--demo cannot be combined with --repo-id.")
             with tempfile.TemporaryDirectory(prefix="worldbench-lerobot-style-") as tmpdir:
                 source = create_lerobot_style_demo_source(Path(tmpdir) / "source")
                 report = import_lerobot_style(source, output_path)
+        elif repo_id is not None:
+            if input_path is not None:
+                raise click.ClickException("Do not provide input_path when using --repo-id.")
+            selected_episodes = parse_episode_selection(episodes)
+            report = import_lerobot_repo(
+                repo_id,
+                output_path,
+                episodes=selected_episodes,
+                camera_key=camera_key,
+                timeline=timeline,
+            )
         else:
             if input_path is None:
-                raise click.ClickException("Provide input_path, or use --demo with --out.")
+                raise click.ClickException("Provide input_path, use --demo, or use --repo-id.")
+            console.print("Using legacy local LeRobot-style folder converter.")
             report = import_lerobot_style(input_path, output_path)
     except click.ClickException:
         raise
@@ -138,7 +196,9 @@ def import_lerobot(input_path: Path | None, output_path: Path, demo: bool) -> No
             f"({report.episode_count} episode, {report.frame_count} frame(s))"
         )
     else:
-        console.print(f"[bold red]Imported dataset has validation errors[/bold red]: {output_path}")
+        console.print(
+            f"[bold red]Imported dataset has validation errors[/bold red]: {output_path}"
+        )
 
     if report.issues:
         table = Table(title="Validation Issues")

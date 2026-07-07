@@ -96,7 +96,7 @@ class ActionConsistencyMetric:
 
 
 def _expected_motion(action: ActionRecord) -> tuple[float, float]:
-    name = action.action.lower()
+    name = str(action.action).lower()
     dx = action.dx
     dy = action.dy
     if "right" in name:

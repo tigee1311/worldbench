@@ -12,7 +12,12 @@ class ActionRecord(BaseModel):
     """Single robot action aligned to a rollout timestep."""
 
     t: int
-    action: str = "noop"
+    timestamp: float | None = None
+    source_control_index: int | None = None
+    source_control_timestamp: float | None = None
+    source_video_frame_index: int | None = None
+    source_video_timestamp: float | None = None
+    action: Any = "noop"
     dx: float = 0.0
     dy: float = 0.0
     gripper: str | None = None
@@ -22,6 +27,12 @@ class StateRecord(BaseModel):
     """Simple robot/object state used by lightweight synthetic evaluators."""
 
     t: int
+    timestamp: float | None = None
+    source_control_index: int | None = None
+    source_control_timestamp: float | None = None
+    source_video_frame_index: int | None = None
+    source_video_timestamp: float | None = None
+    observation_state: Any = None
     robot_x: float | None = None
     robot_y: float | None = None
     object_x: float | None = None
@@ -36,6 +47,17 @@ class EpisodeMetadata(BaseModel):
     task: str = "unknown"
     fps: float = 5.0
     description: str = ""
+    source: str | None = None
+    repo_id: str | None = None
+    episode_index: int | None = None
+    camera_key: str | None = None
+    timeline: Literal["video", "control"] | None = None
+    video_fps: float | None = None
+    alignment_strategy: dict[str, str] | None = None
+    source_control_steps: int | None = None
+    source_unique_video_frames: int | None = None
+    source_referenced_video_frames: int | None = None
+    exported_timesteps: int | None = None
 
 
 class ValidationIssue(BaseModel):
@@ -131,4 +153,3 @@ class EvaluationResult(BaseModel):
         for name, result in self.metrics.items():
             table.add_row(name.replace("_", " ").title(), f"{result.score:.1f}", f"{self.weights.get(name, 0):.0%}")
         console.print(table)
-
