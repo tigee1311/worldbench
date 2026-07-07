@@ -1,0 +1,126 @@
+[
+  {
+    "dataset": "examples/yaskawa_video",
+    "episode": "episode_000000",
+    "corruption_type": "temporal_scramble",
+    "severity": 0.0,
+    "requested_severity": 0.0,
+    "seed": 42,
+    "source_frames": 900,
+    "moved_frames": 0,
+    "moved_frame_percentage": 0.0,
+    "exported_frames": 900,
+    "scores": {
+      "overall": 79.69817037175325,
+      "visual_similarity": 100.0,
+      "action_consistency": "N/A",
+      "action_reason": "unsupported raw numeric action vectors require an action adapter.",
+      "temporal_stability": 99.2769296344697,
+      "object_permanence": 72.88888888888889,
+      "contact_realism": 0.0
+    },
+    "prediction_root": "examples/temporal_scramble_benchmark/scramble_0",
+    "issues": [
+      "unsupported raw numeric action vectors require an action adapter.",
+      "unsupported raw numeric action vectors require an action adapter.",
+      "Object disappeared or became too small in 19 frame(s) (2% of prediction): [12, 13, 14, 20, 21, 22, 24, 38].",
+      "Object blob size changes abruptly across frames.",
+      "Object moved before contact in predicted frame(s): [5, 6, 7, 8, 9, 10, 11, 12].",
+      "Object began moving at frame 5; no contact was detected.",
+      "Object motion occurred without any detected robot/object contact."
+    ]
+  },
+  {
+    "dataset": "examples/yaskawa_video",
+    "episode": "episode_000000",
+    "corruption_type": "temporal_scramble",
+    "severity": 0.05,
+    "requested_severity": 0.05,
+    "seed": 42,
+    "source_frames": 900,
+    "moved_frames": 45,
+    "moved_frame_percentage": 0.05,
+    "exported_frames": 900,
+    "scores": {
+      "overall": 79.67078809002888,
+      "visual_similarity": 99.99203461563172,
+      "action_consistency": "N/A",
+      "action_reason": "unsupported raw numeric action vectors require an action adapter.",
+      "temporal_stability": 99.19104837889476,
+      "object_permanence": 72.88888888888889,
+      "contact_realism": 0.0
+    },
+    "prediction_root": "examples/temporal_scramble_benchmark/scramble_5",
+    "issues": [
+      "unsupported raw numeric action vectors require an action adapter.",
+      "unsupported raw numeric action vectors require an action adapter.",
+      "Object disappeared or became too small in 19 frame(s) (2% of prediction): [12, 13, 14, 20, 21, 22, 24, 38].",
+      "Object blob size changes abruptly across frames.",
+      "Object moved before contact in predicted frame(s): [5, 6, 7, 8, 9, 10, 11, 12].",
+      "Object began moving at frame 5; no contact was detected.",
+      "Object motion occurred without any detected robot/object contact."
+    ]
+  },
+  {
+    "dataset": "examples/yaskawa_video",
+    "episode": "episode_000000",
+    "corruption_type": "temporal_scramble",
+    "severity": 0.15,
+    "requested_severity": 0.15,
+    "seed": 42,
+    "source_frames": 900,
+    "moved_frames": 135,
+    "moved_frame_percentage": 0.15,
+    "exported_frames": 900,
+    "scores": {
+      "overall": 79.6321188611115,
+      "visual_similarity": 99.9769196811952,
+      "action_consistency": "N/A",
+      "action_reason": "unsupported raw numeric action vectors require an action adapter.",
+      "temporal_stability": 99.07459974572959,
+      "object_permanence": 72.88888888888889,
+      "contact_realism": 0.0
+    },
+    "prediction_root": "examples/temporal_scramble_benchmark/scramble_15",
+    "issues": [
+      "unsupported raw numeric action vectors require an action adapter.",
+      "unsupported raw numeric action vectors require an action adapter.",
+      "Object disappeared or became too small in 19 frame(s) (2% of prediction): [12, 13, 14, 20, 21, 22, 24, 38].",
+      "Object blob size changes abruptly across frames.",
+      "Object moved before contact in predicted frame(s): [4, 5, 7, 8, 9, 10, 11, 12].",
+      "Object began moving at frame 4; no contact was detected.",
+      "Object motion occurred without any detected robot/object contact."
+    ]
+  },
+  {
+    "dataset": "examples/yaskawa_video",
+    "episode": "episode_000000",
+    "corruption_type": "temporal_scramble",
+    "severity": 0.3,
+    "requested_severity": 0.3,
+    "seed": 42,
+    "source_frames": 900,
+    "moved_frames": 270,
+    "moved_frame_percentage": 0.3,
+    "exported_frames": 900,
+    "scores": {
+      "overall": 79.59272561838577,
+      "visual_similarity": 99.95604961907995,
+      "action_consistency": "N/A",
+      "action_reason": "unsupported raw numeric action vectors require an action adapter.",
+      "temporal_stability": 98.96281097383358,
+      "object_permanence": 72.88888888888889,
+      "contact_realism": 0.0
+    },
+    "prediction_root": "examples/temporal_scramble_benchmark/scramble_30",
+    "issues": [
+      "unsupported raw numeric action vectors require an action adapter.",
+      "unsupported raw numeric action vectors require an action adapter.",
+      "Object disappeared or became too small in 19 frame(s) (2% of prediction): [12, 13, 15, 19, 20, 22, 24, 38].",
+      "Object blob size changes abruptly across frames.",
+      "Object moved before contact in predicted frame(s): [4, 5, 7, 8, 9, 10, 11, 12].",
+      "Object began moving at frame 4; no contact was detected.",
+      "Object motion occurred without any detected robot/object contact."
+    ]
+  }
+]

@@ -11,5 +11,6 @@ build/
 .worldbench/
 examples/yaskawa_*/
 examples/corruption_benchmark/
+examples/temporal_scramble_benchmark/
 quickstart_report.md
 .DS_Store
