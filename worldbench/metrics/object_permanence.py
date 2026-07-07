@@ -8,7 +8,7 @@ import numpy as np
 
 from worldbench.dataset import Episode
 from worldbench.schemas import MetricResult
-from worldbench.utils import clamp, load_rgb, object_area
+from worldbench.utils import clamp, load_rgb, object_area, rollout_supports_synthetic_tracking
 
 
 class ObjectPermanenceMetric:
@@ -17,18 +17,33 @@ class ObjectPermanenceMetric:
     name = "object_permanence"
 
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
-        del episode
+        if not rollout_supports_synthetic_tracking(episode):
+            return MetricResult(
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason="Reliable object tracking is unavailable for this rollout.",
+                issues=["Reliable object tracking is unavailable for this rollout."],
+            )
         if not prediction_frames:
-            return MetricResult(name=self.name, score=0.0, issues=["No predicted frames available."])
+            return MetricResult(
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason="No predicted frames available.",
+                issues=["No predicted frames available."],
+            )
 
         areas = [object_area(load_rgb(path)) for path in prediction_frames]
         positive_areas = [area for area in areas if area > 10]
         if not positive_areas:
             return MetricResult(
                 name=self.name,
-                score=0.0,
+                score=None,
+                status="unsupported",
+                reason="Reliable object tracking is unavailable for this rollout.",
                 details={"visible_frames": 0, "total_frames": len(areas), "areas": areas},
-                issues=["Main object was not detected in any predicted frame."],
+                issues=["Reliable object tracking is unavailable for this rollout."],
             )
 
         reference_area = float(np.median(positive_areas))
@@ -51,6 +66,7 @@ class ObjectPermanenceMetric:
         return MetricResult(
             name=self.name,
             score=score,
+            status="available",
             details={
                 "visible_frames": len(areas) - len(missing),
                 "total_frames": len(areas),

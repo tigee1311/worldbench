@@ -6,18 +6,24 @@
     "severity": 0.0,
     "seed": 42,
     "source_frames": 900,
-    "frozen_frames": 0,
     "exported_frames": 900,
     "scores": {
-      "overall": 79.69817037175325,
+      "overall": 99.67863539309765,
       "visual_similarity": 100.0,
       "action_consistency": "N/A",
       "action_reason": "unsupported raw numeric action vectors require an action adapter.",
       "temporal_stability": 99.2769296344697,
-      "object_permanence": 72.88888888888889,
-      "contact_realism": 0.0
+      "object_permanence": "N/A",
+      "object_reason": "Reliable object tracking is unavailable for this rollout.",
+      "contact_realism": "N/A",
+      "contact_reason": "Reliable robot and object tracking are unavailable for this rollout."
     },
-    "prediction_root": "examples/corruption_benchmark/freeze_0"
+    "prediction_root": "examples/corruption_benchmark/freeze_0",
+    "issues": [
+      "episode_000000: unsupported raw numeric action vectors require an action adapter.",
+      "episode_000000: Reliable object tracking is unavailable for this rollout.",
+      "episode_000000: Reliable robot and object tracking are unavailable for this rollout."
+    ]
   },
   {
     "dataset": "examples/yaskawa_video",
@@ -26,18 +32,24 @@
     "severity": 0.05,
     "seed": 42,
     "source_frames": 900,
-    "frozen_frames": 45,
     "exported_frames": 900,
     "scores": {
-      "overall": 79.51997025248616,
+      "overall": 99.40143520757107,
       "visual_similarity": 99.99443436482812,
       "action_consistency": "N/A",
       "action_reason": "unsupported raw numeric action vectors require an action adapter.",
       "temporal_stability": 98.66018626099975,
-      "object_permanence": 72.88888888888889,
-      "contact_realism": 0.0
+      "object_permanence": "N/A",
+      "object_reason": "Reliable object tracking is unavailable for this rollout.",
+      "contact_realism": "N/A",
+      "contact_reason": "Reliable robot and object tracking are unavailable for this rollout."
     },
-    "prediction_root": "examples/corruption_benchmark/freeze_5"
+    "prediction_root": "examples/corruption_benchmark/freeze_5",
+    "issues": [
+      "episode_000000: unsupported raw numeric action vectors require an action adapter.",
+      "episode_000000: Reliable object tracking is unavailable for this rollout.",
+      "episode_000000: Reliable robot and object tracking are unavailable for this rollout."
+    ]
   },
   {
     "dataset": "examples/yaskawa_video",
@@ -46,18 +58,24 @@
     "severity": 0.15,
     "seed": 42,
     "source_frames": 900,
-    "frozen_frames": 135,
     "exported_frames": 900,
     "scores": {
-      "overall": 79.27034019332706,
+      "overall": 99.08719585628653,
       "visual_similarity": 99.98191953577046,
       "action_consistency": "N/A",
       "action_reason": "unsupported raw numeric action vectors require an action adapter.",
       "temporal_stability": 97.96879125693161,
-      "object_permanence": 72.66666666666667,
-      "contact_realism": 0.0
+      "object_permanence": "N/A",
+      "object_reason": "Reliable object tracking is unavailable for this rollout.",
+      "contact_realism": "N/A",
+      "contact_reason": "Reliable robot and object tracking are unavailable for this rollout."
     },
-    "prediction_root": "examples/corruption_benchmark/freeze_15"
+    "prediction_root": "examples/corruption_benchmark/freeze_15",
+    "issues": [
+      "episode_000000: unsupported raw numeric action vectors require an action adapter.",
+      "episode_000000: Reliable object tracking is unavailable for this rollout.",
+      "episode_000000: Reliable robot and object tracking are unavailable for this rollout."
+    ]
   },
   {
     "dataset": "examples/yaskawa_video",
@@ -66,17 +84,23 @@
     "severity": 0.3,
     "seed": 42,
     "source_frames": 900,
-    "frozen_frames": 270,
     "exported_frames": 900,
     "scores": {
-      "overall": 79.13696650560264,
+      "overall": 98.8056516013078,
       "visual_similarity": 99.95884331350604,
       "action_consistency": "N/A",
       "action_reason": "unsupported raw numeric action vectors require an action adapter.",
       "temporal_stability": 97.36416196106002,
-      "object_permanence": 72.88888888888889,
-      "contact_realism": 0.0
+      "object_permanence": "N/A",
+      "object_reason": "Reliable object tracking is unavailable for this rollout.",
+      "contact_realism": "N/A",
+      "contact_reason": "Reliable robot and object tracking are unavailable for this rollout."
     },
-    "prediction_root": "examples/corruption_benchmark/freeze_30"
+    "prediction_root": "examples/corruption_benchmark/freeze_30",
+    "issues": [
+      "episode_000000: unsupported raw numeric action vectors require an action adapter.",
+      "episode_000000: Reliable object tracking is unavailable for this rollout.",
+      "episode_000000: Reliable robot and object tracking are unavailable for this rollout."
+    ]
   }
 ]

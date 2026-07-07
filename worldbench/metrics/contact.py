@@ -8,7 +8,7 @@ import numpy as np
 
 from worldbench.dataset import Episode
 from worldbench.schemas import MetricResult
-from worldbench.utils import clamp, detect_object_centroid, detect_robot_centroid, load_rgb, vector_norm
+from worldbench.utils import clamp, detect_object_centroid, detect_robot_centroid, load_rgb, rollout_supports_synthetic_tracking, vector_norm
 
 
 class ContactRealismMetric:
@@ -21,9 +21,22 @@ class ContactRealismMetric:
         self.motion_threshold_px = motion_threshold_px
 
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
-        del episode
+        if not rollout_supports_synthetic_tracking(episode):
+            return MetricResult(
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason="Reliable robot and object tracking are unavailable for this rollout.",
+                issues=["Reliable robot and object tracking are unavailable for this rollout."],
+            )
         if len(prediction_frames) < 2:
-            return MetricResult(name=self.name, score=0.0, issues=["Need at least two predicted frames."])
+            return MetricResult(
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason="Need at least two predicted frames.",
+                issues=["Need at least two predicted frames."],
+            )
 
         images = [load_rgb(path) for path in prediction_frames]
         robot = [detect_robot_centroid(image) for image in images]
@@ -34,7 +47,13 @@ class ContactRealismMetric:
         object_motion: list[float] = []
         first_object = next((point for point in obj if point is not None), None)
         if first_object is None:
-            return MetricResult(name=self.name, score=0.0, issues=["Object centroid was never detected."])
+            return MetricResult(
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason="Reliable robot and object tracking are unavailable for this rollout.",
+                issues=["Reliable robot and object tracking are unavailable for this rollout."],
+            )
 
         for idx in range(1, len(images)):
             if robot[idx - 1] is None or obj[idx - 1] is None or obj[idx] is None:
@@ -84,6 +103,7 @@ class ContactRealismMetric:
         return MetricResult(
             name=self.name,
             score=score,
+            status="available",
             details={
                 "premature_motion_frames": premature,
                 "contact_frames": contact_like_frames,

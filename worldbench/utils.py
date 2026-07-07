@@ -114,6 +114,16 @@ def object_area(image: np.ndarray) -> int:
     return int(_green_object_mask(image).sum())
 
 
+def rollout_supports_synthetic_tracking(episode: Any) -> bool:
+    """Return whether this rollout is explicitly labeled for synthetic tracking heuristics."""
+
+    metadata = getattr(episode, "metadata", None)
+    robot = str(getattr(metadata, "robot", "") or "").lower()
+    description = str(getattr(metadata, "description", "") or "").lower()
+    task = str(getattr(metadata, "task", "") or "").lower()
+    return robot.startswith("synthetic_") or "synthetic" in robot or "synthetic" in description or "synthetic" in task
+
+
 def _green_object_mask(image: np.ndarray) -> np.ndarray:
     """Detect green cube/object pixels while ignoring gray-blue labels and UI text."""
 
