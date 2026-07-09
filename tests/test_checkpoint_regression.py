@@ -306,7 +306,7 @@ def _baseline_candidate_batches(tmp_path: Path) -> tuple[dict, dict]:
     for episode, delta in [("episode_001.mp4", 0), ("episode_002.mp4", 4)]:
         gt_frames = _frames(6, delta=delta)
         _write_video(gt_root / episode, gt_frames)
-        _write_video(baseline_root / episode, _frames(6, delta=delta + 35))
+        _write_video(baseline_root / episode, _degraded_frames(6, delta=delta + 35))
         _write_video(candidate_root / episode, gt_frames)
 
     baseline, _ = evaluate_video_batch(
@@ -347,6 +347,14 @@ def _frames(
             255,
         )
         frames.append(frame)
+    return frames
+
+
+def _degraded_frames(count: int, *, delta: int = 0) -> list[np.ndarray]:
+    frames = _frames(count, delta=delta)
+    for index, frame in enumerate(frames):
+        if index % 2:
+            frame[:, :, :] = 255 - frame
     return frames
 
 
