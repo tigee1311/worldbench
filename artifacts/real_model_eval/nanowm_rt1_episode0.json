@@ -1,0 +1,246 @@
+{
+  "dataset_path": "/Users/ayush/nanowm_worldbench_eval/worldbench_dataset",
+  "predictions_path": "/Users/ayush/nanowm_worldbench_eval/nanowm_predictions",
+  "created_at": "2026-07-09T01:01:02.726668+00:00",
+  "score": 92.39024104284573,
+  "metrics": {
+    "visual_similarity": {
+      "name": "visual_similarity",
+      "score": 89.24097498284189,
+      "status": "available",
+      "reason": null,
+      "details": {
+        "episode_scores": [
+          89.24097498284189
+        ]
+      },
+      "issues": []
+    },
+    "action_consistency": {
+      "name": "action_consistency",
+      "score": null,
+      "status": "unsupported",
+      "reason": "unsupported raw numeric action vectors require an action adapter.",
+      "details": {
+        "available_episode_scores": [],
+        "unsupported_episodes": [
+          "episode_001: unsupported raw numeric action vectors require an action adapter."
+        ]
+      },
+      "issues": [
+        "episode_001: unsupported raw numeric action vectors require an action adapter."
+      ]
+    },
+    "temporal_stability": {
+      "name": "temporal_stability",
+      "score": 96.32682361785054,
+      "status": "available",
+      "reason": null,
+      "details": {
+        "episode_scores": [
+          96.32682361785054
+        ]
+      },
+      "issues": []
+    },
+    "object_permanence": {
+      "name": "object_permanence",
+      "score": null,
+      "status": "unsupported",
+      "reason": "Reliable object tracking is unavailable for this rollout.",
+      "details": {
+        "available_episode_scores": [],
+        "unsupported_episodes": [
+          "episode_001: Reliable object tracking is unavailable for this rollout."
+        ]
+      },
+      "issues": [
+        "episode_001: Reliable object tracking is unavailable for this rollout."
+      ]
+    },
+    "contact_realism": {
+      "name": "contact_realism",
+      "score": null,
+      "status": "unsupported",
+      "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+      "details": {
+        "available_episode_scores": [],
+        "unsupported_episodes": [
+          "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+        ]
+      },
+      "issues": [
+        "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+      ]
+    }
+  },
+  "episodes": [
+    {
+      "episode": "episode_001",
+      "score": 92.39024104284573,
+      "metrics": {
+        "visual_similarity": {
+          "name": "visual_similarity",
+          "score": 89.24097498284189,
+          "status": "available",
+          "reason": null,
+          "details": {
+            "mse": 133.82511806488037,
+            "psnr": 27.051995374043187,
+            "ssim": 0.9721145836189138,
+            "frame_pairs": 8,
+            "components": {
+              "mse_score": 99.79419435899288,
+              "psnr_score": 67.62998843510798,
+              "ssim_score": 97.21145836189137
+            }
+          },
+          "issues": []
+        },
+        "action_consistency": {
+          "name": "action_consistency",
+          "score": null,
+          "status": "unsupported",
+          "reason": "unsupported raw numeric action vectors require an action adapter.",
+          "details": {
+            "unsupported_steps": 8,
+            "total_steps": 8,
+            "unsupported_examples": [
+              {
+                "t": 0,
+                "action": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "t": 1,
+                "action": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "t": 2,
+                "action": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "t": 3,
+                "action": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "dx": 0.0,
+                "dy": 0.0
+              },
+              {
+                "t": 4,
+                "action": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "dx": 0.0,
+                "dy": 0.0
+              }
+            ]
+          },
+          "issues": [
+            "unsupported raw numeric action vectors require an action adapter."
+          ]
+        },
+        "temporal_stability": {
+          "name": "temporal_stability",
+          "score": 96.32682361785054,
+          "status": "available",
+          "reason": null,
+          "details": {
+            "mean_frame_delta": 6.566043649400983,
+            "median_frame_delta": 6.13763427734375,
+            "max_frame_delta": 10.321711540222168,
+            "std_frame_delta": 2.04065354563859,
+            "jump_indices": [],
+            "flicker_frames": [],
+            "largest_jump_frame": 5,
+            "largest_jump_delta": 10.321711540222168
+          },
+          "issues": []
+        },
+        "object_permanence": {
+          "name": "object_permanence",
+          "score": null,
+          "status": "unsupported",
+          "reason": "Reliable object tracking is unavailable for this rollout.",
+          "details": {},
+          "issues": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        },
+        "contact_realism": {
+          "name": "contact_realism",
+          "score": null,
+          "status": "unsupported",
+          "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+          "details": {},
+          "issues": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        }
+      },
+      "issues": [
+        "unsupported raw numeric action vectors require an action adapter.",
+        "unsupported raw numeric action vectors require an action adapter.",
+        "Reliable object tracking is unavailable for this rollout.",
+        "Reliable object tracking is unavailable for this rollout.",
+        "Reliable robot and object tracking are unavailable for this rollout.",
+        "Reliable robot and object tracking are unavailable for this rollout."
+      ]
+    }
+  ],
+  "weights": {
+    "visual_similarity": 0.25,
+    "action_consistency": 0.3,
+    "temporal_stability": 0.2,
+    "object_permanence": 0.15,
+    "contact_realism": 0.1
+  },
+  "issues": [
+    "episode_001: unsupported raw numeric action vectors require an action adapter.",
+    "episode_001: Reliable object tracking is unavailable for this rollout.",
+    "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+  ],
+  "main_failure": "No dominant failure detected; the run is strong across core world-model checks."
+}
