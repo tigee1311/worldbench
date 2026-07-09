@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+No changes yet.
+
+## v0.2.0
+
 ### Added
 
 - Native LeRobot import
