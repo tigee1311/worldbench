@@ -1,0 +1,75 @@
+name: publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Package index to publish to
+        required: true
+        type: choice
+        options:
+          - testpypi
+          - pypi
+      tag:
+        description: Release tag whose GitHub release assets should be published
+        required: true
+        default: v0.2.0
+
+permissions:
+  contents: read
+
+jobs:
+  publish-testpypi:
+    name: Publish to TestPyPI
+    if: inputs.target == 'testpypi'
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/worldbench
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download release distributions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist
+          gh release download "${{ inputs.tag }}" \
+            --repo "${{ github.repository }}" \
+            --dir dist \
+            --pattern "worldbench-*.tar.gz" \
+            --pattern "worldbench-*.whl"
+          ls -la dist
+
+      - name: Publish package distributions to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+  publish-pypi:
+    name: Publish to PyPI
+    if: inputs.target == 'pypi'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/worldbench
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download release distributions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist
+          gh release download "${{ inputs.tag }}" \
+            --repo "${{ github.repository }}" \
+            --dir dist \
+            --pattern "worldbench-*.tar.gz" \
+            --pattern "worldbench-*.whl"
+          ls -la dist
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
