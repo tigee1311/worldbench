@@ -14,7 +14,7 @@ WorldBench is not another world model. It is a local evaluation toolkit for chec
 
 ![Tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
-![Version](https://img.shields.io/badge/version-0.2.0-blue)
+![Version](https://img.shields.io/badge/version-0.3.0.dev0-blue)
 ![License](https://img.shields.io/github/license/tigee1311/worldbench)
 
 ## Real Model Evaluation Proof

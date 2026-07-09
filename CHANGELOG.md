@@ -12,6 +12,7 @@
 
 ### Changed
 
+- Main branch development version is now `0.3.0.dev0`; `0.2.0` remains the latest published release.
 - Development test dependencies now include the optional video stack used by offline video workflow tests
 
 ## v0.2.0
