@@ -31,7 +31,14 @@ from worldbench.runners.comparator import (
     save_comparison_artifacts,
 )
 from worldbench.runners.evaluator import EvaluationRunner
+from worldbench.runners.regression import (
+    build_gate_comparison,
+    evaluate_video_batch,
+    load_batch_result,
+    save_gate_artifacts,
+)
 from worldbench.runners.reporter import save_markdown_report
+from worldbench.runners.video import VideoEvaluationError, evaluate_video_pair
 
 console = Console()
 
@@ -232,6 +239,200 @@ def eval_cmd(dataset_path: Path, predictions: Path | None, output_root: Path) ->
     console.print(f"[green]Latest alias:[/green] {output_root / 'latest' / 'result.json'}")
 
 
+@app.command("eval-video")
+@click.option(
+    "--ground-truth",
+    "ground_truth",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Ground-truth rollout video containing context and future frames.",
+)
+@click.option(
+    "--prediction",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Predicted video containing the same context and future frame count.",
+)
+@click.option(
+    "--skip-context",
+    default=0,
+    show_default=True,
+    type=int,
+    help="Number of leading context frames to exclude from scoring.",
+)
+@click.option("--name", default=None, help="Optional display name for this video evaluation.")
+@click.option(
+    "--output-root",
+    type=click.Path(path_type=Path),
+    default=Path(".worldbench/runs"),
+    help="Run storage root.",
+)
+def eval_video(
+    ground_truth: Path,
+    prediction: Path,
+    skip_context: int,
+    name: str | None,
+    output_root: Path,
+) -> None:
+    """Evaluate one predicted future video against one ground-truth video."""
+
+    try:
+        result = evaluate_video_pair(
+            ground_truth,
+            prediction,
+            skip_context=skip_context,
+            name=name,
+        )
+    except VideoEvaluationError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    result_path = _save_result(result, output_root)
+    provenance = result.provenance
+    console.print(Panel.fit("[bold]WorldBench Video Evaluation[/bold]"))
+    console.print(
+        f"Ground truth frames: {provenance['ground_truth_frame_count']} | "
+        f"Prediction frames: {provenance['prediction_frame_count']} | "
+        f"Evaluated future frames: {provenance['evaluated_frame_count']}"
+    )
+    result.print_summary()
+    console.print(f"[green]Saved result:[/green] {result_path}")
+    console.print(f"[green]Saved run directory:[/green] {result_path.parent}")
+
+
+@app.command("eval-batch")
+@click.option(
+    "--ground-truth",
+    "ground_truth",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Directory of ground-truth episode videos.",
+)
+@click.option(
+    "--predictions",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Directory of predicted episode videos for one checkpoint.",
+)
+@click.option("--name", default=None, help="Checkpoint name. Also controls the default JSON copy name.")
+@click.option(
+    "--skip-context",
+    default=0,
+    show_default=True,
+    type=int,
+    help="Number of leading context frames to exclude from every episode.",
+)
+@click.option(
+    "--output-root",
+    type=click.Path(path_type=Path),
+    default=Path(".worldbench/batches"),
+    help="Batch result storage root.",
+)
+@click.option(
+    "--output",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Optional direct JSON output path. Defaults to <name>.json when --name is set.",
+)
+def eval_batch(
+    ground_truth: Path,
+    predictions: Path,
+    name: str | None,
+    skip_context: int,
+    output_root: Path,
+    output: Path | None,
+) -> None:
+    """Evaluate one checkpoint across a directory of episode videos."""
+
+    try:
+        payload, paths = evaluate_video_batch(
+            ground_truth,
+            predictions,
+            name=name,
+            skip_context=skip_context,
+            output_root=output_root,
+            output=output,
+        )
+    except (ValueError, VideoEvaluationError) as exc:
+        raise click.UsageError(str(exc)) from exc
+
+    _print_batch_summary(payload)
+    console.print(f"[green]Saved batch result:[/green] {paths['json']}")
+    console.print(f"[green]Latest alias:[/green] {paths['latest_json']}")
+    if "output_json" in paths:
+        console.print(f"[green]Checkpoint JSON:[/green] {paths['output_json']}")
+
+
+@app.command("gate")
+@click.option(
+    "--baseline",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Baseline checkpoint batch result JSON.",
+)
+@click.option(
+    "--candidate",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Candidate checkpoint batch result JSON.",
+)
+@click.option(
+    "--max-overall-drop",
+    default=0.0,
+    show_default=True,
+    type=click.FloatRange(min=0.0),
+    help="Maximum allowed drop in aggregate overall score.",
+)
+@click.option(
+    "--max-metric-drop",
+    default=0.0,
+    show_default=True,
+    type=click.FloatRange(min=0.0),
+    help="Maximum allowed drop for any comparable metric mean.",
+)
+@click.option(
+    "--max-horizon-drop",
+    default=0.0,
+    show_default=True,
+    type=click.FloatRange(min=0.0),
+    help="Maximum allowed drop for any comparable per-horizon metric mean.",
+)
+@click.option(
+    "--output-root",
+    type=click.Path(path_type=Path),
+    default=Path(".worldbench/gates"),
+    help="Gate result storage root.",
+)
+def gate(
+    baseline: Path,
+    candidate: Path,
+    max_overall_drop: float,
+    max_metric_drop: float,
+    max_horizon_drop: float,
+    output_root: Path,
+) -> None:
+    """Return PASS or FAIL for a candidate checkpoint regression gate."""
+
+    try:
+        baseline_payload = load_batch_result(baseline)
+        candidate_payload = load_batch_result(candidate)
+        comparison = build_gate_comparison(
+            baseline_payload,
+            candidate_payload,
+            max_overall_drop=max_overall_drop,
+            max_metric_drop=max_metric_drop,
+            max_horizon_drop=max_horizon_drop,
+        )
+    except ValueError as exc:
+        raise click.UsageError(str(exc)) from exc
+
+    paths = save_gate_artifacts(comparison, output_root=output_root)
+    _print_gate_summary(comparison)
+    console.print(f"[green]Saved gate result:[/green] {paths['json']}")
+    console.print(f"[green]Latest alias:[/green] {paths['latest_json']}")
+    if comparison["status"] == "FAIL":
+        raise click.exceptions.Exit(1)
+
+
 @app.command()
 @click.argument("target", type=click.Path(path_type=Path))
 @click.argument("run_b", required=False, type=click.Path(path_type=Path))
@@ -424,6 +625,103 @@ def _print_rich_comparison(comparison: dict[str, object]) -> None:
     console.print("\n".join(gap_lines))
     console.print("\n[bold]Conclusion:[/bold]")
     console.print(str(comparison["conclusion"]))
+
+
+def _print_batch_summary(payload: dict[str, object]) -> None:
+    checkpoint = str(payload["checkpoint_name"])
+    aggregate = payload["aggregate"]
+    assert isinstance(aggregate, dict)
+    overall = aggregate["overall"]
+    assert isinstance(overall, dict)
+    metrics = aggregate["metrics"]
+    assert isinstance(metrics, dict)
+
+    console.print(Panel.fit(f"[bold]Checkpoint:[/bold] {checkpoint}"))
+    console.print(f"[bold]Episodes evaluated:[/bold] {int(payload['episode_count'])}")
+    console.print(f"[bold]Overall mean:[/bold] {float(overall['mean']):.1f}")
+    console.print(f"[bold]Overall median:[/bold] {float(overall['median']):.1f}")
+    console.print(f"[bold]Standard deviation:[/bold] {float(overall['std']):.1f}")
+    console.print(f"[bold]Minimum:[/bold] {float(overall['min']):.1f}")
+    console.print(f"[bold]Maximum:[/bold] {float(overall['max']):.1f}")
+
+    table = Table(title="Metric Aggregates")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Mean", justify="right")
+    table.add_column("Available", justify="right")
+    for name, stats in metrics.items():
+        assert isinstance(stats, dict)
+        if stats.get("status") == "available":
+            table.add_row(
+                name.replace("_", " ").title(),
+                f"{float(stats['mean']):.1f}",
+                f"{int(stats['available_count'])}/{int(stats['total_count'])}",
+            )
+        else:
+            table.add_row(
+                name.replace("_", " ").title(),
+                "N/A",
+                f"0/{int(stats['total_count'])}",
+            )
+    console.print(table)
+
+    worst = payload.get("worst_episodes")
+    if isinstance(worst, list) and worst:
+        console.print("[bold]Worst episodes:[/bold]")
+        for item in worst[:5]:
+            if isinstance(item, dict):
+                console.print(f"  {item['episode_id']}: {float(item['score']):.1f}")
+
+
+def _print_gate_summary(comparison: dict[str, object]) -> None:
+    status = str(comparison["status"])
+    color = "green" if status == "PASS" else "red"
+    console.print(f"[bold {color}]{status}[/bold {color}]")
+
+    baseline = comparison["baseline"]
+    candidate = comparison["candidate"]
+    overall = comparison["overall"]
+    episodes = comparison["episodes"]
+    assert isinstance(baseline, dict)
+    assert isinstance(candidate, dict)
+    assert isinstance(overall, dict)
+    assert isinstance(episodes, dict)
+
+    console.print(f"\nBaseline:  {baseline.get('checkpoint_name')}")
+    console.print(f"Candidate: {candidate.get('checkpoint_name')}")
+    console.print("\n[bold]Overall:[/bold]")
+    console.print(f"{float(overall['baseline']):.1f} -> {float(overall['candidate']):.1f}")
+    console.print(f"Change: {float(overall['change']):+.1f}")
+
+    failures = comparison["failure_reasons"]
+    assert isinstance(failures, list)
+    if failures:
+        console.print("\n[bold red]Regression detected:[/bold red]")
+        for failure in failures[:8]:
+            assert isinstance(failure, dict)
+            label = str(failure["kind"])
+            if "metric" in failure:
+                label += f" {failure['metric']}"
+            if "horizon" in failure:
+                label += f" {failure['horizon']} {failure.get('metric')}"
+            console.print(
+                f"{label}: {float(failure['baseline']):.1f} -> "
+                f"{float(failure['candidate']):.1f} "
+                f"({float(failure['change']):+.1f}); "
+                f"allowed drop {float(failure['allowed_drop']):.1f}"
+            )
+    else:
+        console.print("\nNo configured regression threshold was exceeded.")
+
+    console.print("\n[bold]Episodes:[/bold]")
+    console.print(f"Improved:   {int(episodes['improved_count'])}")
+    console.print(f"Regressed:  {int(episodes['regressed_count'])}")
+    console.print(f"Unchanged:  {int(episodes['unchanged_count'])}")
+    worst = episodes.get("worst_regressions")
+    if isinstance(worst, list) and worst:
+        console.print("\n[bold]Worst episodes:[/bold]")
+        for item in worst[:5]:
+            if isinstance(item, dict):
+                console.print(f"{item['episode_id']}    {float(item['change']):+.1f}")
 
 
 def _print_benchmark_summary(payload: dict[str, object]) -> None:

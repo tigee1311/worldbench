@@ -102,6 +102,65 @@ Overall scores are weighted over available metrics only. In the NanoWM proof, Vi
 (89.2 * 25 + 96.3 * 20) / 45 = 92.4 overall
 ```
 
+## Checkpoint Regression Workflow
+
+WorldBench can now test robotics world-model checkpoints the way pytest tests code: evaluate a fixed suite, compare a baseline checkpoint to a candidate checkpoint, and return a CI-friendly PASS or FAIL.
+
+Directory convention:
+
+```text
+eval_suite/
+  episode_001.mp4
+  episode_002.mp4
+
+checkpoint_183/
+  episode_001.mp4
+  episode_002.mp4
+
+checkpoint_184/
+  episode_001.mp4
+  episode_002.mp4
+```
+
+Evaluate both checkpoints:
+
+```bash
+worldbench eval-batch \
+  --ground-truth eval_suite/ \
+  --predictions checkpoint_183/ \
+  --name checkpoint_183
+
+worldbench eval-batch \
+  --ground-truth eval_suite/ \
+  --predictions checkpoint_184/ \
+  --name checkpoint_184
+```
+
+Then gate the candidate:
+
+```bash
+worldbench gate \
+  --baseline checkpoint_183.json \
+  --candidate checkpoint_184.json
+```
+
+`eval-batch` pairs videos by relative path, evaluates each episode through the same metric pipeline as `worldbench eval`, saves per-episode results, aggregates available metric scores, and writes per-horizon curves. Unsupported metrics remain N/A and are excluded from numeric aggregates.
+
+`gate` compares overall score, available metric means, per-episode deltas, and per-horizon metric means. The default gate allows no score drop beyond a 0.01-point numerical tolerance; use `--max-overall-drop`, `--max-metric-drop`, and `--max-horizon-drop` to set engineering thresholds for your CI.
+
+For one-off video pairs:
+
+```bash
+worldbench eval-video \
+  --ground-truth sample_0000_gt.mp4 \
+  --prediction sample_0000_gen.mp4 \
+  --skip-context 4
+```
+
+`eval-video` removes the context frames from both videos and scores only the aligned future frames. It rejects mismatched future lengths, incompatible resolution, incompatible FPS, unreadable videos, and empty videos rather than silently truncating or resampling.
+
+More detail: [docs/checkpoint_regression.md](docs/checkpoint_regression.md)
+
 ## Real Data Validation
 
 WorldBench has an opt-in integration test against a public LeRobot Yaskawa cable-untangling dataset:
@@ -199,6 +258,9 @@ worldbench compare           Compare result files or two model folders inside a 
 worldbench dashboard         Launch a local WorldBench dashboard.
 worldbench demo              Generate a complete synthetic demo dataset and good/bad model outputs.
 worldbench eval              Run all WorldBench metrics and save result.json.
+worldbench eval-batch        Evaluate one checkpoint across a directory of episode videos.
+worldbench eval-video        Evaluate one predicted future video against one ground-truth video.
+worldbench gate              Return PASS or FAIL for a candidate checkpoint regression gate.
 worldbench import-lerobot    Import LeRobot data into WorldBench format.
 worldbench init              Create a sample WorldBench dataset folder structure.
 worldbench make-demo-video   Generate README demo MP4, GIF, and thumbnail assets.
@@ -214,6 +276,9 @@ worldbench init <path>
 worldbench demo [output]
 worldbench validate <dataset_path>
 worldbench eval <dataset_path> --predictions <predictions_path>
+worldbench eval-video --ground-truth <gt.mp4> --prediction <pred.mp4> --skip-context 4
+worldbench eval-batch --ground-truth <eval_suite> --predictions <checkpoint_dir> --name checkpoint_184
+worldbench gate --baseline checkpoint_183.json --candidate checkpoint_184.json
 worldbench compare <dataset_path> --models good_model bad_model
 worldbench compare <run_a/result.json> <run_b/result.json>
 worldbench benchmark --demo
@@ -316,6 +381,8 @@ The result schema is represented by `EvaluationResult`:
 - `score`
 - `metrics`
 - `episodes`
+- `horizon`
+- `provenance`
 - `weights`
 - `issues`
 - `main_failure`
@@ -346,15 +413,15 @@ Working now:
 - unavailable-metric handling
 - corruption validation
 - real NanoWM evaluation
+- direct video-pair evaluation
+- multi-episode checkpoint aggregation
+- per-horizon curves
+- regression gate
 - reports
 - dashboard
 
 Next:
 
-- direct video-pair evaluation
-- multi-episode aggregation
-- per-horizon curves
-- regression gate
 - explicit action-adapter registry
 - second real world model
 - external users

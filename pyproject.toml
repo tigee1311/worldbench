@@ -44,7 +44,7 @@ dependencies = [
 
 [project.optional-dependencies]
 vision = ["scikit-image>=0.21"]
-dev = ["pytest>=8.0", "ruff>=0.8", "build>=1.5", "twine>=6.2"]
+dev = ["pytest>=8.0", "ruff>=0.8", "build>=1.5", "twine>=6.2", "imageio>=2.34", "imageio-ffmpeg>=0.5"]
 video = ["imageio>=2.34", "imageio-ffmpeg>=0.5"]
 lerobot = ["lerobot>=0.4.4"]
 

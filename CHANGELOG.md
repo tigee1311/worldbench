@@ -2,7 +2,17 @@
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Direct video-pair evaluation with `worldbench eval-video`
+- Multi-episode checkpoint evaluation with `worldbench eval-batch`
+- Per-horizon metric output for honest horizon-supported metrics
+- Regression gate command with CI-friendly PASS/FAIL exit codes
+- Batch and gate artifacts for checkpoint regression workflows
+
+### Changed
+
+- Development test dependencies now include the optional video stack used by offline video workflow tests
 
 ## v0.2.0
 

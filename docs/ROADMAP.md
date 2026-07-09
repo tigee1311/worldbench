@@ -17,16 +17,16 @@ This roadmap separates completed capabilities from future work. Completed items 
 11. Single-rollout NanoWM RT-1 real-model evaluation artifact.
 12. Markdown reports.
 13. Local dashboard.
+14. Direct video-pair evaluation for teams that only have ground-truth and predicted videos.
+15. Multi-episode checkpoint aggregation with per-episode availability reporting.
+16. Per-horizon curves for supported metrics.
+17. Regression gate command for CI and model-development workflows.
 
 ## Next
 
-1. Direct video-pair evaluation for teams that only have ground-truth and predicted videos.
-2. Multi-episode aggregation with clearer per-episode availability reporting.
-3. Per-horizon curves for visual and temporal metrics.
-4. Regression gate command for CI and model-development workflows.
-5. Explicit action-adapter registry for robot-specific numeric action spaces.
-6. Second real world model evaluation.
-7. External user validation and feedback from teams outside this repository.
+1. Explicit action-adapter registry for robot-specific numeric action spaces.
+2. Second real world model evaluation.
+3. External user validation and feedback from teams outside this repository.
 
 ## Later
 

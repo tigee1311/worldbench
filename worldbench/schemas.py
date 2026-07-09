@@ -106,18 +106,23 @@ class EpisodeResult(BaseModel):
     episode: str
     score: float = Field(ge=0.0, le=100.0)
     metrics: dict[str, MetricResult] = Field(default_factory=dict)
+    horizon: dict[str, Any] = Field(default_factory=dict)
     issues: list[str] = Field(default_factory=list)
 
 
 class EvaluationResult(BaseModel):
     """Serializable result object returned by WorldBench evaluations."""
 
+    schema_version: str = "1"
+    result_type: str = "evaluation"
     dataset_path: str
     predictions_path: str | None = None
     created_at: str
     score: float = Field(ge=0.0, le=100.0)
     metrics: dict[str, MetricResult] = Field(default_factory=dict)
     episodes: list[EpisodeResult] = Field(default_factory=list)
+    horizon: dict[str, Any] = Field(default_factory=dict)
+    provenance: dict[str, Any] = Field(default_factory=dict)
     weights: dict[str, float] = Field(default_factory=dict)
     issues: list[str] = Field(default_factory=list)
     main_failure: str = "No dominant failure detected."

@@ -85,8 +85,20 @@ class EvaluationRunner:
                     global_issues.append(f"{episode.name}: {result.reason}")
 
             episode_score = weighted_score(metric_results, selected_weights)
+            episode_horizon = compute_episode_horizon(
+                episode,
+                prediction_frames,
+                selected_metrics,
+                selected_weights,
+            )
             episode_results.append(
-                EpisodeResult(episode=episode.name, score=episode_score, metrics=metric_results, issues=episode_issues)
+                EpisodeResult(
+                    episode=episode.name,
+                    score=episode_score,
+                    metrics=metric_results,
+                    horizon=episode_horizon,
+                    issues=episode_issues,
+                )
             )
 
         aggregate_metrics = aggregate_metric_results(episode_results, selected_metrics)
@@ -99,6 +111,7 @@ class EvaluationRunner:
             score=overall,
             metrics=aggregate_metrics,
             episodes=episode_results,
+            horizon=aggregate_horizon_results(episode_results),
             weights=selected_weights,
             issues=global_issues,
             main_failure=main_failure,
@@ -216,7 +229,10 @@ def infer_main_failure(metrics: dict[str, MetricResult]) -> str:
     if not available_metrics:
         return "No available metrics were scored."
     lowest = min(available_metrics, key=lambda result: result.score)
+    unsupported_count = len([result for result in metrics.values() if not result.is_available])
     if float(lowest.score) >= 85:
+        if unsupported_count:
+            return f"No dominant failure among available metrics; {unsupported_count} metrics were unsupported."
         return "No dominant failure detected; the run is strong across core world-model checks."
     messages = {
         "visual_similarity": "The model does not visually match held-out future frames closely enough.",
@@ -226,3 +242,164 @@ def infer_main_failure(metrics: dict[str, MetricResult]) -> str:
         "contact_realism": "The model moves objects before plausible robot/object contact.",
     }
     return messages.get(lowest.name, f"The weakest metric is {lowest.name}.")
+
+
+def compute_episode_horizon(
+    episode: Episode,
+    prediction_frames: list[Path],
+    metrics: list[EvaluatorMetric],
+    weights: dict[str, float],
+) -> dict[str, dict[str, object]]:
+    """Evaluate honest per-horizon metric prefixes for one episode.
+
+    Horizon entries are cumulative through t+N. Metrics that cannot produce a
+    meaningful value for the available prefix remain unavailable instead of
+    receiving fabricated values.
+    """
+
+    horizon: dict[str, dict[str, object]] = {}
+    max_pairs = min(len(episode.frames), len(prediction_frames))
+    for index in range(1, max_pairs + 1):
+        label = f"t+{index}"
+        prefix_episode = Episode(
+            name=episode.name,
+            path=episode.path,
+            frames=episode.frames[:index],
+            predictions=episode.predictions[:index],
+            actions=episode.actions[: max(0, index - 1)],
+            states=episode.states[:index],
+            metadata=episode.metadata,
+        )
+        prefix_predictions = prediction_frames[:index]
+        available: dict[str, object] = {}
+        unavailable: dict[str, object] = {}
+        metric_results: dict[str, MetricResult] = {}
+        for metric in metrics:
+            result = _evaluate_horizon_metric(metric, prefix_episode, prefix_predictions)
+            metric_results[metric.name] = result
+            if result.is_available:
+                available[metric.name] = result.model_dump(mode="json")
+            else:
+                unavailable[metric.name] = {
+                    "status": result.status,
+                    "reason": result.reason,
+                    "issues": result.issues,
+                }
+
+        horizon[label] = {
+            "horizon_index": index,
+            "sample_count": 1,
+            "frame_pairs": index,
+            "mode": "cumulative_prefix",
+            "score": weighted_score(metric_results, weights),
+            "metrics": available,
+            "unavailable_metrics": unavailable,
+        }
+    return horizon
+
+
+def _evaluate_horizon_metric(
+    metric: EvaluatorMetric,
+    episode: Episode,
+    prediction_frames: list[Path],
+) -> MetricResult:
+    if metric.name == "temporal_stability" and len(prediction_frames) < 2:
+        return MetricResult(
+            name=metric.name,
+            score=None,
+            status="unsupported",
+            reason="Temporal stability requires at least one future-frame transition.",
+            issues=["Temporal stability requires at least one future-frame transition."],
+        )
+    return metric.evaluate(episode, prediction_frames)
+
+
+def aggregate_horizon_results(episode_results: list[EpisodeResult]) -> dict[str, dict[str, object]]:
+    """Aggregate per-horizon metric values across episodes."""
+
+    labels = sorted(
+        {label for episode in episode_results for label in episode.horizon},
+        key=_horizon_sort_key,
+    )
+    aggregate: dict[str, dict[str, object]] = {}
+    for label in labels:
+        entries = [episode.horizon[label] for episode in episode_results if label in episode.horizon]
+        metric_names = sorted(
+            {
+                name
+                for entry in entries
+                for name in _as_dict(entry.get("metrics")).keys()
+            }
+        )
+        metric_stats: dict[str, object] = {}
+        for name in metric_names:
+            values = []
+            for entry in entries:
+                metric_payload = _as_dict(_as_dict(entry.get("metrics")).get(name))
+                score = metric_payload.get("score")
+                if isinstance(score, (int, float)):
+                    values.append(float(score))
+            if values:
+                metric_stats[name] = numeric_summary(values)
+
+        unavailable: dict[str, object] = {}
+        unavailable_names = sorted(
+            {
+                name
+                for entry in entries
+                for name in _as_dict(entry.get("unavailable_metrics")).keys()
+            }
+        )
+        for name in unavailable_names:
+            reasons = []
+            for entry in entries:
+                payload = _as_dict(_as_dict(entry.get("unavailable_metrics")).get(name))
+                reason = payload.get("reason")
+                if isinstance(reason, str) and reason not in reasons:
+                    reasons.append(reason)
+            unavailable[name] = {
+                "count": sum(1 for entry in entries if name in _as_dict(entry.get("unavailable_metrics"))),
+                "reasons": reasons[:5],
+            }
+
+        aggregate[label] = {
+            "horizon_index": _horizon_sort_key(label),
+            "sample_count": len(entries),
+            "metrics": metric_stats,
+            "unavailable_metrics": unavailable,
+        }
+    return aggregate
+
+
+def numeric_summary(values: list[float]) -> dict[str, float | int]:
+    """Return numeric statistics for available values only."""
+
+    if not values:
+        return {"count": 0}
+    arr = np.asarray(values, dtype=float)
+    return {
+        "count": int(arr.size),
+        "mean": float(np.mean(arr)),
+        "median": float(np.median(arr)),
+        "std": float(np.std(arr)),
+        "min": float(np.min(arr)),
+        "max": float(np.max(arr)),
+        "p10": float(np.percentile(arr, 10)),
+        "p25": float(np.percentile(arr, 25)),
+        "p50": float(np.percentile(arr, 50)),
+        "p75": float(np.percentile(arr, 75)),
+        "p90": float(np.percentile(arr, 90)),
+    }
+
+
+def _horizon_sort_key(label: str) -> int:
+    if label.startswith("t+"):
+        try:
+            return int(label[2:])
+        except ValueError:
+            return 0
+    return 0
+
+
+def _as_dict(value: object) -> dict[str, object]:
+    return value if isinstance(value, dict) else {}
