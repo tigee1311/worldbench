@@ -23,7 +23,7 @@ Compact result artifact:
 | RT-1 paper | https://arxiv.org/abs/2212.06817 |
 | Rollout count | 1 |
 | Episode | 0 |
-| Context frames | 4, inferred from local dataset metadata: "Future-only evaluation of NanoWM frames 4 through 11." |
+| Context frames | 4, inferred from temporary evaluation dataset metadata: "Future-only evaluation of NanoWM frames 4 through 11." |
 | Generated future frames | 8 |
 | FPS | 3 |
 | Resolution | 256x256 RGB |
@@ -34,11 +34,11 @@ The artifact was generated before the repository metadata was bumped to 0.2.0.
 
 ## Evaluation Command
 
-The compact artifact records the local scoring paths:
+The compact artifact was produced from temporary scoring inputs:
 
 ```bash
-worldbench eval /Users/ayush/nanowm_worldbench_eval/worldbench_dataset \
-  --predictions /Users/ayush/nanowm_worldbench_eval/nanowm_predictions
+worldbench eval <temporary-rt1-episode0-worldbench-dataset> \
+  --predictions <temporary-nanowm-prediction-frames>
 ```
 
 The local temporary dataset and prediction folders are not committed. The repository keeps only the compact JSON result artifact.

@@ -5,7 +5,7 @@
     "dataset": "RT-1 / Fractal",
     "episode": 0,
     "context_frames": 4,
-    "context_frames_note": "Inferred from local dataset metadata: future-only evaluation of NanoWM frames 4 through 11.",
+    "context_frames_note": "Inferred from temporary evaluation dataset metadata: future-only evaluation of NanoWM frames 4 through 11.",
     "generated_frames": 8,
     "fps": 3,
     "resolution": "256x256 RGB",
@@ -13,8 +13,8 @@
     "evaluation_timestamp": "2026-07-09T01:01:02.726668+00:00",
     "scope": "single-rollout integration proof"
   },
-  "dataset_path": "/Users/ayush/nanowm_worldbench_eval/worldbench_dataset",
-  "predictions_path": "/Users/ayush/nanowm_worldbench_eval/nanowm_predictions",
+  "dataset_path": "temporary RT-1 episode 0 evaluation dataset; not committed",
+  "predictions_path": "temporary NanoWM prediction frames; not committed",
   "created_at": "2026-07-09T01:01:02.726668+00:00",
   "score": 92.39024104284573,
   "metrics": {
@@ -256,5 +256,5 @@
     "episode_001: Reliable object tracking is unavailable for this rollout.",
     "episode_001: Reliable robot and object tracking are unavailable for this rollout."
   ],
-  "main_failure": "No dominant failure detected; the run is strong across core world-model checks."
+  "main_failure": "No dominant failure among available metrics; 3 metrics were unsupported."
 }
