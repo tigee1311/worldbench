@@ -1,0 +1,89 @@
+{
+  "fields": [
+    {
+      "baseline": "NanoWM-B/2",
+      "candidate": "NanoWM-B/2",
+      "field": "model.arch",
+      "matches": true
+    },
+    {
+      "baseline": "NanoWM-B-2",
+      "candidate": "NanoWM-B-2",
+      "field": "model.name",
+      "matches": true
+    },
+    {
+      "baseline": "4",
+      "candidate": "4",
+      "field": "model.num_frames",
+      "matches": true
+    },
+    {
+      "baseline": "True",
+      "candidate": "True",
+      "field": "model.use_action",
+      "matches": true
+    },
+    {
+      "baseline": "additive",
+      "candidate": "additive",
+      "field": "model.action_injection.type",
+      "matches": true
+    },
+    {
+      "baseline": "True",
+      "candidate": "True",
+      "field": "model.causal",
+      "matches": true
+    },
+    {
+      "baseline": "256",
+      "candidate": "256",
+      "field": "model.image_size",
+      "matches": true
+    },
+    {
+      "baseline": "None",
+      "candidate": "None",
+      "field": "model.latent_channels",
+      "matches": true
+    },
+    {
+      "baseline": "rt1",
+      "candidate": "rt1",
+      "field": "dataset.name",
+      "matches": true
+    },
+    {
+      "baseline": "1",
+      "candidate": "1",
+      "field": "dataset.frame_interval",
+      "matches": true
+    },
+    {
+      "baseline": "7",
+      "candidate": "7",
+      "field": "dataset.spec.action_dim",
+      "matches": true
+    },
+    {
+      "baseline": "v",
+      "candidate": "v",
+      "field": "experiment.diffusion.pred_name",
+      "matches": true
+    },
+    {
+      "baseline": "True",
+      "candidate": "True",
+      "field": "experiment.diffusion.zero_terminal_snr",
+      "matches": true
+    },
+    {
+      "baseline": "1000",
+      "candidate": "1000",
+      "field": "experiment.diffusion.diffusion_steps",
+      "matches": true
+    }
+  ],
+  "mismatches": []
+}

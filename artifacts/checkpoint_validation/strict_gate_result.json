@@ -1,0 +1,315 @@
+{
+  "baseline": {
+    "checkpoint_name": "nanowm-b2-rt1-50k",
+    "episode_count": 10,
+    "score": 85.66975052333503
+  },
+  "candidate": {
+    "checkpoint_name": "nanowm-b2-rt1-300k",
+    "episode_count": 10,
+    "score": 87.28132535733272
+  },
+  "created_at": "2026-07-09T17:02:49.406530+00:00",
+  "episodes": {
+    "best_improvements": [
+      {
+        "baseline": 78.7431204277141,
+        "candidate": 84.96368573033958,
+        "change": 6.220565302625474,
+        "episode_id": "episode_008.mp4"
+      },
+      {
+        "baseline": 85.9031866049779,
+        "candidate": 87.9905663260026,
+        "change": 2.087379721024689,
+        "episode_id": "episode_007.mp4"
+      },
+      {
+        "baseline": 86.23300910059669,
+        "candidate": 88.25148185985967,
+        "change": 2.018472759262977,
+        "episode_id": "episode_001.mp4"
+      },
+      {
+        "baseline": 81.36622241586906,
+        "candidate": 83.28455629789718,
+        "change": 1.9183338820281222,
+        "episode_id": "episode_009.mp4"
+      },
+      {
+        "baseline": 88.76564115543671,
+        "candidate": 90.17766348226796,
+        "change": 1.4120223268312486,
+        "episode_id": "episode_000.mp4"
+      }
+    ],
+    "deltas": [
+      {
+        "baseline": 88.76564115543671,
+        "candidate": 90.17766348226796,
+        "change": 1.4120223268312486,
+        "episode_id": "episode_000.mp4"
+      },
+      {
+        "baseline": 86.23300910059669,
+        "candidate": 88.25148185985967,
+        "change": 2.018472759262977,
+        "episode_id": "episode_001.mp4"
+      },
+      {
+        "baseline": 87.25950665881,
+        "candidate": 86.92756596903406,
+        "change": -0.3319406897759336,
+        "episode_id": "episode_002.mp4"
+      },
+      {
+        "baseline": 88.65714559797262,
+        "candidate": 89.38657817963947,
+        "change": 0.7294325816668561,
+        "episode_id": "episode_003.mp4"
+      },
+      {
+        "baseline": 85.81565257713562,
+        "candidate": 86.72724509417769,
+        "change": 0.9115925170420667,
+        "episode_id": "episode_004.mp4"
+      },
+      {
+        "baseline": 87.5033123772992,
+        "candidate": 88.15672430603064,
+        "change": 0.6534119287314439,
+        "episode_id": "episode_005.mp4"
+      },
+      {
+        "baseline": 86.45070831753848,
+        "candidate": 86.9471863280783,
+        "change": 0.49647801053981766,
+        "episode_id": "episode_006.mp4"
+      },
+      {
+        "baseline": 85.9031866049779,
+        "candidate": 87.9905663260026,
+        "change": 2.087379721024689,
+        "episode_id": "episode_007.mp4"
+      },
+      {
+        "baseline": 78.7431204277141,
+        "candidate": 84.96368573033958,
+        "change": 6.220565302625474,
+        "episode_id": "episode_008.mp4"
+      },
+      {
+        "baseline": 81.36622241586906,
+        "candidate": 83.28455629789718,
+        "change": 1.9183338820281222,
+        "episode_id": "episode_009.mp4"
+      }
+    ],
+    "improved_count": 9,
+    "regressed_count": 1,
+    "unchanged_count": 0,
+    "worst_regressions": [
+      {
+        "baseline": 87.25950665881,
+        "candidate": 86.92756596903406,
+        "change": -0.3319406897759336,
+        "episode_id": "episode_002.mp4"
+      },
+      {
+        "baseline": 86.45070831753848,
+        "candidate": 86.9471863280783,
+        "change": 0.49647801053981766,
+        "episode_id": "episode_006.mp4"
+      },
+      {
+        "baseline": 87.5033123772992,
+        "candidate": 88.15672430603064,
+        "change": 0.6534119287314439,
+        "episode_id": "episode_005.mp4"
+      },
+      {
+        "baseline": 88.65714559797262,
+        "candidate": 89.38657817963947,
+        "change": 0.7294325816668561,
+        "episode_id": "episode_003.mp4"
+      },
+      {
+        "baseline": 85.81565257713562,
+        "candidate": 86.72724509417769,
+        "change": 0.9115925170420667,
+        "episode_id": "episode_004.mp4"
+      }
+    ]
+  },
+  "failure_reasons": [],
+  "horizon": [
+    {
+      "baseline": 81.20207644159832,
+      "baseline_count": 10,
+      "candidate": 83.35655727989031,
+      "candidate_count": 10,
+      "change": 2.154480838291988,
+      "horizon": "t+1",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 98.91006841659546,
+      "baseline_count": 10,
+      "candidate": 99.63601150512696,
+      "candidate_count": 10,
+      "change": 0.7259430885314941,
+      "horizon": "t+2",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 80.6614152656648,
+      "baseline_count": 10,
+      "candidate": 82.60617532963026,
+      "candidate_count": 10,
+      "change": 1.944760063965461,
+      "horizon": "t+2",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 97.49908369541168,
+      "baseline_count": 10,
+      "candidate": 98.6598426270485,
+      "candidate_count": 10,
+      "change": 1.1607589316368205,
+      "horizon": "t+3",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 79.91143274091665,
+      "baseline_count": 10,
+      "candidate": 81.99068708063605,
+      "candidate_count": 10,
+      "change": 2.079254339719398,
+      "horizon": "t+3",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 96.50793869159705,
+      "baseline_count": 10,
+      "candidate": 97.89460023038949,
+      "candidate_count": 10,
+      "change": 1.3866615387924384,
+      "horizon": "t+4",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 79.33578149199418,
+      "baseline_count": 10,
+      "candidate": 81.40480754576471,
+      "candidate_count": 10,
+      "change": 2.0690260537705285,
+      "horizon": "t+4",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 96.68084558920386,
+      "baseline_count": 10,
+      "candidate": 97.90561062367242,
+      "candidate_count": 10,
+      "change": 1.224765034468561,
+      "horizon": "t+5",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 78.89313150664658,
+      "baseline_count": 10,
+      "candidate": 80.99387761743685,
+      "candidate_count": 10,
+      "change": 2.1007461107902685,
+      "horizon": "t+5",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 96.43031026723268,
+      "baseline_count": 10,
+      "candidate": 97.538460834873,
+      "candidate_count": 10,
+      "change": 1.1081505676403225,
+      "horizon": "t+6",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 78.40367255853388,
+      "baseline_count": 10,
+      "candidate": 80.52901417623158,
+      "candidate_count": 10,
+      "change": 2.1253416176977,
+      "horizon": "t+6",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 95.87130758166049,
+      "baseline_count": 10,
+      "candidate": 96.87646674014512,
+      "candidate_count": 10,
+      "change": 1.0051591584846307,
+      "horizon": "t+7",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 77.96019345370394,
+      "baseline_count": 10,
+      "candidate": 80.1262758025099,
+      "candidate_count": 10,
+      "change": 2.1660823488059577,
+      "horizon": "t+7",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 95.79452618050964,
+      "baseline_count": 10,
+      "candidate": 96.68916230708876,
+      "candidate_count": 10,
+      "change": 0.8946361265791296,
+      "horizon": "t+8",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 77.56992999759537,
+      "baseline_count": 10,
+      "candidate": 79.75505579752789,
+      "candidate_count": 10,
+      "change": 2.1851257999325213,
+      "horizon": "t+8",
+      "metric": "visual_similarity"
+    }
+  ],
+  "metrics": [
+    {
+      "available_count_baseline": 10,
+      "available_count_candidate": 10,
+      "baseline": 95.79452618050964,
+      "candidate": 96.68916230708876,
+      "change": 0.8946361265791296,
+      "metric": "temporal_stability"
+    },
+    {
+      "available_count_baseline": 10,
+      "available_count_candidate": 10,
+      "baseline": 77.56992999759537,
+      "candidate": 79.75505579752789,
+      "change": 2.1851257999325213,
+      "metric": "visual_similarity"
+    }
+  ],
+  "overall": {
+    "baseline": 85.66975052333503,
+    "candidate": 87.28132535733272,
+    "change": 1.6115748339976932
+  },
+  "passed": true,
+  "result_type": "gate_comparison",
+  "schema_version": "1",
+  "status": "PASS",
+  "thresholds": {
+    "max_horizon_drop": 0.0,
+    "max_metric_drop": 0.0,
+    "max_overall_drop": 0.0,
+    "unchanged_tolerance": 0.01
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "baseline": {
+    "config_path": "checkpoint_validation/checkpoints/baseline/config.yaml",
+    "repo": "knightnemo/nanowm-b2-rt1-abl-pred-v-50k",
+    "revision": "82b169ab3c26d585efdeb88df782fa4a70db7486",
+    "storage_note": "Checkpoint files were cached in Kaggle working storage during inference and are not committed.",
+    "weights_bytes": 634407072,
+    "weights_path": "checkpoint_validation/checkpoints/baseline/model.safetensors"
+  },
+  "candidate": {
+    "config_path": "checkpoint_validation/checkpoints/candidate/config.yaml",
+    "repo": "knightnemo/nanowm-b2-rt1-300k",
+    "revision": "e073162d1ef2a34029cfe4f4662abbb7d18895e0",
+    "storage_note": "Checkpoint files were cached in Kaggle working storage during inference and are not committed.",
+    "weights_bytes": 634407072,
+    "weights_path": "checkpoint_validation/checkpoints/candidate/model.safetensors"
+  }
+}

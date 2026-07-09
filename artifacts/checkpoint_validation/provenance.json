@@ -1,0 +1,184 @@
+{
+  "actual_data_root_stats": {
+    "bytes": 10801527,
+    "files": 51,
+    "largest_files": [
+      {
+        "bytes": 7428777,
+        "path": "meta/episodes.jsonl"
+      },
+      {
+        "bytes": 594362,
+        "path": "videos/chunk-000/observation.images.image/episode_000000.mp4"
+      },
+      {
+        "bytes": 564589,
+        "path": "videos/chunk-000/observation.images.image/episode_000007.mp4"
+      },
+      {
+        "bytes": 426450,
+        "path": "videos/chunk-000/observation.images.image/episode_000008.mp4"
+      },
+      {
+        "bytes": 405098,
+        "path": "videos/chunk-000/observation.images.image/episode_000001.mp4"
+      },
+      {
+        "bytes": 372656,
+        "path": "videos/chunk-000/observation.images.image/episode_000005.mp4"
+      },
+      {
+        "bytes": 245910,
+        "path": "videos/chunk-000/observation.images.image/episode_000004.mp4"
+      },
+      {
+        "bytes": 223368,
+        "path": "videos/chunk-000/observation.images.image/episode_000006.mp4"
+      },
+      {
+        "bytes": 198087,
+        "path": "videos/chunk-000/observation.images.image/episode_000009.mp4"
+      },
+      {
+        "bytes": 122317,
+        "path": "videos/chunk-000/observation.images.image/episode_000002.mp4"
+      },
+      {
+        "bytes": 83931,
+        "path": "videos/chunk-000/observation.images.image/episode_000003.mp4"
+      },
+      {
+        "bytes": 41115,
+        "path": "meta/tasks.jsonl"
+      }
+    ]
+  },
+  "actual_hf_home_stats": {
+    "bytes": 669914683,
+    "files": 31,
+    "largest_files": [
+      {
+        "bytes": 334643276,
+        "path": "hub/models--stabilityai--sd-vae-ft-mse/blobs/a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815"
+      },
+      {
+        "bytes": 334643276,
+        "path": "hub/models--stabilityai--sd-vae-ft-mse/snapshots/31f26fdeee1355a5c34592e401dd41e45d25a493/diffusion_pytorch_model.safetensors"
+      },
+      {
+        "bytes": 398696,
+        "path": "xet/logs/xet_20260709T162942121+0000_224.log"
+      },
+      {
+        "bytes": 149467,
+        "path": "xet/logs/xet_20260709T162139759+0000_58.log"
+      },
+      {
+        "bytes": 12672,
+        "path": "datasets/parquet/default-b6fd271eca806e9e/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 10176,
+        "path": "datasets/parquet/default-9ec3c7fd6ff26cdf/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 7960,
+        "path": "datasets/parquet/default-6742daaf36352912/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 7872,
+        "path": "datasets/parquet/default-5844687a22f3060c/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 6040,
+        "path": "datasets/parquet/default-794b480fc2439b09/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 5464,
+        "path": "datasets/parquet/default-769d0a1b8fe559a4/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 5376,
+        "path": "datasets/parquet/default-6fd8afb3b46af69f/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 5080,
+        "path": "datasets/parquet/default-8d2bfce7f8495b74/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      }
+    ]
+  },
+  "baseline_checkpoint": "knightnemo/nanowm-b2-rt1-abl-pred-v-50k",
+  "baseline_revision": "82b169ab3c26d585efdeb88df782fa4a70db7486",
+  "candidate_checkpoint": "knightnemo/nanowm-b2-rt1-300k",
+  "candidate_revision": "e073162d1ef2a34029cfe4f4662abbb7d18895e0",
+  "completed_at": "2026-07-09T17:02:49.982010+00:00",
+  "created_at": "2026-07-09T16:44:03.831414+00:00",
+  "dataset": "RT-1 / Fractal via LeRobot",
+  "dataset_repo": "IPEC-COMMUNITY/fractal20220817_data_lerobot",
+  "episode_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "episode_selection_rule": "fixed consecutive RT-1 / Fractal episode ids 0 through 9, chosen before inference",
+  "evaluation_command_baseline": "worldbench eval-batch --ground-truth checkpoint_validation/videos/ground_truth --predictions checkpoint_validation/videos/baseline --name nanowm-b2-rt1-50k --skip-context 4",
+  "evaluation_command_candidate": "worldbench eval-batch --ground-truth checkpoint_validation/videos/ground_truth --predictions checkpoint_validation/videos/candidate --name nanowm-b2-rt1-300k --skip-context 4",
+  "gate_command_engineering": "worldbench gate --baseline baseline_batch_result.json --candidate candidate_batch_result.json --max-overall-drop 2 --max-metric-drop 5 --max-horizon-drop 5",
+  "gate_command_strict": "worldbench gate --baseline baseline_batch_result.json --candidate candidate_batch_result.json",
+  "inference_environment": {
+    "cuda_available": true,
+    "cuda_version": "12.6",
+    "gpu_name": "Tesla T4",
+    "python_version": "3.12.13",
+    "torch_version": "2.7.1+cu126",
+    "vram_bytes": 15636037632
+  },
+  "limitations": [
+    "Ten RT-1 / Fractal episodes only; not a standardized leaderboard result.",
+    "One generated sample per checkpoint per episode.",
+    "Only metrics available from RGB video pairs are scored; unsupported metrics remain N/A.",
+    "Determinism depends on NanoWM/PyTorch/CUDA kernels; fixed seeds are used where supported."
+  ],
+  "model_family": "NanoWM-B/2",
+  "nanowm_commit": "2ee3c355a6e44d2254eba8a8c29f199adddf4a3e",
+  "settings": {
+    "action_conditioning": "enabled, identical actions from RT-1 / Fractal",
+    "batch_size": 1,
+    "fps": 3,
+    "future_frames_evaluated": 8,
+    "history_length": 4,
+    "num_samples": 1,
+    "num_sampling_steps": 50,
+    "precision": "fp16",
+    "resolution": [
+      256,
+      256
+    ],
+    "rollout_length": 12,
+    "seeds": {
+      "0": 2026070900,
+      "1": 2026070901,
+      "2": 2026070902,
+      "3": 2026070903,
+      "4": 2026070904,
+      "5": 2026070905,
+      "6": 2026070906,
+      "7": 2026070907,
+      "8": 2026070908,
+      "9": 2026070909
+    }
+  },
+  "storage_notes": [
+    "Raw RT-1 data shards, generated videos, model checkpoints, and prediction frame data were kept in the Kaggle working directory and are not committed.",
+    "Committed artifacts contain compact JSON results only; paths are portable descriptions of the run layout."
+  ],
+  "worldbench_commit": "75f2f7b0549653c955671dc695fcdaec5e742377",
+  "worldbench_version": "0.3.0.dev0"
+}

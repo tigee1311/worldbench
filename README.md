@@ -44,6 +44,25 @@ Compact artifact: [artifacts/real_model_eval/nanowm_rt1_episode0.json](artifacts
 
 More detail: [docs/real_model_evaluation.md](docs/real_model_evaluation.md)
 
+## Real Checkpoint Regression Proof
+
+WorldBench has also compared two real NanoWM checkpoints from the same model family on the same RT-1 / Fractal episodes:
+
+| Field | Value |
+| --- | --- |
+| Baseline | `knightnemo/nanowm-b2-rt1-abl-pred-v-50k` |
+| Candidate | `knightnemo/nanowm-b2-rt1-300k` |
+| Episodes | 10 fixed episodes, IDs 0 through 9 |
+| Result | Overall mean improved from 85.67 to 87.28 |
+| Episode comparison | 9 improved, 1 regressed, 0 unchanged |
+| Gates | Strict PASS; engineering-threshold PASS |
+
+WorldBench detected an overall improvement and also surfaced the one small episode-level regression (`episode_002.mp4`, -0.33). This is a controlled validation slice, not a standardized leaderboard result.
+
+Compact artifacts: [artifacts/checkpoint_validation/](artifacts/checkpoint_validation/)
+
+More detail: [docs/checkpoint_validation.md](docs/checkpoint_validation.md)
+
 ## One Quickstart
 
 WorldBench is installed from a source checkout today. This README does not claim a PyPI install path.

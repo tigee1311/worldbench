@@ -9,6 +9,7 @@
 - Per-horizon metric output for honest horizon-supported metrics
 - Regression gate command with CI-friendly PASS/FAIL exit codes
 - Batch and gate artifacts for checkpoint regression workflows
+- Real NanoWM 50k vs 300k checkpoint validation artifacts and report
 
 ### Changed
 

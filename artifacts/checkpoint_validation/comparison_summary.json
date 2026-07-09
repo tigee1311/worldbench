@@ -1,0 +1,391 @@
+{
+  "answer": "Candidate improved overall on this fixed 10-episode validation slice.",
+  "baseline_checkpoint": "knightnemo/nanowm-b2-rt1-abl-pred-v-50k",
+  "baseline_overall": 85.66975052333503,
+  "baseline_revision": "82b169ab3c26d585efdeb88df782fa4a70db7486",
+  "best_improvements": [
+    {
+      "baseline": 78.7431204277141,
+      "candidate": 84.96368573033958,
+      "change": 6.220565302625474,
+      "episode_id": "episode_008.mp4"
+    },
+    {
+      "baseline": 85.9031866049779,
+      "candidate": 87.9905663260026,
+      "change": 2.087379721024689,
+      "episode_id": "episode_007.mp4"
+    },
+    {
+      "baseline": 86.23300910059669,
+      "candidate": 88.25148185985967,
+      "change": 2.018472759262977,
+      "episode_id": "episode_001.mp4"
+    }
+  ],
+  "candidate_checkpoint": "knightnemo/nanowm-b2-rt1-300k",
+  "candidate_overall": 87.28132535733272,
+  "candidate_revision": "e073162d1ef2a34029cfe4f4662abbb7d18895e0",
+  "data_root_stats_final": {
+    "bytes": 10801527,
+    "files": 51,
+    "largest_files": [
+      {
+        "bytes": 7428777,
+        "path": "meta/episodes.jsonl"
+      },
+      {
+        "bytes": 594362,
+        "path": "videos/chunk-000/observation.images.image/episode_000000.mp4"
+      },
+      {
+        "bytes": 564589,
+        "path": "videos/chunk-000/observation.images.image/episode_000007.mp4"
+      },
+      {
+        "bytes": 426450,
+        "path": "videos/chunk-000/observation.images.image/episode_000008.mp4"
+      },
+      {
+        "bytes": 405098,
+        "path": "videos/chunk-000/observation.images.image/episode_000001.mp4"
+      },
+      {
+        "bytes": 372656,
+        "path": "videos/chunk-000/observation.images.image/episode_000005.mp4"
+      },
+      {
+        "bytes": 245910,
+        "path": "videos/chunk-000/observation.images.image/episode_000004.mp4"
+      },
+      {
+        "bytes": 223368,
+        "path": "videos/chunk-000/observation.images.image/episode_000006.mp4"
+      },
+      {
+        "bytes": 198087,
+        "path": "videos/chunk-000/observation.images.image/episode_000009.mp4"
+      },
+      {
+        "bytes": 122317,
+        "path": "videos/chunk-000/observation.images.image/episode_000002.mp4"
+      },
+      {
+        "bytes": 83931,
+        "path": "videos/chunk-000/observation.images.image/episode_000003.mp4"
+      },
+      {
+        "bytes": 41115,
+        "path": "meta/tasks.jsonl"
+      }
+    ]
+  },
+  "engineering_gate_failure_reasons": [],
+  "engineering_gate_status": "PASS",
+  "episode_count": 10,
+  "episodes_evaluated": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "episodes_improved": 9,
+  "episodes_regressed": 1,
+  "episodes_unchanged": 0,
+  "hf_home_stats_final": {
+    "bytes": 669914683,
+    "files": 31,
+    "largest_files": [
+      {
+        "bytes": 334643276,
+        "path": "hub/models--stabilityai--sd-vae-ft-mse/blobs/a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815"
+      },
+      {
+        "bytes": 334643276,
+        "path": "hub/models--stabilityai--sd-vae-ft-mse/snapshots/31f26fdeee1355a5c34592e401dd41e45d25a493/diffusion_pytorch_model.safetensors"
+      },
+      {
+        "bytes": 398696,
+        "path": "xet/logs/xet_20260709T162942121+0000_224.log"
+      },
+      {
+        "bytes": 149467,
+        "path": "xet/logs/xet_20260709T162139759+0000_58.log"
+      },
+      {
+        "bytes": 12672,
+        "path": "datasets/parquet/default-b6fd271eca806e9e/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 10176,
+        "path": "datasets/parquet/default-9ec3c7fd6ff26cdf/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 7960,
+        "path": "datasets/parquet/default-6742daaf36352912/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 7872,
+        "path": "datasets/parquet/default-5844687a22f3060c/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 6040,
+        "path": "datasets/parquet/default-794b480fc2439b09/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 5464,
+        "path": "datasets/parquet/default-769d0a1b8fe559a4/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 5376,
+        "path": "datasets/parquet/default-6fd8afb3b46af69f/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      },
+      {
+        "bytes": 5080,
+        "path": "datasets/parquet/default-8d2bfce7f8495b74/0.0.0/9c460aabd2aa27d1496e5e38d2060760561f0ac2cd6a110134eefa5b3f153b8d/parquet-train.arrow"
+      }
+    ]
+  },
+  "horizon_deltas": [
+    {
+      "baseline": 81.20207644159832,
+      "baseline_count": 10,
+      "candidate": 83.35655727989031,
+      "candidate_count": 10,
+      "change": 2.154480838291988,
+      "horizon": "t+1",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 98.91006841659546,
+      "baseline_count": 10,
+      "candidate": 99.63601150512696,
+      "candidate_count": 10,
+      "change": 0.7259430885314941,
+      "horizon": "t+2",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 80.6614152656648,
+      "baseline_count": 10,
+      "candidate": 82.60617532963026,
+      "candidate_count": 10,
+      "change": 1.944760063965461,
+      "horizon": "t+2",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 97.49908369541168,
+      "baseline_count": 10,
+      "candidate": 98.6598426270485,
+      "candidate_count": 10,
+      "change": 1.1607589316368205,
+      "horizon": "t+3",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 79.91143274091665,
+      "baseline_count": 10,
+      "candidate": 81.99068708063605,
+      "candidate_count": 10,
+      "change": 2.079254339719398,
+      "horizon": "t+3",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 96.50793869159705,
+      "baseline_count": 10,
+      "candidate": 97.89460023038949,
+      "candidate_count": 10,
+      "change": 1.3866615387924384,
+      "horizon": "t+4",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 79.33578149199418,
+      "baseline_count": 10,
+      "candidate": 81.40480754576471,
+      "candidate_count": 10,
+      "change": 2.0690260537705285,
+      "horizon": "t+4",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 96.68084558920386,
+      "baseline_count": 10,
+      "candidate": 97.90561062367242,
+      "candidate_count": 10,
+      "change": 1.224765034468561,
+      "horizon": "t+5",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 78.89313150664658,
+      "baseline_count": 10,
+      "candidate": 80.99387761743685,
+      "candidate_count": 10,
+      "change": 2.1007461107902685,
+      "horizon": "t+5",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 96.43031026723268,
+      "baseline_count": 10,
+      "candidate": 97.538460834873,
+      "candidate_count": 10,
+      "change": 1.1081505676403225,
+      "horizon": "t+6",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 78.40367255853388,
+      "baseline_count": 10,
+      "candidate": 80.52901417623158,
+      "candidate_count": 10,
+      "change": 2.1253416176977,
+      "horizon": "t+6",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 95.87130758166049,
+      "baseline_count": 10,
+      "candidate": 96.87646674014512,
+      "candidate_count": 10,
+      "change": 1.0051591584846307,
+      "horizon": "t+7",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 77.96019345370394,
+      "baseline_count": 10,
+      "candidate": 80.1262758025099,
+      "candidate_count": 10,
+      "change": 2.1660823488059577,
+      "horizon": "t+7",
+      "metric": "visual_similarity"
+    },
+    {
+      "baseline": 95.79452618050964,
+      "baseline_count": 10,
+      "candidate": 96.68916230708876,
+      "candidate_count": 10,
+      "change": 0.8946361265791296,
+      "horizon": "t+8",
+      "metric": "temporal_stability"
+    },
+    {
+      "baseline": 77.56992999759537,
+      "baseline_count": 10,
+      "candidate": 79.75505579752789,
+      "candidate_count": 10,
+      "change": 2.1851257999325213,
+      "horizon": "t+8",
+      "metric": "visual_similarity"
+    }
+  ],
+  "inference_environment": {
+    "cuda_available": true,
+    "cuda_version": "12.6",
+    "gpu_name": "Tesla T4",
+    "python_version": "3.12.13",
+    "torch_version": "2.7.1+cu126",
+    "vram_bytes": 15636037632
+  },
+  "limitations": [
+    "Ten RT-1 / Fractal episodes only; not a standardized leaderboard result.",
+    "One generated sample per checkpoint per episode.",
+    "Only metrics available from RGB video pairs are scored; unsupported metrics remain N/A.",
+    "Determinism depends on NanoWM/PyTorch/CUDA kernels; fixed seeds are used where supported."
+  ],
+  "metric_deltas": [
+    {
+      "available_count_baseline": 10,
+      "available_count_candidate": 10,
+      "baseline": 95.79452618050964,
+      "candidate": 96.68916230708876,
+      "change": 0.8946361265791296,
+      "metric": "temporal_stability"
+    },
+    {
+      "available_count_baseline": 10,
+      "available_count_candidate": 10,
+      "baseline": 77.56992999759537,
+      "candidate": 79.75505579752789,
+      "change": 2.1851257999325213,
+      "metric": "visual_similarity"
+    }
+  ],
+  "nanowm_commit": "2ee3c355a6e44d2254eba8a8c29f199adddf4a3e",
+  "overall_delta": 1.6115748339976932,
+  "question": "Did the NanoWM 300k checkpoint improve over the NanoWM 50k checkpoint on the same RT-1 episodes?",
+  "runtime": {
+    "baseline_total_runtime_seconds": 883.802,
+    "candidate_total_runtime_seconds": 182.339,
+    "elapsed_seconds": 1126.15,
+    "finished_at": "2026-07-09T17:02:49.982010+00:00",
+    "started_at": "2026-07-09T16:44:03.831414+00:00"
+  },
+  "settings": {
+    "action_conditioning": "enabled, identical actions from RT-1 / Fractal",
+    "batch_size": 1,
+    "fps": 3,
+    "future_frames_evaluated": 8,
+    "history_length": 4,
+    "num_samples": 1,
+    "num_sampling_steps": 50,
+    "precision": "fp16",
+    "resolution": [
+      256,
+      256
+    ],
+    "rollout_length": 12,
+    "seeds": {
+      "0": 2026070900,
+      "1": 2026070901,
+      "2": 2026070902,
+      "3": 2026070903,
+      "4": 2026070904,
+      "5": 2026070905,
+      "6": 2026070906,
+      "7": 2026070907,
+      "8": 2026070908,
+      "9": 2026070909
+    }
+  },
+  "strict_gate_failure_reasons": [],
+  "strict_gate_status": "PASS",
+  "worldbench_paths": {
+    "baseline_batch_result": "checkpoint_validation/compact/baseline_batch_result.json",
+    "candidate_batch_result": "checkpoint_validation/compact/candidate_batch_result.json",
+    "engineering_exit_code": 0,
+    "engineering_gate_result": "checkpoint_validation/compact/engineering_gate_result.json",
+    "strict_exit_code": 0,
+    "strict_gate_result": "checkpoint_validation/compact/strict_gate_result.json"
+  },
+  "worst_regressions": [
+    {
+      "baseline": 87.25950665881,
+      "candidate": 86.92756596903406,
+      "change": -0.3319406897759336,
+      "episode_id": "episode_002.mp4"
+    },
+    {
+      "baseline": 86.45070831753848,
+      "candidate": 86.9471863280783,
+      "change": 0.49647801053981766,
+      "episode_id": "episode_006.mp4"
+    },
+    {
+      "baseline": 87.5033123772992,
+      "candidate": 88.15672430603064,
+      "change": 0.6534119287314439,
+      "episode_id": "episode_005.mp4"
+    }
+  ]
+}
