@@ -1,16 +1,30 @@
 # WorldBench Robotics
 
+Did your new world-model checkpoint actually improve?
+
+WorldBench evaluates baseline and candidate predictions on the same robot episodes, finds regressions across metrics, episodes, and prediction horizons, and returns a CI-friendly PASS or FAIL.
+
 Testing and regression infrastructure for robotics world models.
 
-Bring your own robot rollout and predicted futures. WorldBench scores the behaviors it can reliably measure, marks unsupported metrics N/A, compares runs, and saves reproducible evaluation artifacts.
+```text
+old checkpoint
+vs
+new checkpoint
+        ↓
+same robot episodes
+        ↓
+WorldBench
+        ↓
+PASS / FAIL
+```
 
-Use it to ask whether a newly trained robotics world-model checkpoint actually improved over a baseline checkpoint.
+Install the released package:
+
+```bash
+pip install "worldbench[video]"
+```
 
 WorldBench is not another world model. It is a local evaluation toolkit for checking whether generated futures are useful for robotics workflows.
-
-<p align="center">
-  <img src="assets/demo/worldbench_demo.gif" width="850" alt="WorldBench demo showing robot world-model evaluation" />
-</p>
 
 ## Badges
 
@@ -19,17 +33,115 @@ WorldBench is not another world model. It is a local evaluation toolkit for chec
 ![Version](https://img.shields.io/badge/version-0.3.0-blue)
 ![License](https://img.shields.io/github/license/tigee1311/worldbench)
 
-## Real Model Evaluation Proof
+## Real Checkpoint Regression Proof
 
-WorldBench has been run on a real pretrained world model and a real robot rollout:
+WorldBench compared two real NanoWM checkpoints from the same model family on the same RT-1 / Fractal episodes:
+
+| Field | Value |
+| --- | --- |
+| Model family | NanoWM-B/2 |
+| Baseline | `knightnemo/nanowm-b2-rt1-abl-pred-v-50k` |
+| Candidate | `knightnemo/nanowm-b2-rt1-300k` |
+| Episodes | 10 identical RT-1 episodes, IDs 0 through 9 |
+
+| Result | Value |
+| --- | ---: |
+| Overall | 85.67 -> 87.28 |
+| Change | +1.61 |
+| Visual Similarity | +2.19 |
+| Temporal Stability | +0.89 |
+| Episodes improved | 9 / 10 |
+| Episodes regressed | 1 / 10 |
+| Strict gate | PASS |
+| Engineering gate | PASS |
+
+Visual similarity improved at every evaluated horizon from t+1 through t+8. Temporal stability improved at every measurable horizon from t+2 through t+8.
+
+The later checkpoint improved overall, while WorldBench still caught the episode where it got worse: `episode_002.mp4` regressed by 0.33 points.
+
+This is a fixed 10-episode validation proof, not a standardized leaderboard result or universal model ranking.
+
+Compact artifacts: [artifacts/checkpoint_validation/](artifacts/checkpoint_validation/)
+
+More detail: [docs/checkpoint_validation.md](docs/checkpoint_validation.md)
+
+## Fast Quickstart
+
+Use the same ground-truth episode suite for the old and new checkpoint predictions:
+
+```text
+eval_suite/
+├── episode_001.mp4
+├── episode_002.mp4
+└── episode_003.mp4
+
+checkpoint_old/
+├── episode_001.mp4
+├── episode_002.mp4
+└── episode_003.mp4
+
+checkpoint_new/
+├── episode_001.mp4
+├── episode_002.mp4
+└── episode_003.mp4
+```
+
+Evaluate both checkpoints:
+
+```bash
+worldbench eval-batch \
+  --ground-truth eval_suite/ \
+  --predictions checkpoint_old/ \
+  --name checkpoint_old
+```
+
+```bash
+worldbench eval-batch \
+  --ground-truth eval_suite/ \
+  --predictions checkpoint_new/ \
+  --name checkpoint_new
+```
+
+Gate the candidate:
+
+```bash
+worldbench gate \
+  --baseline checkpoint_old.json \
+  --candidate checkpoint_new.json
+```
+
+Example output:
+
+```text
+PASS
+
+Overall: +1.61
+
+Episodes improved:  9
+Episodes regressed: 1
+```
+
+Have only one prediction pair?
+
+```bash
+worldbench eval-video \
+  --ground-truth gt.mp4 \
+  --prediction pred.mp4 \
+  --skip-context 4
+```
+
+## Additional Real-Model Integration Proof
+
+Before the checkpoint regression workflow, WorldBench was also run on one real pretrained world model and one real robot rollout:
 
 | Field | Value |
 | --- | --- |
 | Model | NanoWM B2 RT-1 300K |
 | Checkpoint | `knightnemo/nanowm-b2-rt1-300k` |
 | Data | RT-1 real robot rollout |
-| Scope | 1 rollout |
+| Scope | 1 model, 1 rollout |
 | Generated future | 8 genuinely generated future frames |
+| Supported metrics | 2 |
 
 | Metric | Score |
 | --- | ---: |
@@ -46,53 +158,9 @@ Compact artifact: [artifacts/real_model_eval/nanowm_rt1_episode0.json](artifacts
 
 More detail: [docs/real_model_evaluation.md](docs/real_model_evaluation.md)
 
-## Real Checkpoint Regression Proof
-
-WorldBench has also compared two real NanoWM checkpoints from the same model family on the same RT-1 / Fractal episodes:
-
-| Field | Value |
-| --- | --- |
-| Baseline | `knightnemo/nanowm-b2-rt1-abl-pred-v-50k` |
-| Candidate | `knightnemo/nanowm-b2-rt1-300k` |
-| Episodes | 10 fixed episodes, IDs 0 through 9 |
-| Result | Overall mean improved from 85.67 to 87.28 |
-| Visual Similarity | +2.19 |
-| Temporal Stability | +0.89 |
-| Episode comparison | 9 improved, 1 regressed, 0 unchanged |
-| Gates | Strict PASS; engineering-threshold PASS |
-
-Visual similarity improved at every evaluated horizon from t+1 through t+8. Temporal stability improved at every measurable horizon from t+2 through t+8. WorldBench detected the aggregate improvement and also surfaced the one small episode-level regression (`episode_002.mp4`, -0.33).
-
-This is a fixed 10-episode validation proof, not a standardized leaderboard result or universal model ranking.
-
-Compact artifacts: [artifacts/checkpoint_validation/](artifacts/checkpoint_validation/)
-
-More detail: [docs/checkpoint_validation.md](docs/checkpoint_validation.md)
-
-## One Quickstart
-
-Install WorldBench with the video extra for checkpoint regression workflows:
+## Synthetic Demo
 
 ```bash
-python3.11 -m venv worldbench-env
-source worldbench-env/bin/activate
-python -m pip install --upgrade pip
-python -m pip install "worldbench[video]"
-
-worldbench --help
-```
-
-For development from source:
-
-```bash
-git clone https://github.com/tigee1311/worldbench.git
-cd worldbench
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -e ".[dev,video]"
-
-worldbench --help
 worldbench demo
 worldbench validate examples/demo_dataset
 worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
@@ -101,6 +169,10 @@ worldbench dashboard .worldbench/runs/latest/result.json --no-open
 ```
 
 The demo creates a synthetic rollout plus good and bad prediction folders. It is useful for smoke testing the CLI and reports, but the project is no longer synthetic-only.
+
+<p align="center">
+  <img src="assets/demo/worldbench_demo.gif" width="850" alt="WorldBench demo showing robot world-model evaluation" />
+</p>
 
 ## How WorldBench Works
 
@@ -427,12 +499,14 @@ Each metric result contains `name`, `score`, `status`, `reason`, `details`, and 
 
 ## Current Limitations
 
-- The NanoWM proof is one real-model rollout so far.
-- The NanoWM proof evaluates eight generated future frames.
-- The NanoWM score is not a standardized leaderboard result.
+- The single-model integration proof covers 1 rollout and 8 generated future frames.
+- The checkpoint-regression proof covers 2 NanoWM checkpoints and 10 fixed RT-1 episodes.
+- The checkpoint proof currently relies on 2 supported metrics: Visual Similarity and Temporal Stability.
 - Arbitrary numeric action vectors require explicit action adapters before action consistency can be scored.
+- Action Consistency remains N/A for raw real-world video pairs where required action semantics are unavailable.
 - Real-world object permanence requires reliable object tracking support.
 - Real-world contact realism requires reliable robot and object tracking support.
+- Neither real-model result is a standardized leaderboard result, universal model ranking, or model accuracy percentage.
 - Temporal scrambling currently produces a weaker score response than frame freezing.
 - Normal CI does not download large LeRobot datasets or rerun expensive model inference.
 
