@@ -11,8 +11,10 @@ Record a 90-120 second demo that shows:
 - `good_model` beating `bad_model`
 - the generated Markdown report
 - the local dashboard
+- the real-model proof artifact
+- native LeRobot import status
 
-Do not claim official LeRobot support, ROS support, real robot support, cloud sharing, or a hosted leaderboard. Those are planned or experimental.
+Do not claim ROS support, cloud sharing, a hosted leaderboard, or standardized benchmark status. Native LeRobot import and real robot rollout evaluation are current capabilities; direct video-pair evaluation, multi-episode aggregation, and leaderboard work remain future roadmap items.
 
 ## Recording Outline
 
@@ -45,7 +47,7 @@ worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_m
 worldbench compare examples/demo_dataset --models good_model bad_model
 worldbench benchmark --demo
 worldbench report .worldbench/runs/latest/result.json
-worldbench dashboard .worldbench/runs/latest/result.json
+worldbench dashboard .worldbench/runs/latest/result.json --no-open
 ```
 
 4. Point out the main failure:
@@ -74,7 +76,7 @@ WorldBench is a local evaluation toolkit for robotics world models. Instead of o
 
 In this demo, the bad model produces frames that look plausible at a glance, but the robot motion does not follow the action log and the cube moves before contact. WorldBench catches that with action consistency, contact realism, object permanence, temporal stability, and visual similarity scores.
 
-The comparison command turns this into a benchmark-style result: the good model beats the bad model, and the largest gaps explain why.
+The comparison command turns this into a benchmark-style local result: the good model beats the bad model, and the largest gaps explain why. The README also links a compact NanoWM RT-1 artifact, which is a single-rollout integration proof rather than a leaderboard result.
 
 ## Capture Settings
 

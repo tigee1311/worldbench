@@ -14,8 +14,8 @@ twine check dist/*
 The build should produce:
 
 ```text
-dist/worldbench-0.1.0.tar.gz
-dist/worldbench-0.1.0-py3-none-any.whl
+dist/worldbench-0.2.0.tar.gz
+dist/worldbench-0.2.0-py3-none-any.whl
 ```
 
 ## Local Wheel Smoke Test
@@ -23,7 +23,7 @@ dist/worldbench-0.1.0-py3-none-any.whl
 ```bash
 python -m venv /tmp/worldbench-wheel-test
 source /tmp/worldbench-wheel-test/bin/activate
-python -m pip install dist/worldbench-0.1.0-py3-none-any.whl
+python -m pip install dist/worldbench-0.2.0-py3-none-any.whl
 worldbench --help
 ```
 
@@ -38,7 +38,7 @@ Then verify installation in a fresh environment:
 ```bash
 python -m venv /tmp/worldbench-testpypi
 source /tmp/worldbench-testpypi/bin/activate
-python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple worldbench
+python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple <published-package-name>
 worldbench --help
 ```
 
@@ -55,13 +55,13 @@ After publishing:
 ```bash
 python -m venv /tmp/worldbench-pypi-test
 source /tmp/worldbench-pypi-test/bin/activate
-python -m pip install worldbench
+python -m pip install <published-package-name>
 worldbench --help
 ```
 
 ## Package Name Note
 
-If `worldbench` is unavailable on PyPI, use a package name such as `worldbench-ai` and update:
+If the intended package name is unavailable on PyPI, choose the final published package name before release and update:
 
 ```text
 pyproject.toml
@@ -75,5 +75,5 @@ Then rebuild the package from a clean `dist/` directory before uploading.
 
 - Keep `version` in `pyproject.toml` aligned with the Git tag.
 - Keep release notes in `docs/release_notes_<version>.md`.
-- Do not publish claims for planned adapters or cloud features until they exist.
+- Do not publish claims for unfinished adapters, cloud features, or standardized leaderboard status until they exist.
 - Rebuild demo assets only when the visual demo changes.

@@ -36,7 +36,7 @@ def test_import_lerobot_demo_command_creates_valid_dataset(tmp_path: Path) -> No
     result = CliRunner().invoke(app, ["import-lerobot", "--demo", "--out", str(output_path)])
 
     assert result.exit_code == 0, result.output
-    assert "Experimental LeRobot-style import" in result.output
+    assert "Native LeRobot import is available" in result.output
     assert (output_path / "episode_001" / "frames" / "000.png").exists()
     assert (output_path / "episode_001" / "actions.json").exists()
     assert validate_dataset(output_path).is_valid

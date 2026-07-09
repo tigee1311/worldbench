@@ -159,7 +159,7 @@ def import_lerobot(
 
     console.print("[bold]LeRobot import[/bold]")
     console.print(
-        "Experimental LeRobot-style import remains available for local folders and --demo."
+        "Native LeRobot import is available with --repo-id; the local LeRobot-style folder converter remains available for --demo and local folders."
     )
 
     try:

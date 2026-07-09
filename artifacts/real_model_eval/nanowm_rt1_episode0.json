@@ -1,4 +1,18 @@
 {
+  "provenance": {
+    "model_name": "knightnemo/nanowm-b2-rt1-300k",
+    "checkpoint": "knightnemo/nanowm-b2-rt1-300k",
+    "dataset": "RT-1 / Fractal",
+    "episode": 0,
+    "context_frames": 4,
+    "context_frames_note": "Inferred from local dataset metadata: future-only evaluation of NanoWM frames 4 through 11.",
+    "generated_frames": 8,
+    "fps": 3,
+    "resolution": "256x256 RGB",
+    "worldbench_version": "0.1.0",
+    "evaluation_timestamp": "2026-07-09T01:01:02.726668+00:00",
+    "scope": "single-rollout integration proof"
+  },
   "dataset_path": "/Users/ayush/nanowm_worldbench_eval/worldbench_dataset",
   "predictions_path": "/Users/ayush/nanowm_worldbench_eval/nanowm_predictions",
   "created_at": "2026-07-09T01:01:02.726668+00:00",

@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Native LeRobot import
+- Video/control timelines
+- Real robot rollout support
+- Frame-freeze benchmark
+- Temporal-scramble benchmark
+- Real NanoWM evaluation
+
+### Changed
+
+- Unsupported metrics return N/A
+- Overall scores renormalize across available metrics
+
+### Fixed
+
+- Arbitrary numeric action vectors are no longer interpreted as zero-motion commands
+- Synthetic-only object/contact heuristics no longer create misleading real-world scores
+
 ## v0.1.0
 
 Initial public MVP:

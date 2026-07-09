@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "worldbench"
-version = "0.1.0"
+version = "0.2.0"
 description = "Control-aware evaluation toolkit for robotics world models."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -44,9 +44,9 @@ dependencies = [
 
 [project.optional-dependencies]
 vision = ["scikit-image>=0.21"]
-dev = ["pytest>=8.0", "ruff>=0.8"]
+dev = ["pytest>=8.0", "ruff>=0.8", "build>=1.5", "twine>=6.2"]
 video = ["imageio>=2.34", "imageio-ffmpeg>=0.5"]
-lerobot = ["lerobot"]
+lerobot = ["lerobot>=0.4.4"]
 
 [project.urls]
 Changelog = "https://github.com/tigee1311/worldbench/blob/main/CHANGELOG.md"
