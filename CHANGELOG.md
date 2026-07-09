@@ -1,20 +1,32 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
 ### Added
 
 - Direct video-pair evaluation with `worldbench eval-video`
 - Multi-episode checkpoint evaluation with `worldbench eval-batch`
-- Per-horizon metric output for honest horizon-supported metrics
-- Regression gate command with CI-friendly PASS/FAIL exit codes
+- Per-horizon evaluation curves
+- Baseline-vs-candidate regression gates with `worldbench gate`
+- Episode-level improvement and regression analysis
+- CI-compatible PASS / FAIL exit codes
 - Batch and gate artifacts for checkpoint regression workflows
-- Real NanoWM 50k vs 300k checkpoint validation artifacts and report
+- Real NanoWM 50k vs 300k checkpoint validation
 
 ### Changed
 
-- Main branch development version is now `0.3.0.dev0`; `0.2.0` remains the latest published release.
+- WorldBench can now evaluate checkpoints across identical episode suites
+- Results include additive horizon and provenance data
 - Development test dependencies now include the optional video stack used by offline video workflow tests
+
+### Validation
+
+- Real checkpoint proof compared NanoWM-B/2 50k vs 300k on 10 fixed RT-1 / Fractal episodes
+- Candidate overall mean improved from 85.67 to 87.28 (+1.61)
+- Visual Similarity improved by +2.19 and Temporal Stability improved by +0.89
+- 9 episodes improved and 1 episode had a small regression (`episode_002.mp4`, -0.33)
+- Strict gate PASS and engineering-threshold gate PASS
+- This validation is a fixed 10-episode proof, not a standardized leaderboard result or universal model ranking
 
 ## v0.2.0
 

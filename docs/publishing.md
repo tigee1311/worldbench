@@ -1,21 +1,21 @@
 # Publishing
 
-WorldBench is prepared for PyPI-style packaging. These notes are for maintainers; do not upload release artifacts until CI passes and the release checklist is complete.
+WorldBench releases are published from GitHub release assets through GitHub Actions OIDC trusted publishing. Do not store PyPI API tokens in the repository and do not upload from a local machine unless trusted publishing is unavailable and the maintainer explicitly chooses that path.
 
 ## Build
 
 ```bash
-rm -rf dist build *.egg-info
-python -m pip install --upgrade build twine
+rm -rf dist build
+find . -maxdepth 2 -type d -name "*.egg-info" -prune -exec rm -rf {} +
 python -m build
 twine check dist/*
 ```
 
-The build should produce:
+For v0.3.0 the clean build should produce exactly:
 
 ```text
-dist/worldbench-0.2.0.tar.gz
-dist/worldbench-0.2.0-py3-none-any.whl
+dist/worldbench-0.3.0.tar.gz
+dist/worldbench-0.3.0-py3-none-any.whl
 ```
 
 ## Local Wheel Smoke Test
@@ -23,31 +23,65 @@ dist/worldbench-0.2.0-py3-none-any.whl
 ```bash
 python -m venv /tmp/worldbench-wheel-test
 source /tmp/worldbench-wheel-test/bin/activate
-python -m pip install dist/worldbench-0.2.0-py3-none-any.whl
+python -m pip install --upgrade pip
+python -m pip install dist/worldbench-0.3.0-py3-none-any.whl
 worldbench --help
+worldbench eval-video --help
+worldbench eval-batch --help
+worldbench gate --help
+python - <<'PY'
+import worldbench
+assert worldbench.__version__ == "0.3.0"
+PY
+deactivate
 ```
+
+## GitHub Release Assets
+
+Create the GitHub release after CI passes and attach both files:
+
+```text
+worldbench-0.3.0.tar.gz
+worldbench-0.3.0-py3-none-any.whl
+```
+
+The `publish.yml` workflow downloads those release assets and publishes the exact attached distributions. Do not rebuild during publishing.
 
 ## TestPyPI
 
-```bash
-twine upload --repository testpypi dist/*
+Use the `publish` workflow with:
+
+```text
+target: testpypi
+tag: v0.3.0
 ```
 
-Then verify installation in a fresh environment:
+Then verify installation in a fresh environment using TestPyPI for WorldBench and PyPI for dependencies:
 
 ```bash
 python -m venv /tmp/worldbench-testpypi
 source /tmp/worldbench-testpypi/bin/activate
-python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple <published-package-name>
+python -m pip install --upgrade pip
+python -m pip install \
+  --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple \
+  "worldbench[video]==0.3.0"
 worldbench --help
+worldbench eval-video --help
+worldbench eval-batch --help
+worldbench gate --help
+deactivate
 ```
 
 ## PyPI
 
-Only publish to PyPI after GitHub CI passes, TestPyPI installation has been checked, and the GitHub release notes are ready.
+Only publish to PyPI after GitHub CI passes, the GitHub release assets are correct, and TestPyPI installation has been checked.
 
-```bash
-twine upload dist/*
+Use the `publish` workflow with:
+
+```text
+target: pypi
+tag: v0.3.0
 ```
 
 After publishing:
@@ -55,25 +89,18 @@ After publishing:
 ```bash
 python -m venv /tmp/worldbench-pypi-test
 source /tmp/worldbench-pypi-test/bin/activate
-python -m pip install <published-package-name>
+python -m pip install --upgrade pip
+python -m pip install "worldbench[video]==0.3.0"
 worldbench --help
+worldbench eval-video --help
+worldbench eval-batch --help
+worldbench gate --help
+deactivate
 ```
-
-## Package Name Note
-
-If the intended package name is unavailable on PyPI, choose the final published package name before release and update:
-
-```text
-pyproject.toml
-README install commands
-release notes
-```
-
-Then rebuild the package from a clean `dist/` directory before uploading.
 
 ## Release Hygiene
 
-- Keep `version` in `pyproject.toml` aligned with the Git tag.
-- Keep release notes in `docs/release_notes_<version>.md`.
-- Do not publish claims for unfinished adapters, cloud features, or standardized leaderboard status until they exist.
-- Rebuild demo assets only when the visual demo changes.
+- Keep `version` in `pyproject.toml`, `worldbench.__version__`, and the Git tag aligned.
+- Keep release notes accurate about implemented features only.
+- Do not publish claims for unfinished adapters, cloud features, hosted services, or standardized leaderboard status.
+- Do not commit generated videos, PNG frame dumps, model checkpoints, dataset shards, build output, or credentials.

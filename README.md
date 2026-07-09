@@ -4,6 +4,8 @@ Testing and regression infrastructure for robotics world models.
 
 Bring your own robot rollout and predicted futures. WorldBench scores the behaviors it can reliably measure, marks unsupported metrics N/A, compares runs, and saves reproducible evaluation artifacts.
 
+Use it to ask whether a newly trained robotics world-model checkpoint actually improved over a baseline checkpoint.
+
 WorldBench is not another world model. It is a local evaluation toolkit for checking whether generated futures are useful for robotics workflows.
 
 <p align="center">
@@ -14,7 +16,7 @@ WorldBench is not another world model. It is a local evaluation toolkit for chec
 
 ![Tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
-![Version](https://img.shields.io/badge/version-0.3.0.dev0-blue)
+![Version](https://img.shields.io/badge/version-0.3.0-blue)
 ![License](https://img.shields.io/github/license/tigee1311/worldbench)
 
 ## Real Model Evaluation Proof
@@ -54,10 +56,14 @@ WorldBench has also compared two real NanoWM checkpoints from the same model fam
 | Candidate | `knightnemo/nanowm-b2-rt1-300k` |
 | Episodes | 10 fixed episodes, IDs 0 through 9 |
 | Result | Overall mean improved from 85.67 to 87.28 |
+| Visual Similarity | +2.19 |
+| Temporal Stability | +0.89 |
 | Episode comparison | 9 improved, 1 regressed, 0 unchanged |
 | Gates | Strict PASS; engineering-threshold PASS |
 
-WorldBench detected an overall improvement and also surfaced the one small episode-level regression (`episode_002.mp4`, -0.33). This is a controlled validation slice, not a standardized leaderboard result.
+Visual similarity improved at every evaluated horizon from t+1 through t+8. Temporal stability improved at every measurable horizon from t+2 through t+8. WorldBench detected the aggregate improvement and also surfaced the one small episode-level regression (`episode_002.mp4`, -0.33).
+
+This is a fixed 10-episode validation proof, not a standardized leaderboard result or universal model ranking.
 
 Compact artifacts: [artifacts/checkpoint_validation/](artifacts/checkpoint_validation/)
 
@@ -65,7 +71,18 @@ More detail: [docs/checkpoint_validation.md](docs/checkpoint_validation.md)
 
 ## One Quickstart
 
-WorldBench is installed from a source checkout today. This README does not claim a PyPI install path.
+Install WorldBench with the video extra for checkpoint regression workflows:
+
+```bash
+python3.11 -m venv worldbench-env
+source worldbench-env/bin/activate
+python -m pip install --upgrade pip
+python -m pip install "worldbench[video]"
+
+worldbench --help
+```
+
+For development from source:
 
 ```bash
 git clone https://github.com/tigee1311/worldbench.git

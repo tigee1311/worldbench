@@ -1,78 +1,116 @@
 # Release Checklist
 
-WorldBench 0.2.0 surfaces the completed real-data and real-model validation work.
+WorldBench 0.3.0 turns robotics world-model evaluation into checkpoint regression testing.
 
-## 0.2.0 Scope
+## 0.3.0 Scope
 
-- Native LeRobot import through the optional `lerobot` extra
-- Video and control timeline import modes
-- Real robot rollout evaluation
-- Source provenance fields on imported actions and states
-- Unsupported metric handling with N/A status and reasons
-- Weighted overall score renormalization across available metrics
-- Frame-freeze corruption benchmark artifact
-- Temporal-scramble corruption benchmark artifact
-- Compact NanoWM RT-1 single-rollout evaluation artifact
-- Updated README and documentation for current behavior
-- Python 3.10, 3.11, and 3.12 CI matrix
+- Direct video-pair evaluation with `worldbench eval-video`
+- Multi-episode checkpoint evaluation with `worldbench eval-batch`
+- Per-horizon evaluation curves
+- Baseline-vs-candidate regression gates with `worldbench gate`
+- Episode-level improvement and regression analysis
+- CI-compatible PASS / FAIL exit codes
+- Strict video validation for future-frame alignment, resolution, FPS, and frame count
+- Batch aggregation across identical episode suites
+- Checkpoint compatibility validation before gating
+- Real NanoWM-B/2 50k vs 300k checkpoint validation on 10 fixed RT-1 / Fractal episodes
+
+## Non-Goals
+
+- New metrics
+- New action adapters
+- New model experiments
+- Leaderboards
+- Cloud sharing
+- ROS support
+- Hosted services
+- Statistical hypothesis testing
 
 ## Pre-Release Checks
 
 ```bash
-python3.11 --version
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -e ".[dev,video]"
 ruff check .
 pytest
 worldbench --help
-worldbench import-lerobot --help
-worldbench demo
-worldbench validate examples/demo_dataset
-worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_model
-worldbench compare examples/demo_dataset --models good_model bad_model
-worldbench benchmark --demo
-worldbench report .worldbench/runs/latest/result.json
-worldbench dashboard .worldbench/runs/latest/result.json --no-open
-worldbench import-lerobot --demo --out examples/lerobot_push_cube
-worldbench validate examples/lerobot_push_cube
+worldbench eval-video --help
+worldbench eval-batch --help
+worldbench gate --help
 python -m build
 twine check dist/*
 ```
 
-Confirm README links and images render on GitHub.
-Confirm compact artifact links exist.
-Confirm no generated videos, PNG frame sequences, ZIP archives, virtual environments, or temporary datasets are staged.
-Use `docs/demo_video_guide.md` if recording a short Loom or release demo.
+Confirm:
+
+- `pyproject.toml` and `worldbench.__version__` both report `0.3.0`.
+- README links and images render on GitHub.
+- Compact checkpoint-validation artifact links exist.
+- No generated videos, PNG frame sequences, ZIP archives, virtual environments, model checkpoints, dataset shards, build output, or temporary run directories are staged.
+- `v0.2.0` tag and release remain untouched.
+
+## Local Wheel Smoke Test
+
+Install `dist/worldbench-0.3.0-py3-none-any.whl` in a fresh environment and verify:
+
+```bash
+worldbench --help
+worldbench eval-video --help
+worldbench eval-batch --help
+worldbench gate --help
+```
+
+Also verify:
+
+```python
+import worldbench
+assert worldbench.__version__ == "0.3.0"
+```
+
+Run one offline checkpoint-regression smoke test that exercises `eval-batch` and `gate` for both PASS and valid-regression FAIL.
 
 ## GitHub Release
-
-1. Confirm `pyproject.toml` and `worldbench.__version__` have `0.2.0`.
-2. Confirm README badges, links, and quickstart point to `https://github.com/tigee1311/worldbench`.
-3. Confirm demo media exists under `assets/demo/`.
-4. Confirm package build artifacts pass `twine check`.
-5. Confirm GitHub Actions pass for Python 3.10, 3.11, and 3.12.
-6. Create a normal Git tag and release only after the synchronized documentation commit is pushed.
 
 Suggested release title:
 
 ```text
-WorldBench v0.2.0 - Real robot rollout and real-model validation
+WorldBench v0.3.0 - Checkpoint regression testing
 ```
 
 Suggested release summary:
 
 ```text
-WorldBench 0.2.0 adds native LeRobot import, video/control timelines, real robot rollout support, unavailable-metric handling, corruption validation artifacts, and a compact NanoWM RT-1 single-rollout evaluation proof. The result is not a standardized leaderboard and not a model-accuracy claim.
+WorldBench v0.3.0 turns robotics world-model evaluation into checkpoint regression testing.
+
+Teams can now evaluate identical episode suites for baseline and candidate checkpoints, compare aggregate and per-horizon behavior, inspect episode-level regressions, and fail CI when configured thresholds are exceeded.
+
+Real validation:
+- NanoWM-B/2 50k vs 300k
+- 10 fixed RT-1 episodes
+- Overall: 85.67 -> 87.28
+- Change: +1.61
+- 9 episodes improved
+- 1 small regression detected
+- Strict gate: PASS
+- Engineering gate: PASS
+
+This validation is a fixed 10-episode proof, not a standardized leaderboard result or universal model ranking.
 ```
 
-Tag and publish:
+Attach:
 
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-gh release create v0.2.0 --title "WorldBench v0.2.0 - Real robot rollout and real-model validation"
+```text
+worldbench-0.3.0.tar.gz
+worldbench-0.3.0-py3-none-any.whl
 ```
 
-If the tag or release already exists, update notes instead of recreating history.
+## Publishing
+
+Publishing uses GitHub Actions OIDC trusted publishing through `.github/workflows/publish.yml`.
+
+Workflow inputs:
+
+```text
+target: testpypi or pypi
+tag: v0.3.0
+```
+
+Publish to TestPyPI first, verify a fresh TestPyPI install, then publish to production PyPI and verify a fresh production install.
