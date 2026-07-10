@@ -52,7 +52,9 @@ def launch_dashboard(
                 if report_path is None:
                     self.send_error(404, "Report not found")
                     return
-                self._send_bytes(report_path.read_bytes(), "text/markdown; charset=utf-8")
+                self._send_bytes(
+                    report_path.read_bytes(), "text/markdown; charset=utf-8"
+                )
                 return
             if parsed.path == "/frame":
                 self._send_frame(parsed.query)
@@ -101,7 +103,9 @@ def launch_dashboard(
                 return
 
             payload = frame_path.read_bytes()
-            content_type = mimetypes.guess_type(frame_path.name)[0] or "application/octet-stream"
+            content_type = (
+                mimetypes.guess_type(frame_path.name)[0] or "application/octet-stream"
+            )
             self.send_response(200)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(payload)))
@@ -111,7 +115,9 @@ def launch_dashboard(
     try:
         server = ThreadingHTTPServer((host, port), DashboardHandler)
     except OSError as exc:
-        raise RuntimeError(f"Could not start dashboard on {host}:{port}: {exc}") from exc
+        raise RuntimeError(
+            f"Could not start dashboard on {host}:{port}: {exc}"
+        ) from exc
     url = f"http://{host}:{server.server_port}"
     print(f"WorldBench dashboard running at {url}")
     print("Press Ctrl+C to stop.")
@@ -139,7 +145,13 @@ def load_comparison_if_present(path: Path) -> dict[str, object] | None:
         data = read_json(candidate)
     except Exception:  # noqa: BLE001
         return None
-    if isinstance(data, dict) and {"overall", "metrics", "largest_gaps", "label_a", "label_b"}.issubset(data):
+    if isinstance(data, dict) and {
+        "overall",
+        "metrics",
+        "largest_gaps",
+        "label_a",
+        "label_b",
+    }.issubset(data):
         return data
     return None
 
@@ -158,7 +170,9 @@ def build_frame_index(result: EvaluationResult) -> dict[str, dict[str, list[Path
     except Exception:  # noqa: BLE001
         return {}
 
-    predictions_root = Path(result.predictions_path) if result.predictions_path else None
+    predictions_root = (
+        Path(result.predictions_path) if result.predictions_path else None
+    )
     index: dict[str, dict[str, list[Path]]] = {}
     for episode in dataset.episodes:
         predictions = resolve_prediction_frames(episode, predictions_root)
@@ -170,7 +184,9 @@ def build_frame_index(result: EvaluationResult) -> dict[str, dict[str, list[Path
     return index
 
 
-def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[str, list[Path]]]) -> str:
+def build_dashboard_html(
+    result: EvaluationResult, frame_index: dict[str, dict[str, list[Path]]]
+) -> str:
     data = {
         "result": result.to_dict(),
         "frames": {
@@ -179,13 +195,30 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
         },
     }
     payload = json.dumps(data).replace("</", "<\\/")
-    metric_cards = "\n".join(_metric_card(name, metric.score, metric.is_available) for name, metric in result.metrics.items())
+    metric_cards = "\n".join(
+        _metric_card(name, metric.score, metric.is_available)
+        for name, metric in result.metrics.items()
+    )
     episode_rows = "\n".join(_episode_row(episode) for episode in result.episodes)
     issue_items = _issue_items(result)
     fix_items = _fix_items(result)
     timeline = _timeline_svg(result)
     raw_json = html.escape(json.dumps(result.to_dict(), indent=2))
     report_link = '<a class="report-link" href="/report.md">Open generated report</a>'
+    available_metrics = (
+        ", ".join(
+            name.replace("_", " ").title()
+            for name in result.coverage.get("available_metrics", [])
+        )
+        or "None"
+    )
+    unsupported_metrics = (
+        ", ".join(
+            name.replace("_", " ").title()
+            for name in result.coverage.get("unsupported_metrics", [])
+        )
+        or "None"
+    )
 
     return f"""<!doctype html>
 <html lang="en">
@@ -379,7 +412,7 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
   <main>
     <div class="summary">
     <div class="score">
-        <div class="label">Overall Score</div>
+        <div class="label">Composite Score</div>
       <div class="value">{result.score:.1f}<small>/100</small></div>
       </div>
       <div class="panel main-failure">
@@ -390,6 +423,13 @@ def build_dashboard_html(result: EvaluationResult, frame_index: dict[str, dict[s
     </div>
 
     <div class="metrics">{metric_cards}</div>
+
+    <section class="panel">
+      <h2>Metric Coverage</h2>
+      <p>{result.coverage.get("available_metric_count", 0)} of {result.coverage.get("configured_metric_count", 0)} configured metrics; {float(result.coverage.get("configured_weight_coverage", 0.0)):.0%} configured-weight coverage.</p>
+      <p><strong>Available:</strong> {html.escape(available_metrics)}</p>
+      <p><strong>Unsupported:</strong> {html.escape(unsupported_metrics)}</p>
+    </section>
 
     <section class="panel">
       <h2>Per-Episode Scores</h2>
@@ -488,6 +528,9 @@ def build_comparison_dashboard_html(comparison: dict[str, object]) -> str:
     assert isinstance(metrics, list)
     largest_gaps = comparison["largest_gaps"]
     assert isinstance(largest_gaps, list)
+    coverage = comparison.get("coverage", {})
+    coverage_a = coverage.get("a", {}) if isinstance(coverage, dict) else {}
+    coverage_b = coverage.get("b", {}) if isinstance(coverage, dict) else {}
     raw_json = html.escape(json.dumps(comparison, indent=2))
 
     metric_rows = "\n".join(
@@ -506,7 +549,7 @@ def build_comparison_dashboard_html(comparison: dict[str, object]) -> str:
     winner = html.escape(str(overall["winner"]))
     loser = html.escape(str(overall["loser"]))
     summary = (
-        f"{winner} beats {loser} by +{float(overall['winner_margin']):.1f} overall points."
+        f"{winner} beats {loser} by +{float(overall['winner_margin']):.1f} Composite Score points."
         if winner != "tie"
         else f"{label_a} and {label_b} are tied."
     )
@@ -583,14 +626,16 @@ def build_comparison_dashboard_html(comparison: dict[str, object]) -> str:
         <h2>{summary}</h2>
         <p class="muted">{html.escape(str(comparison["conclusion"]))}</p>
       </div>
-      <div class="score">+{float(overall['winner_margin']):.1f}<small> overall</small></div>
+      <div class="score">+{float(overall["winner_margin"]):.1f}<small> overall</small></div>
     </section>
     <section class="panel">
-      <h2>Overall</h2>
+      <h2>Composite Scores</h2>
       <table>
         <tbody>
-          <tr><td>{label_a}</td><td>{_format_optional_score(overall['score_a'])}</td></tr>
-          <tr><td>{label_b}</td><td>{_format_optional_score(overall['score_b'])}</td></tr>
+          <tr><td>{label_a}</td><td>{_format_optional_score(overall["score_a"])}</td></tr>
+          <tr><td>{label_b}</td><td>{_format_optional_score(overall["score_b"])}</td></tr>
+          <tr><td>{label_a} metric coverage</td><td>{coverage_a.get("available_metric_count", 0)}/{coverage_a.get("configured_metric_count", 0)} ({float(coverage_a.get("configured_weight_coverage", 0.0)):.0%} weight)</td></tr>
+          <tr><td>{label_b} metric coverage</td><td>{coverage_b.get("available_metric_count", 0)}/{coverage_b.get("configured_metric_count", 0)} ({float(coverage_b.get("configured_weight_coverage", 0.0)):.0%} weight)</td></tr>
         </tbody>
       </table>
     </section>
@@ -620,7 +665,15 @@ def _metric_card(name: str, score: float | None, available: bool = True) -> str:
     label = html.escape(name.replace("_", " ").title())
     display = "N/A" if score is None else f"{score:.1f}"
     width = 0 if score is None else max(0, min(100, score))
-    color = "#7f8c99" if score is None else "#41d38a" if score >= 85 else "#ffb85c" if score >= 60 else "#ff6b5f"
+    color = (
+        "#7f8c99"
+        if score is None
+        else "#41d38a"
+        if score >= 85
+        else "#ffb85c"
+        if score >= 60
+        else "#ff6b5f"
+    )
     return (
         '<div class="metric-card">'
         f'<div class="name">{label}</div>'
@@ -632,7 +685,9 @@ def _metric_card(name: str, score: float | None, available: bool = True) -> str:
 
 def _episode_row(episode) -> str:
     breakdown = ", ".join(
-        f"{html.escape(name.replace('_', ' ').title())}: {metric.score:.1f}" if metric.is_available and metric.score is not None else f"{html.escape(name.replace('_', ' ').title())}: N/A"
+        f"{html.escape(name.replace('_', ' ').title())}: {metric.score:.1f}"
+        if metric.is_available and metric.score is not None
+        else f"{html.escape(name.replace('_', ' ').title())}: N/A"
         for name, metric in episode.metrics.items()
     )
     return (
@@ -652,12 +707,18 @@ def _issue_items(result: EvaluationResult) -> str:
         return '<li class="ok">No major issues detected.</li>'
 
     critical_terms = ("contact", "mismatch", "disappear", "missing", "opposite")
-    critical = [issue for issue in issues if any(term in issue.lower() for term in critical_terms)]
+    critical = [
+        issue
+        for issue in issues
+        if any(term in issue.lower() for term in critical_terms)
+    ]
     warnings = [issue for issue in issues if issue not in critical]
     parts: list[str] = []
     if critical:
         parts.append('<li class="severity-label">Critical</li>')
-        parts.extend(f'<li class="critical">{html.escape(issue)}</li>' for issue in critical[:10])
+        parts.extend(
+            f'<li class="critical">{html.escape(issue)}</li>' for issue in critical[:10]
+        )
     if warnings:
         parts.append('<li class="severity-label">Warnings</li>')
         parts.extend(f"<li>{html.escape(issue)}</li>" for issue in warnings[:10])
@@ -691,8 +752,12 @@ def _timeline_svg(result: EvaluationResult) -> str:
     ]
     for tick in [0, 25, 50, 75, 100]:
         y = top + plot_height - (tick / 100) * plot_height
-        parts.append(f'<line x1="{left - 4}" y1="{y}" x2="{width - 16}" y2="{y}" stroke="#182b3c"/>')
-        parts.append(f'<text x="12" y="{y + 4}" font-size="11" fill="#91a9bb">{tick}</text>')
+        parts.append(
+            f'<line x1="{left - 4}" y1="{y}" x2="{width - 16}" y2="{y}" stroke="#182b3c"/>'
+        )
+        parts.append(
+            f'<text x="12" y="{y + 4}" font-size="11" fill="#91a9bb">{tick}</text>'
+        )
 
     for episode_idx, episode in enumerate(result.episodes):
         base_x = left + episode_idx * group_width + 20
@@ -719,8 +784,12 @@ def _timeline_svg(result: EvaluationResult) -> str:
         color = colors[idx % len(colors)]
         label = html.escape(name.replace("_", " ").title())
         x = legend_x + idx * 150
-        parts.append(f'<rect x="{x}" y="{height - 14}" width="10" height="10" fill="{color}"/>')
-        parts.append(f'<text x="{x + 14}" y="{height - 5}" font-size="11" fill="#91a9bb">{label}</text>')
+        parts.append(
+            f'<rect x="{x}" y="{height - 14}" width="10" height="10" fill="{color}"/>'
+        )
+        parts.append(
+            f'<text x="{x + 14}" y="{height - 5}" font-size="11" fill="#91a9bb">{label}</text>'
+        )
     parts.append("</svg>")
     return "\n".join(parts)
 
@@ -737,5 +806,7 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        raise SystemExit("Usage: python -m worldbench.dashboard <result_json_or_dataset_path>")
+        raise SystemExit(
+            "Usage: python -m worldbench.dashboard <result_json_or_dataset_path>"
+        )
     launch_dashboard(sys.argv[1])

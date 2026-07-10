@@ -12,7 +12,10 @@ def test_good_model_scores_higher_than_bad_model(tmp_path: Path) -> None:
     bad = WorldBench(dataset_path).evaluate(predictions=dataset_path / "bad_model")
 
     assert good.score > bad.score
-    assert good.metrics["action_consistency"].score > bad.metrics["action_consistency"].score
+    assert (
+        good.metrics["action_consistency"].score
+        > bad.metrics["action_consistency"].score
+    )
 
 
 def test_convenience_api_and_report(tmp_path: Path) -> None:
@@ -31,7 +34,9 @@ def test_run_and_save_updates_latest_alias(tmp_path: Path) -> None:
     dataset_path = DemoBackend().create(tmp_path / "demo")
     output_root = tmp_path / "runs"
 
-    result_path = EvaluationRunner(dataset_path, predictions=dataset_path / "bad_model").run_and_save(output_root)
+    result_path = EvaluationRunner(
+        dataset_path, predictions=dataset_path / "bad_model"
+    ).run_and_save(output_root)
 
     assert result_path.exists()
     assert (output_root / "latest" / "result.json").exists()

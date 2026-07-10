@@ -1,0 +1,35 @@
+metrics:
+  visual_similarity:
+    enabled: true
+    required: true
+    weight: 0.25
+  temporal_stability:
+    enabled: true
+    required: true
+    weight: 0.20
+  action_consistency:
+    enabled: true
+    required: false
+    weight: 0.30
+  object_permanence:
+    enabled: true
+    required: false
+    weight: 0.15
+  contact_realism:
+    enabled: true
+    required: false
+    weight: 0.10
+
+gate:
+  min_composite_improvement: 0
+  max_episode_regressions: 1
+  max_metric_drop: 2
+  max_horizon_drop: 2
+  min_metric_coverage: 0.40
+  min_metric_count: 2
+  min_configured_weight_coverage: 0.45
+  strict_config_match: true
+
+output:
+  json: true
+  markdown: true

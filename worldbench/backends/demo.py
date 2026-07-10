@@ -16,7 +16,9 @@ class DemoBackend:
     width = 128
     height = 96
 
-    def create(self, output_path: str | Path = "examples/demo_dataset", overwrite: bool = True) -> Path:
+    def create(
+        self, output_path: str | Path = "examples/demo_dataset", overwrite: bool = True
+    ) -> Path:
         root = Path(output_path)
         if root.exists() and overwrite:
             shutil.rmtree(root)
@@ -57,8 +59,20 @@ class DemoBackend:
         write_json(
             episode / "actions.json",
             [
-                {"t": 0, "action": "move_right", "dx": 1.0, "dy": 0.0, "gripper": "open"},
-                {"t": 1, "action": "close_gripper", "dx": 0.0, "dy": 0.0, "gripper": "closed"},
+                {
+                    "t": 0,
+                    "action": "move_right",
+                    "dx": 1.0,
+                    "dy": 0.0,
+                    "gripper": "open",
+                },
+                {
+                    "t": 1,
+                    "action": "close_gripper",
+                    "dx": 0.0,
+                    "dy": 0.0,
+                    "gripper": "closed",
+                },
             ],
         )
         write_json(
@@ -90,7 +104,9 @@ class DemoBackend:
         actions = plan["actions_json"]
 
         for idx, state in enumerate(states):
-            image = self._render_frame(state["robot"], state["object"], label=f"gt {idx:03d}")
+            image = self._render_frame(
+                state["robot"], state["object"], label=f"gt {idx:03d}"
+            )
             image.save(frames_dir / f"{idx:03d}.png")
             image.save(predictions_dir / f"{idx:03d}.png")
 
@@ -107,7 +123,13 @@ class DemoBackend:
             },
         )
 
-    def _write_model_outputs(self, root: Path, episodes: list[dict[str, object]], model_name: str, quality: str) -> None:
+    def _write_model_outputs(
+        self,
+        root: Path,
+        episodes: list[dict[str, object]],
+        model_name: str,
+        quality: str,
+    ) -> None:
         model_root = root / model_name
         ensure_dir(model_root)
         for plan in episodes:
@@ -131,7 +153,10 @@ class DemoBackend:
     def _mirror_example_outputs(self, root: Path) -> None:
         if root.name != "demo_dataset" or root.parent.name != "examples":
             return
-        for model_name, folder_name in [("good_model", "good_model_outputs"), ("bad_model", "bad_model_outputs")]:
+        for model_name, folder_name in [
+            ("good_model", "good_model_outputs"),
+            ("bad_model", "bad_model_outputs"),
+        ]:
             target = root.parent / folder_name
             if target.exists():
                 shutil.rmtree(target)
@@ -154,17 +179,29 @@ class DemoBackend:
         for y in range(0, self.height, 16):
             draw.line((0, y, self.width, y), fill=(24, 34, 43), width=1)
 
-        draw.rectangle((5, 5, self.width - 6, self.height - 6), outline=(58, 75, 88), width=1)
+        draw.rectangle(
+            (5, 5, self.width - 6, self.height - 6), outline=(58, 75, 88), width=1
+        )
         draw.text((8, 7), label, fill=(129, 152, 166))
 
         rx, ry = robot
         ox, oy = obj
         draw.line((rx, ry, ox, oy), fill=(51, 68, 80), width=2)
-        draw.ellipse((rx - 8, ry - 8, rx + 8, ry + 8), fill=(231, 76, 60), outline=(255, 180, 160), width=2)
+        draw.ellipse(
+            (rx - 8, ry - 8, rx + 8, ry + 8),
+            fill=(231, 76, 60),
+            outline=(255, 180, 160),
+            width=2,
+        )
         draw.rectangle((rx - 4, ry - 14, rx + 4, ry - 8), fill=(255, 202, 120))
 
         if not hide_object:
-            draw.rectangle((ox - 8, oy - 8, ox + 8, oy + 8), fill=(46, 204, 113), outline=(179, 255, 204), width=2)
+            draw.rectangle(
+                (ox - 8, oy - 8, ox + 8, oy + 8),
+                fill=(46, 204, 113),
+                outline=(179, 255, 204),
+                width=2,
+            )
             draw.line((ox - 8, oy, ox + 8, oy), fill=(22, 120, 75), width=1)
             draw.line((ox, oy - 8, ox, oy + 8), fill=(22, 120, 75), width=1)
 
@@ -180,19 +217,35 @@ def _episode_plan(
     actions: list[str],
 ) -> dict[str, object]:
     states = [{"robot": robot_start, "object": object_start}]
-    states_json = [{"t": 0, "robot_x": robot_start[0], "robot_y": robot_start[1], "object_x": object_start[0], "object_y": object_start[1]}]
+    states_json = [
+        {
+            "t": 0,
+            "robot_x": robot_start[0],
+            "robot_y": robot_start[1],
+            "object_x": object_start[0],
+            "object_y": object_start[1],
+        }
+    ]
     actions_json = []
     robot = robot_start
     obj = object_start
     for idx, action in enumerate(actions):
-        contact_before_action = ((robot[0] - obj[0]) ** 2 + (robot[1] - obj[1]) ** 2) ** 0.5 <= 18.0
+        contact_before_action = (
+            (robot[0] - obj[0]) ** 2 + (robot[1] - obj[1]) ** 2
+        ) ** 0.5 <= 18.0
         if action.startswith("move"):
             robot = (robot[0] + delta[0], robot[1] + delta[1])
             if contact_before_action:
                 obj = (obj[0] + delta[0], obj[1] + delta[1])
         states.append({"robot": robot, "object": obj})
         states_json.append(
-            {"t": idx + 1, "robot_x": robot[0], "robot_y": robot[1], "object_x": obj[0], "object_y": obj[1]}
+            {
+                "t": idx + 1,
+                "robot_x": robot[0],
+                "robot_y": robot[1],
+                "object_x": obj[0],
+                "object_y": obj[1],
+            }
         )
 
     for idx, action in enumerate(actions):
@@ -207,7 +260,13 @@ def _episode_plan(
                 "gripper": "closed" if action == "close_gripper" else "open",
             }
         )
-    return {"name": name, "task": task, "states": states, "states_json": states_json, "actions_json": actions_json}
+    return {
+        "name": name,
+        "task": task,
+        "states": states,
+        "states_json": states_json,
+        "actions_json": actions_json,
+    }
 
 
 def _bad_states(plan: dict[str, object]) -> list[dict[str, tuple[int, int]]]:

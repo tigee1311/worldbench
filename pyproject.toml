@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "worldbench"
-version = "0.3.0"
-description = "Control-aware evaluation toolkit for robotics world models."
+version = "0.4.0"
+description = "Regression testing for robot world-model checkpoints."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -40,6 +40,7 @@ dependencies = [
   "pydantic>=2.0",
   "rich>=13.0",
   "click>=8.0",
+  "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]

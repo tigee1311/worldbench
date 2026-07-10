@@ -41,7 +41,11 @@ def list_image_files(path: str | Path) -> list[Path]:
     root = Path(path)
     if not root.exists() or not root.is_dir():
         return []
-    return sorted(p for p in root.iterdir() if p.suffix.lower() in IMAGE_EXTENSIONS and p.is_file())
+    return sorted(
+        p
+        for p in root.iterdir()
+        if p.suffix.lower() in IMAGE_EXTENSIONS and p.is_file()
+    )
 
 
 def load_rgb(path: str | Path, size: tuple[int, int] | None = None) -> np.ndarray:
@@ -51,7 +55,9 @@ def load_rgb(path: str | Path, size: tuple[int, int] | None = None) -> np.ndarra
     return np.asarray(image, dtype=np.float32)
 
 
-def load_aligned_pairs(ground_truth: Iterable[Path], predictions: Iterable[Path]) -> list[tuple[np.ndarray, np.ndarray]]:
+def load_aligned_pairs(
+    ground_truth: Iterable[Path], predictions: Iterable[Path]
+) -> list[tuple[np.ndarray, np.ndarray]]:
     pairs: list[tuple[np.ndarray, np.ndarray]] = []
     for gt_path, pred_path in zip(ground_truth, predictions):
         gt = load_rgb(gt_path)
@@ -121,7 +127,12 @@ def rollout_supports_synthetic_tracking(episode: Any) -> bool:
     robot = str(getattr(metadata, "robot", "") or "").lower()
     description = str(getattr(metadata, "description", "") or "").lower()
     task = str(getattr(metadata, "task", "") or "").lower()
-    return robot.startswith("synthetic_") or "synthetic" in robot or "synthetic" in description or "synthetic" in task
+    return (
+        robot.startswith("synthetic_")
+        or "synthetic" in robot
+        or "synthetic" in description
+        or "synthetic" in task
+    )
 
 
 def _green_object_mask(image: np.ndarray) -> np.ndarray:

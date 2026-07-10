@@ -5,7 +5,10 @@ import tempfile
 
 from rich.console import Console
 
-from worldbench.backends.lerobot import create_lerobot_style_demo_source, import_lerobot_style
+from worldbench.backends.lerobot import (
+    create_lerobot_style_demo_source,
+    import_lerobot_style,
+)
 
 
 console = Console()

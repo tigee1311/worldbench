@@ -288,7 +288,9 @@ def _validate_timeline(timeline: str) -> TimelineMode:
     if timeline == "video" or timeline == "control":
         return timeline
     available = ", ".join(TIMELINE_MODES)
-    raise ValueError(f"Invalid LeRobot timeline {timeline!r}. Choose one of: {available}.")
+    raise ValueError(
+        f"Invalid LeRobot timeline {timeline!r}. Choose one of: {available}."
+    )
 
 
 def _normalize_episodes(episodes: list[int] | None) -> list[int] | None:
@@ -456,7 +458,9 @@ def _export_video_timeline(
             },
         )
         episode_export.source_control_steps = len(source_rows)
-        frame_ids = _video_frame_ids_for_episode(dataset, episode_index, source_rows, feature_info)
+        frame_ids = _video_frame_ids_for_episode(
+            dataset, episode_index, source_rows, feature_info
+        )
         _ensure_frame_id_sets(episode_export)
         episode_export.source_video_frame_ids.update(frame_ids)
         episode_export.referenced_video_frame_ids.update(
@@ -470,7 +474,12 @@ def _export_video_timeline(
             action_row = _latest_at_or_before(source_rows, video_timestamp)
             state_row = _nearest_by_timestamp(source_rows, video_timestamp)
             image_value = _image_for_video_frame(
-                dataset, episode_index, frame_id, video_timestamp, source_rows, feature_info
+                dataset,
+                episode_index,
+                frame_id,
+                video_timestamp,
+                source_rows,
+                feature_info,
             )
             aligned_row = _aligned_video_row(
                 image_value,
@@ -506,7 +515,10 @@ def _collect_source_rows_by_episode(
             fallback_episode=fallback_episode,
             include_image=include_image,
         )
-        if requested_episodes is not None and source_row.episode_index not in requested_episodes:
+        if (
+            requested_episodes is not None
+            and source_row.episode_index not in requested_episodes
+        ):
             continue
         rows_by_episode.setdefault(source_row.episode_index, []).append(source_row)
     return rows_by_episode
@@ -660,9 +672,7 @@ def _source_control_index(row: dict[str, Any], row_index: int) -> int:
     return row_index
 
 
-def _can_read_selected_video(
-    dataset: Any, feature_info: LeRobotFeatureInfo
-) -> bool:
+def _can_read_selected_video(dataset: Any, feature_info: LeRobotFeatureInfo) -> bool:
     return (
         feature_info.selected_camera in _dataset_video_keys(dataset)
         and getattr(dataset, "hf_dataset", None) is not None
@@ -805,7 +815,9 @@ def _latest_at_or_before(
 def _nearest_by_timestamp(
     source_rows: list[_SourceRow], target_timestamp: float
 ) -> _SourceRow:
-    candidates = [source_row for source_row in source_rows if source_row.timestamp is not None]
+    candidates = [
+        source_row for source_row in source_rows if source_row.timestamp is not None
+    ]
     if not candidates:
         raise LeRobotImportError(
             "Video timeline alignment requires source control timestamps."
@@ -994,7 +1006,9 @@ def _add_provenance_fields(
     if control_index is not None:
         record["source_control_index"] = int(_scalar_to_jsonable(control_index))
     if control_timestamp is not None:
-        record["source_control_timestamp"] = float(_scalar_to_jsonable(control_timestamp))
+        record["source_control_timestamp"] = float(
+            _scalar_to_jsonable(control_timestamp)
+        )
     video_frame_index = row.get("_source_video_frame_index")
     video_timestamp = row.get("_source_video_timestamp")
     if video_frame_index is not None:
@@ -1023,7 +1037,9 @@ def _write_lerobot_episode_records(
         "video_fps": feature_info.fps,
         "alignment_strategy": episode_export.alignment_strategy,
         "source_control_steps": episode_export.source_control_steps,
-        "source_unique_video_frames": len(episode_export.source_video_frame_ids or set()),
+        "source_unique_video_frames": len(
+            episode_export.source_video_frame_ids or set()
+        ),
         "source_referenced_video_frames": len(
             episode_export.referenced_video_frame_ids or set()
         ),

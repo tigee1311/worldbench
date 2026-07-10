@@ -35,12 +35,18 @@ class BenchmarkBackend:
     scenarios = [
         ScenarioConfig("push_cube", "combined control/contact failures"),
         ScenarioConfig("action_mismatch", "robot moves opposite the commanded action"),
-        ScenarioConfig("pre_contact_motion", "object moves before robot/object contact"),
+        ScenarioConfig(
+            "pre_contact_motion", "object moves before robot/object contact"
+        ),
         ScenarioConfig("object_disappears", "object disappears during prediction"),
-        ScenarioConfig("temporal_flicker", "prediction flickers or jumps between frames"),
+        ScenarioConfig(
+            "temporal_flicker", "prediction flickers or jumps between frames"
+        ),
     ]
 
-    def create(self, output_path: str | Path = "benchmarks", overwrite: bool = True) -> Path:
+    def create(
+        self, output_path: str | Path = "benchmarks", overwrite: bool = True
+    ) -> Path:
         root = Path(output_path)
         if root.exists() and overwrite:
             shutil.rmtree(root)
@@ -107,10 +113,22 @@ class BenchmarkBackend:
         quality: str,
     ) -> None:
         model_dir = ensure_dir(root / model_name / "episode_001")
-        generated = states if quality == "good" else _bad_states_for_scenario(scenario.name, states)
+        generated = (
+            states
+            if quality == "good"
+            else _bad_states_for_scenario(scenario.name, states)
+        )
         for idx, state in enumerate(generated):
-            hide_object = quality == "bad" and scenario.name == "object_disappears" and idx in {2, 3, 4, 5, 6, 7, 8, 9}
-            flicker = quality == "bad" and scenario.name == "temporal_flicker" and idx in {4, 6, 8}
+            hide_object = (
+                quality == "bad"
+                and scenario.name == "object_disappears"
+                and idx in {2, 3, 4, 5, 6, 7, 8, 9}
+            )
+            flicker = (
+                quality == "bad"
+                and scenario.name == "temporal_flicker"
+                and idx in {4, 6, 8}
+            )
             if quality == "bad" and scenario.name == "push_cube":
                 hide_object = idx == 4
                 flicker = idx == 6
@@ -138,17 +156,35 @@ class BenchmarkBackend:
             draw.line((x, 0, x, self.height), fill=(25, 38, 50), width=1)
         for y in range(0, self.height, 16):
             draw.line((0, y, self.width, y), fill=(25, 38, 50), width=1)
-        draw.rectangle((5, 5, self.width - 6, self.height - 6), outline=(54, 78, 96), width=1)
+        draw.rectangle(
+            (5, 5, self.width - 6, self.height - 6), outline=(54, 78, 96), width=1
+        )
         draw.text((8, 7), label, fill=(128, 152, 170))
 
         rx, ry = robot
         ox, oy = obj
         draw.line((rx, ry, ox, oy), fill=(52, 72, 88), width=2)
-        draw.rounded_rectangle((rx - 10, ry - 8, rx + 10, ry + 8), radius=4, fill=(80, 172, 214), outline=(190, 236, 255), width=1)
-        draw.ellipse((rx - 5, ry - 5, rx + 5, ry + 5), fill=(231, 76, 60), outline=(255, 180, 160), width=1)
+        draw.rounded_rectangle(
+            (rx - 10, ry - 8, rx + 10, ry + 8),
+            radius=4,
+            fill=(80, 172, 214),
+            outline=(190, 236, 255),
+            width=1,
+        )
+        draw.ellipse(
+            (rx - 5, ry - 5, rx + 5, ry + 5),
+            fill=(231, 76, 60),
+            outline=(255, 180, 160),
+            width=1,
+        )
         draw.rectangle((rx - 4, ry + 8, rx + 4, ry + 12), fill=(7, 14, 22))
         if not hide_object:
-            draw.rectangle((ox - 8, oy - 8, ox + 8, oy + 8), fill=(46, 204, 113), outline=(179, 255, 204), width=2)
+            draw.rectangle(
+                (ox - 8, oy - 8, ox + 8, oy + 8),
+                fill=(46, 204, 113),
+                outline=(179, 255, 204),
+                width=2,
+            )
         return image
 
 
@@ -172,7 +208,9 @@ def _actions() -> list[dict[str, object]]:
     ]
 
 
-def _bad_states_for_scenario(name: str, states: list[dict[str, tuple[int, int]]]) -> list[dict[str, tuple[int, int]]]:
+def _bad_states_for_scenario(
+    name: str, states: list[dict[str, tuple[int, int]]]
+) -> list[dict[str, tuple[int, int]]]:
     bad: list[dict[str, tuple[int, int]]] = []
     start_robot = states[0]["robot"]
     start_object = states[0]["object"]

@@ -1,12 +1,17 @@
-"""Compare the synthetic good_model and bad_model runs.
+"""Compare two deterministic synthetic fixture outputs.
 
-Run `worldbench demo` first to create examples/demo_dataset.
+This example is for local development when real checkpoint outputs are not
+available. Generate the fixture first with:
+`python scripts/dev/make_synthetic_fixture.py`.
 """
 
 from rich.console import Console
 from rich.table import Table
 
-from worldbench.runners.comparator import compare_model_folders, save_comparison_artifacts
+from worldbench.runners.comparator import (
+    compare_model_folders,
+    save_comparison_artifacts,
+)
 
 
 console = Console()
@@ -17,13 +22,18 @@ metrics = comparison["metrics"]
 assert isinstance(overall, dict)
 assert isinstance(metrics, list)
 
-table = Table(title="WorldBench demo comparison")
+table = Table(title="WorldBench fixture comparison")
 table.add_column("Metric")
-table.add_column("good_model", justify="right")
-table.add_column("bad_model", justify="right")
+table.add_column("fixture_a", justify="right")
+table.add_column("fixture_b", justify="right")
 table.add_column("Delta", justify="right")
 
-table.add_row("Overall", f"{float(overall['score_a']):.1f}", f"{float(overall['score_b']):.1f}", f"{float(overall['delta']):+.1f}")
+table.add_row(
+    "Composite Score",
+    f"{float(overall['score_a']):.1f}",
+    f"{float(overall['score_b']):.1f}",
+    f"{float(overall['delta']):+.1f}",
+)
 for metric in metrics:
     table.add_row(
         str(metric["label"]),

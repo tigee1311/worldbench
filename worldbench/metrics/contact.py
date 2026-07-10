@@ -8,7 +8,14 @@ import numpy as np
 
 from worldbench.dataset import Episode
 from worldbench.schemas import MetricResult
-from worldbench.utils import clamp, detect_object_centroid, detect_robot_centroid, load_rgb, rollout_supports_synthetic_tracking, vector_norm
+from worldbench.utils import (
+    clamp,
+    detect_object_centroid,
+    detect_robot_centroid,
+    load_rgb,
+    rollout_supports_synthetic_tracking,
+    vector_norm,
+)
 
 
 class ContactRealismMetric:
@@ -16,7 +23,9 @@ class ContactRealismMetric:
 
     name = "contact_realism"
 
-    def __init__(self, contact_threshold_px: float = 23.0, motion_threshold_px: float = 3.0) -> None:
+    def __init__(
+        self, contact_threshold_px: float = 23.0, motion_threshold_px: float = 3.0
+    ) -> None:
         self.contact_threshold_px = contact_threshold_px
         self.motion_threshold_px = motion_threshold_px
 
@@ -27,7 +36,9 @@ class ContactRealismMetric:
                 score=None,
                 status="unsupported",
                 reason="Reliable robot and object tracking are unavailable for this rollout.",
-                issues=["Reliable robot and object tracking are unavailable for this rollout."],
+                issues=[
+                    "Reliable robot and object tracking are unavailable for this rollout."
+                ],
             )
         if len(prediction_frames) < 2:
             return MetricResult(
@@ -52,7 +63,9 @@ class ContactRealismMetric:
                 score=None,
                 status="unsupported",
                 reason="Reliable robot and object tracking are unavailable for this rollout.",
-                issues=["Reliable robot and object tracking are unavailable for this rollout."],
+                issues=[
+                    "Reliable robot and object tracking are unavailable for this rollout."
+                ],
             )
 
         for idx in range(1, len(images)):
@@ -60,11 +73,18 @@ class ContactRealismMetric:
                 distances.append(None)
                 object_motion.append(0.0)
                 continue
-            distance = vector_norm(robot[idx - 1][0] - obj[idx - 1][0], robot[idx - 1][1] - obj[idx - 1][1])
+            distance = vector_norm(
+                robot[idx - 1][0] - obj[idx - 1][0], robot[idx - 1][1] - obj[idx - 1][1]
+            )
             distances.append(distance)
-            moved = vector_norm(obj[idx][0] - first_object[0], obj[idx][1] - first_object[1])
+            moved = vector_norm(
+                obj[idx][0] - first_object[0], obj[idx][1] - first_object[1]
+            )
             object_motion.append(moved)
-            if distance > self.contact_threshold_px and moved > self.motion_threshold_px:
+            if (
+                distance > self.contact_threshold_px
+                and moved > self.motion_threshold_px
+            ):
                 premature.append(idx)
 
         contact_like_frames = [
@@ -78,27 +98,40 @@ class ContactRealismMetric:
             if motion > self.motion_threshold_px
         ]
         first_contact_frame = contact_like_frames[0] if contact_like_frames else None
-        first_object_motion_frame = object_motion_frames[0] if object_motion_frames else None
-        moved_before_contact = (
-            first_object_motion_frame is not None
-            and (first_contact_frame is None or first_object_motion_frame < first_contact_frame)
+        first_object_motion_frame = (
+            object_motion_frames[0] if object_motion_frames else None
+        )
+        moved_before_contact = first_object_motion_frame is not None and (
+            first_contact_frame is None
+            or first_object_motion_frame < first_contact_frame
         )
         penalty = min(85.0, len(premature) * 22.0)
-        missing_penalty = 15.0 if not contact_like_frames and max(object_motion, default=0.0) > self.motion_threshold_px else 0.0
+        missing_penalty = (
+            15.0
+            if not contact_like_frames
+            and max(object_motion, default=0.0) > self.motion_threshold_px
+            else 0.0
+        )
         score = clamp(100.0 - penalty - missing_penalty)
 
         issues = []
         if premature:
-            issues.append(f"Object moved before contact in predicted frame(s): {premature[:8]}.")
+            issues.append(
+                f"Object moved before contact in predicted frame(s): {premature[:8]}."
+            )
             if first_object_motion_frame is not None:
                 if first_contact_frame is None:
-                    issues.append(f"Object began moving at frame {first_object_motion_frame}; no contact was detected.")
+                    issues.append(
+                        f"Object began moving at frame {first_object_motion_frame}; no contact was detected."
+                    )
                 else:
                     issues.append(
                         f"Object began moving at frame {first_object_motion_frame}; estimated contact occurred at frame {first_contact_frame}."
                     )
         if missing_penalty:
-            issues.append("Object motion occurred without any detected robot/object contact.")
+            issues.append(
+                "Object motion occurred without any detected robot/object contact."
+            )
 
         return MetricResult(
             name=self.name,
@@ -112,7 +145,9 @@ class ContactRealismMetric:
                 "first_object_motion_frame": first_object_motion_frame,
                 "moved_before_contact": moved_before_contact,
                 "contact_threshold_px": self.contact_threshold_px,
-                "max_object_motion_px": float(np.max(object_motion)) if object_motion else 0.0,
+                "max_object_motion_px": float(np.max(object_motion))
+                if object_motion
+                else 0.0,
             },
             issues=issues,
         )

@@ -8,7 +8,12 @@ import numpy as np
 
 from worldbench.dataset import Episode
 from worldbench.schemas import MetricResult
-from worldbench.utils import clamp, load_rgb, object_area, rollout_supports_synthetic_tracking
+from worldbench.utils import (
+    clamp,
+    load_rgb,
+    object_area,
+    rollout_supports_synthetic_tracking,
+)
 
 
 class ObjectPermanenceMetric:
@@ -42,7 +47,11 @@ class ObjectPermanenceMetric:
                 score=None,
                 status="unsupported",
                 reason="Reliable object tracking is unavailable for this rollout.",
-                details={"visible_frames": 0, "total_frames": len(areas), "areas": areas},
+                details={
+                    "visible_frames": 0,
+                    "total_frames": len(areas),
+                    "areas": areas,
+                },
                 issues=["Reliable object tracking is unavailable for this rollout."],
             )
 

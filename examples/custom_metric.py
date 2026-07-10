@@ -1,6 +1,7 @@
 """Example custom metric for WorldBench.
 
-Run `worldbench demo` first to create examples/demo_dataset.
+This example uses the deterministic development fixture. Generate it first with:
+`python scripts/dev/make_synthetic_fixture.py`.
 """
 
 from pathlib import Path
@@ -21,21 +22,32 @@ class CubeVisibilityMetric:
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
         del episode
         if not prediction_frames:
-            return MetricResult(name=self.name, score=0.0, issues=["No prediction frames found."])
+            return MetricResult(
+                name=self.name, score=0.0, issues=["No prediction frames found."]
+            )
 
         areas = [object_area(load_rgb(path)) for path in prediction_frames]
         visible_ratio = float(np.mean([area > 50 for area in areas]))
         score = visible_ratio * 100.0
-        issues = [] if score > 90 else ["Cube was missing or too small in multiple predicted frames."]
+        issues = (
+            []
+            if score > 90
+            else ["Cube was missing or too small in multiple predicted frames."]
+        )
         return MetricResult(
             name=self.name,
             score=score,
-            details={"visible_ratio": visible_ratio, "frame_count": len(prediction_frames)},
+            details={
+                "visible_ratio": visible_ratio,
+                "frame_count": len(prediction_frames),
+            },
             issues=issues,
         )
 
 
-runner = EvaluationRunner("examples/demo_dataset", predictions="examples/demo_dataset/bad_model")
+runner = EvaluationRunner(
+    "examples/demo_dataset", predictions="examples/demo_dataset/bad_model"
+)
 result = runner.run(
     metrics=[CubeVisibilityMetric()],
     weights={"cube_visibility": 1.0},

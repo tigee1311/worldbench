@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ActionRecord(BaseModel):
@@ -113,19 +113,48 @@ class EpisodeResult(BaseModel):
 class EvaluationResult(BaseModel):
     """Serializable result object returned by WorldBench evaluations."""
 
-    schema_version: str = "1"
+    schema_version: str = "2"
     result_type: str = "evaluation"
     dataset_path: str
     predictions_path: str | None = None
     created_at: str
     score: float = Field(ge=0.0, le=100.0)
+    composite_score: float | None = Field(default=None, ge=0.0, le=100.0)
     metrics: dict[str, MetricResult] = Field(default_factory=dict)
     episodes: list[EpisodeResult] = Field(default_factory=list)
     horizon: dict[str, Any] = Field(default_factory=dict)
     provenance: dict[str, Any] = Field(default_factory=dict)
     weights: dict[str, float] = Field(default_factory=dict)
+    configured_weights: dict[str, float] = Field(default_factory=dict)
+    enabled_metrics: list[str] = Field(default_factory=list)
+    required_metrics: list[str] = Field(default_factory=list)
+    effective_normalized_weights: dict[str, float] = Field(default_factory=dict)
+    coverage: dict[str, Any] = Field(default_factory=dict)
+    configuration: dict[str, Any] = Field(default_factory=dict)
+    configuration_hash: str | None = None
+    worldbench_version: str | None = None
     issues: list[str] = Field(default_factory=list)
     main_failure: str = "No dominant failure detected."
+
+    @model_validator(mode="after")
+    def populate_compatibility_fields(self) -> "EvaluationResult":
+        if self.composite_score is None:
+            self.composite_score = self.score
+        if not self.configured_weights:
+            self.configured_weights = dict(self.weights)
+        if not self.enabled_metrics:
+            self.enabled_metrics = list(self.metrics)
+        if not self.effective_normalized_weights:
+            available = [
+                name for name, metric in self.metrics.items() if metric.is_available
+            ]
+            total = sum(self.configured_weights.get(name, 0.0) for name in available)
+            if total:
+                self.effective_normalized_weights = {
+                    name: self.configured_weights.get(name, 0.0) / total
+                    for name in available
+                }
+        return self
 
     @property
     def overall_score(self) -> float:
@@ -158,7 +187,16 @@ class EvaluationResult(BaseModel):
 
         console = Console()
         console.rule("[bold]WorldBench Evaluation Report[/bold]")
-        console.print(f"[bold]Overall Score:[/bold] {self.score:.1f}/100")
+        console.print(f"[bold]Composite Score:[/bold] {self.score:.2f}/100")
+        if self.coverage:
+            console.print(
+                f"[bold]Metric coverage:[/bold] {self.coverage.get('available_metric_count', 0)} of "
+                f"{self.coverage.get('configured_metric_count', 0)} configured metrics"
+            )
+            console.print(
+                f"[bold]Configured weight coverage:[/bold] "
+                f"{float(self.coverage.get('configured_weight_coverage', 0.0)):.0%}"
+            )
         console.print(f"[bold]Main failure:[/bold] {self.main_failure}")
 
         table = Table(title="Metric Scores", show_lines=False)
@@ -166,9 +204,17 @@ class EvaluationResult(BaseModel):
         table.add_column("Score", justify="right")
         table.add_column("Weight", justify="right")
         for name, result in self.metrics.items():
-            weight = "N/A" if not result.is_available else f"{self.weights.get(name, 0):.0%}"
+            weight = (
+                "N/A"
+                if not result.is_available
+                else f"{self.effective_normalized_weights.get(name, 0):.0%}"
+            )
             table.add_row(name.replace("_", " ").title(), result.display_score, weight)
         console.print(table)
-        unavailable = [f"{name.replace('_', ' ').title()}: {result.reason}" for name, result in self.metrics.items() if not result.is_available and result.reason]
+        unavailable = [
+            f"{name.replace('_', ' ').title()}: {result.reason}"
+            for name, result in self.metrics.items()
+            if not result.is_available and result.reason
+        ]
         if unavailable:
             console.print("\n".join(unavailable))

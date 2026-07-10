@@ -1,8 +1,8 @@
 # Release Checklist
 
-WorldBench 0.3.0 turns robotics world-model evaluation into checkpoint regression testing.
+WorldBench 0.4.0 sharpens WorldBench around checkpoint regression testing with metric-coverage-safe gating and explicit configuration.
 
-## 0.3.0 Scope
+## 0.4.0 Scope
 
 - Direct video-pair evaluation with `worldbench eval-video`
 - Multi-episode checkpoint evaluation with `worldbench eval-batch`
@@ -14,6 +14,10 @@ WorldBench 0.3.0 turns robotics world-model evaluation into checkpoint regressio
 - Batch aggregation across identical episode suites
 - Checkpoint compatibility validation before gating
 - Real NanoWM-B/2 50k vs 300k checkpoint validation on 10 fixed RT-1 / Fractal episodes
+- Composite Score naming with metric coverage, configured-weight coverage, and effective normalized weights
+- `worldbench.yml` configuration for enabled metrics, required metrics, weights, and gate policy
+- Stricter gate checks for metric sets, weights, config hashes, episode identities, coverage, schema versions, and skip-context settings
+- Deprecated synthetic demo commands hidden from the primary CLI surface
 
 ## Non-Goals
 
@@ -25,6 +29,7 @@ WorldBench 0.3.0 turns robotics world-model evaluation into checkpoint regressio
 - ROS support
 - Hosted services
 - Statistical hypothesis testing
+- A standardized public robotics benchmark
 
 ## Pre-Release Checks
 
@@ -41,15 +46,17 @@ twine check dist/*
 
 Confirm:
 
-- `pyproject.toml` and `worldbench.__version__` both report `0.3.0`.
+- `pyproject.toml` and `worldbench.__version__` both report `0.4.0`.
 - README links and images render on GitHub.
 - Compact checkpoint-validation artifact links exist.
 - No generated videos, PNG frame sequences, ZIP archives, virtual environments, model checkpoints, dataset shards, build output, or temporary run directories are staged.
-- `v0.2.0` tag and release remain untouched.
+- Historical tags and releases remain untouched.
+- `docs/MIGRATION_V0_4.md` and `docs/release_notes_0.4.0.md` describe user-visible changes.
+- The real NanoWM checkpoint artifacts still report 85.67 -> 87.28, +1.61, 9 improved, 1 regressed.
 
 ## Local Wheel Smoke Test
 
-Install `dist/worldbench-0.3.0-py3-none-any.whl` in a fresh environment and verify:
+Install `dist/worldbench-0.4.0-py3-none-any.whl` in a fresh environment and verify:
 
 ```bash
 worldbench --help
@@ -62,7 +69,7 @@ Also verify:
 
 ```python
 import worldbench
-assert worldbench.__version__ == "0.3.0"
+assert worldbench.__version__ == "0.4.0"
 ```
 
 Run one offline checkpoint-regression smoke test that exercises `eval-batch` and `gate` for both PASS and valid-regression FAIL.
@@ -72,25 +79,25 @@ Run one offline checkpoint-regression smoke test that exercises `eval-batch` and
 Suggested release title:
 
 ```text
-WorldBench v0.3.0 - Checkpoint regression testing
+WorldBench v0.4.0 - Metric-coverage-safe checkpoint gates
 ```
 
 Suggested release summary:
 
 ```text
-WorldBench v0.3.0 turns robotics world-model evaluation into checkpoint regression testing.
+WorldBench v0.4.0 makes checkpoint regression testing more transparent and harder to misuse.
 
-Teams can now evaluate identical episode suites for baseline and candidate checkpoints, compare aggregate and per-horizon behavior, inspect episode-level regressions, and fail CI when configured thresholds are exceeded.
+Teams can evaluate identical episode suites for baseline and candidate checkpoints, inspect episode-level regressions, and fail CI when configured thresholds are exceeded. Results now report Composite Score coverage explicitly, store the effective WorldBench configuration, and make the gate fail or warn when runs were produced under incomparable conditions.
 
 Real validation:
 - NanoWM-B/2 50k vs 300k
 - 10 fixed RT-1 episodes
-- Overall: 85.67 -> 87.28
+- Composite Score: 85.67 -> 87.28
 - Change: +1.61
 - 9 episodes improved
 - 1 small regression detected
-- Strict gate: PASS
-- Engineering gate: PASS
+- Gate: PASS
+- Metrics available in this proof: Visual Similarity and Temporal Stability
 
 This validation is a fixed 10-episode proof, not a standardized leaderboard result or universal model ranking.
 ```
@@ -98,8 +105,8 @@ This validation is a fixed 10-episode proof, not a standardized leaderboard resu
 Attach:
 
 ```text
-worldbench-0.3.0.tar.gz
-worldbench-0.3.0-py3-none-any.whl
+worldbench-0.4.0.tar.gz
+worldbench-0.4.0-py3-none-any.whl
 ```
 
 ## Publishing
@@ -110,7 +117,7 @@ Workflow inputs:
 
 ```text
 target: testpypi or pypi
-tag: v0.3.0
+tag: v0.4.0
 ```
 
 Publish to TestPyPI first, verify a fresh TestPyPI install, then publish to production PyPI and verify a fresh production install.

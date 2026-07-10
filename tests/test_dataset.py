@@ -23,4 +23,3 @@ def test_load_dataset_reads_episodes(tmp_path: Path) -> None:
     assert dataset.episodes[0].actions
     assert dataset.episodes[0].states
     assert dataset.episodes[0].frames
-

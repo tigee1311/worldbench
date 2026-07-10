@@ -18,6 +18,7 @@ class LocalBackend:
     def validate(self, dataset_path: str | Path) -> ValidationReport:
         return validate_dataset(dataset_path)
 
-    def evaluate(self, dataset_path: str | Path, predictions: str | Path | None = None) -> EvaluationResult:
+    def evaluate(
+        self, dataset_path: str | Path, predictions: str | Path | None = None
+    ) -> EvaluationResult:
         return EvaluationRunner(dataset_path, predictions=predictions).run()
-
