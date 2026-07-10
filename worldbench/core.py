@@ -63,15 +63,23 @@ class WorldBench:
     """SDK entry point for robotics world-model evaluation."""
 
     def __init__(self, dataset: str | Path | RolloutDataset) -> None:
-        self.dataset = load_dataset(dataset) if isinstance(dataset, (str, Path)) else dataset
+        self.dataset = (
+            load_dataset(dataset) if isinstance(dataset, (str, Path)) else dataset
+        )
 
     def evaluate(
         self,
         predictions: str | Path | WorldModelRun | None = None,
         metrics: list[EvaluatorMetric] | None = None,
     ) -> EvaluationResult:
-        prediction_path = predictions.predictions if isinstance(predictions, WorldModelRun) else predictions
-        return EvaluationRunner(self.dataset, predictions=prediction_path).run(metrics=metrics)
+        prediction_path = (
+            predictions.predictions
+            if isinstance(predictions, WorldModelRun)
+            else predictions
+        )
+        return EvaluationRunner(self.dataset, predictions=prediction_path).run(
+            metrics=metrics
+        )
 
     def run(
         self,
@@ -81,8 +89,9 @@ class WorldBench:
         return self.evaluate(predictions=predictions, metrics=metrics)
 
 
-def evaluate(dataset: str | Path | RolloutDataset, predictions: str | Path | None = None) -> EvaluationResult:
+def evaluate(
+    dataset: str | Path | RolloutDataset, predictions: str | Path | None = None
+) -> EvaluationResult:
     """Convenience function for one-line evaluations."""
 
     return WorldBench(dataset).evaluate(predictions=predictions)
-

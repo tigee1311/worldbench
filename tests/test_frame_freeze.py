@@ -13,17 +13,23 @@ def _make_source_frames(root: Path, count: int = 6) -> Path:
     frames = root
     frames.mkdir(parents=True, exist_ok=True)
     for idx in range(count):
-        image = Image.new("RGB", (8, 8), (idx * 30 % 255, idx * 50 % 255, idx * 70 % 255))
+        image = Image.new(
+            "RGB", (8, 8), (idx * 30 % 255, idx * 50 % 255, idx * 70 % 255)
+        )
         image.save(frames / f"{idx:06d}.png")
     return frames
 
 
 def _load_rgb(path: Path) -> list[tuple[int, int, int]]:
     with Image.open(path) as image:
-        return [tuple(pixel) for pixel in np.asarray(image.convert("RGB")).reshape(-1, 3)]
+        return [
+            tuple(pixel) for pixel in np.asarray(image.convert("RGB")).reshape(-1, 3)
+        ]
 
 
-def test_freeze_frames_zero_percent_preserves_source_and_filenames(tmp_path: Path) -> None:
+def test_freeze_frames_zero_percent_preserves_source_and_filenames(
+    tmp_path: Path,
+) -> None:
     source = _make_source_frames(tmp_path / "source" / "frames")
     original = {path.name: path.read_bytes() for path in source.iterdir()}
 
@@ -32,7 +38,10 @@ def test_freeze_frames_zero_percent_preserves_source_and_filenames(tmp_path: Pat
     assert result.source_frames == 6
     assert result.frozen_frames == 0
     assert [path.name for path in result.output_paths] == sorted(original)
-    assert all((tmp_path / "out" / name).read_bytes() == data for name, data in original.items())
+    assert all(
+        (tmp_path / "out" / name).read_bytes() == data
+        for name, data in original.items()
+    )
     assert {path.name: path.read_bytes() for path in source.iterdir()} == original
 
 
@@ -55,8 +64,12 @@ def test_freeze_frames_deterministic_and_constant_length(tmp_path: Path) -> None
     second = freeze_frames(source, tmp_path / "second", severity=0.3, seed=7)
 
     assert len(first.output_paths) == len(second.output_paths) == 6
-    assert [path.name for path in first.output_paths] == [path.name for path in second.output_paths]
-    assert [path.read_bytes() for path in first.output_paths] == [path.read_bytes() for path in second.output_paths]
+    assert [path.name for path in first.output_paths] == [
+        path.name for path in second.output_paths
+    ]
+    assert [path.read_bytes() for path in first.output_paths] == [
+        path.read_bytes() for path in second.output_paths
+    ]
 
 
 def test_freeze_frames_invalid_severity_raises(tmp_path: Path) -> None:
@@ -71,7 +84,11 @@ def test_freeze_frames_invalid_severity_raises(tmp_path: Path) -> None:
 def test_freeze_rollout_predictions_writes_prediction_layout(tmp_path: Path) -> None:
     source = tmp_path / "dataset"
     _make_source_frames(source / "episode_000000" / "frames")
-    results = freeze_rollout_predictions(source, tmp_path / "predictions", severity=0.2, seed=3)
+    results = freeze_rollout_predictions(
+        source, tmp_path / "predictions", severity=0.2, seed=3
+    )
 
     assert len(results) == 1
-    assert (tmp_path / "predictions" / "episode_000000" / "predictions" / "000000.png").exists()
+    assert (
+        tmp_path / "predictions" / "episode_000000" / "predictions" / "000000.png"
+    ).exists()

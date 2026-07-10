@@ -20,7 +20,9 @@ class VisualSimilarityMetric:
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
         pairs = load_aligned_pairs(episode.frames, prediction_frames)
         if not pairs:
-            return MetricResult(name=self.name, score=0.0, issues=["No aligned frame pairs available."])
+            return MetricResult(
+                name=self.name, score=0.0, issues=["No aligned frame pairs available."]
+            )
 
         mses: list[float] = []
         psnrs: list[float] = []
@@ -43,7 +45,9 @@ class VisualSimilarityMetric:
         if score < 60:
             issues.append("Predicted frames diverge strongly from ground truth.")
         elif mean_ssim < 0.75:
-            issues.append("Predicted frames preserve broad color statistics but lose structural similarity.")
+            issues.append(
+                "Predicted frames preserve broad color statistics but lose structural similarity."
+            )
 
         return MetricResult(
             name=self.name,
@@ -73,7 +77,14 @@ def _ssim(gt: np.ndarray, pred: np.ndarray) -> float:
     try:
         from skimage.metrics import structural_similarity
 
-        return float(structural_similarity(gt.astype(np.uint8), pred.astype(np.uint8), channel_axis=2, data_range=255))
+        return float(
+            structural_similarity(
+                gt.astype(np.uint8),
+                pred.astype(np.uint8),
+                channel_axis=2,
+                data_range=255,
+            )
+        )
     except Exception:  # noqa: BLE001
         return _fallback_ssim(gt, pred)
 

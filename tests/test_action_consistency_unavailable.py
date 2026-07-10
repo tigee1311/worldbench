@@ -9,7 +9,13 @@ from worldbench.dataset import Episode
 from worldbench.metrics.action_consistency import ActionConsistencyMetric
 from worldbench.runners.evaluator import weighted_score
 from worldbench.runners.reporter import generate_markdown_report
-from worldbench.schemas import ActionRecord, EpisodeMetadata, EpisodeResult, EvaluationResult, MetricResult
+from worldbench.schemas import (
+    ActionRecord,
+    EpisodeMetadata,
+    EpisodeResult,
+    EvaluationResult,
+    MetricResult,
+)
 
 
 def _make_motion_frames(tmp_path: Path) -> list[Path]:
@@ -83,7 +89,10 @@ def test_arbitrary_numeric_action_vector_is_unsupported(tmp_path: Path) -> None:
 
     assert not result.is_available
     assert result.score is None
-    assert result.reason == "unsupported raw numeric action vectors require an action adapter."
+    assert (
+        result.reason
+        == "unsupported raw numeric action vectors require an action adapter."
+    )
 
 
 def test_unavailable_metric_excluded_from_overall_score() -> None:
@@ -141,7 +150,9 @@ def test_report_shows_na_for_unsupported_metrics(capsys) -> None:
                 episode="episode_001",
                 score=71.1,
                 metrics={
-                    "visual_similarity": MetricResult(name="visual_similarity", score=80.0),
+                    "visual_similarity": MetricResult(
+                        name="visual_similarity", score=80.0
+                    ),
                     "action_consistency": MetricResult(
                         name="action_consistency",
                         score=None,
@@ -160,4 +171,6 @@ def test_report_shows_na_for_unsupported_metrics(capsys) -> None:
 
     assert "N/A" in output
     assert "N/A" in markdown
-    assert "unsupported raw numeric action vectors require an action adapter." in markdown
+    assert (
+        "unsupported raw numeric action vectors require an action adapter." in markdown
+    )

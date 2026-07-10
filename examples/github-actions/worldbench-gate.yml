@@ -1,0 +1,60 @@
+name: WorldBench checkpoint gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checkpoint-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install WorldBench
+        run: python -m pip install "worldbench[video]"
+
+      - name: Retrieve approved baseline
+        run: |
+          # Replace this with an authenticated download from your immutable
+          # artifact store when the baseline is not committed to the repository.
+          test -f artifacts/worldbench/approved-baseline.json
+
+      - name: Generate candidate predictions
+        run: |
+          # Run your model-specific inference here. WorldBench does not provide
+          # a generic inference command. Produce candidate_predictions/*.mp4
+          # matching the relative paths under eval_suite/.
+          test -d candidate_predictions
+
+      - name: Evaluate candidate checkpoint
+        run: |
+          worldbench eval-batch \
+            --ground-truth eval_suite \
+            --predictions candidate_predictions \
+            --name candidate \
+            --output candidate.json \
+            --config worldbench.yml
+
+      - name: Gate candidate checkpoint
+        run: |
+          worldbench gate \
+            --baseline artifacts/worldbench/approved-baseline.json \
+            --candidate candidate.json \
+            --config worldbench.yml
+
+      - name: Upload WorldBench evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldbench-${{ github.sha }}
+          path: |
+            candidate.json
+            .worldbench/batches/**/batch.json
+            .worldbench/batches/**/report.md
+            .worldbench/gates/**/gate.json
+            .worldbench/gates/**/gate.md
+          retention-days: 30

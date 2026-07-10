@@ -32,7 +32,9 @@ def test_eval_video_valid_pair_saves_future_only_result(tmp_path: Path) -> None:
     assert result.metrics["action_consistency"].status == "unsupported"
     assert "t+1" in result.horizon
     assert result.horizon["t+1"]["metrics"]["visual_similarity"]["mean"] > 80
-    assert result.episodes[0].horizon["t+1"]["metrics"]["visual_similarity"]["score"] > 80
+    assert (
+        result.episodes[0].horizon["t+1"]["metrics"]["visual_similarity"]["score"] > 80
+    )
     assert "action_consistency" not in result.horizon["t+1"]["metrics"]
     assert "action_consistency" in result.horizon["t+1"]["unavailable_metrics"]
 
@@ -62,13 +64,22 @@ def test_eval_video_cli_saves_normal_result_structure(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     saved = read_json(output_root / "latest" / "result.json")
     assert saved["result_type"] == "evaluation"
+    assert saved["schema_version"] == "2"
+    assert saved["composite_score"] == saved["score"]
+    assert saved["coverage"]["available_metric_count"] == 2
+    assert saved["coverage"]["configured_metric_count"] == 5
+    assert saved["coverage"]["configured_weight_coverage"] == pytest.approx(0.45)
     assert saved["provenance"]["evaluated_frame_count"] == 4
     assert saved["episodes"][0]["horizon"]["t+1"]["sample_count"] == 1
     assert "Saved run directory" in result.output
+    assert "Composite Score" in result.output
+    assert "Metric coverage" in result.output
 
 
 @pytest.mark.parametrize("skip_context", [-1])
-def test_eval_video_rejects_negative_skip_context(tmp_path: Path, skip_context: int) -> None:
+def test_eval_video_rejects_negative_skip_context(
+    tmp_path: Path, skip_context: int
+) -> None:
     gt = tmp_path / "gt.mp4"
     pred = tmp_path / "pred.mp4"
     _write_video(gt, _frames(4))
@@ -150,16 +161,41 @@ def test_eval_batch_pairs_by_relative_path_and_aggregates_available_values(
     assert payload["episode_ids"] == ["episode_001.mp4", "nested/episode_002.mp4"]
     assert payload["episode_count"] == 2
     scores = [episode["score"] for episode in payload["episodes"]]
-    assert payload["aggregate"]["overall"]["mean"] == pytest.approx(float(np.mean(scores)))
-    assert payload["aggregate"]["overall"]["median"] == pytest.approx(float(np.median(scores)))
-    assert payload["aggregate"]["overall"]["std"] == pytest.approx(float(np.std(scores)))
-    assert payload["aggregate"]["overall"]["p10"] == pytest.approx(float(np.percentile(scores, 10)))
-    assert payload["aggregate"]["overall"]["p25"] == pytest.approx(float(np.percentile(scores, 25)))
-    assert payload["aggregate"]["overall"]["p50"] == pytest.approx(float(np.percentile(scores, 50)))
-    assert payload["aggregate"]["overall"]["p75"] == pytest.approx(float(np.percentile(scores, 75)))
-    assert payload["aggregate"]["overall"]["p90"] == pytest.approx(float(np.percentile(scores, 90)))
-    assert payload["aggregate"]["metrics"]["action_consistency"]["status"] == "unsupported"
+    assert payload["aggregate"]["overall"]["mean"] == pytest.approx(
+        float(np.mean(scores))
+    )
+    assert payload["aggregate"]["overall"]["median"] == pytest.approx(
+        float(np.median(scores))
+    )
+    assert payload["aggregate"]["overall"]["std"] == pytest.approx(
+        float(np.std(scores))
+    )
+    assert payload["aggregate"]["overall"]["p10"] == pytest.approx(
+        float(np.percentile(scores, 10))
+    )
+    assert payload["aggregate"]["overall"]["p25"] == pytest.approx(
+        float(np.percentile(scores, 25))
+    )
+    assert payload["aggregate"]["overall"]["p50"] == pytest.approx(
+        float(np.percentile(scores, 50))
+    )
+    assert payload["aggregate"]["overall"]["p75"] == pytest.approx(
+        float(np.percentile(scores, 75))
+    )
+    assert payload["aggregate"]["overall"]["p90"] == pytest.approx(
+        float(np.percentile(scores, 90))
+    )
+    assert (
+        payload["aggregate"]["metrics"]["action_consistency"]["status"] == "unsupported"
+    )
     assert payload["aggregate"]["metrics"]["visual_similarity"]["available_count"] == 2
+    assert payload["aggregate"]["composite_score"] == payload["aggregate"]["overall"]
+    assert payload["coverage"]["available_metric_count"] == 2
+    assert payload["effective_normalized_weights"] == pytest.approx(
+        {"visual_similarity": 5 / 9, "temporal_stability": 4 / 9}
+    )
+    assert payload["configuration_hash"]
+    assert payload["dataset_identifier"].startswith("sha256:")
     assert payload["horizon"]["t+1"]["metrics"]["visual_similarity"]["count"] == 2
     assert payload["horizon"]["t+3"]["metrics"]["visual_similarity"]["count"] == 1
     assert paths["json"].exists()
@@ -194,7 +230,9 @@ def test_gate_passes_when_candidate_improves(tmp_path: Path) -> None:
     assert comparison["status"] == "PASS"
     assert comparison["overall"]["change"] > 0
     assert comparison["episodes"]["improved_count"] == 2
-    assert not any(item["metric"] == "action_consistency" for item in comparison["metrics"])
+    assert not any(
+        item["metric"] == "action_consistency" for item in comparison["metrics"]
+    )
 
 
 def test_gate_cli_exit_zero_on_pass(tmp_path: Path) -> None:

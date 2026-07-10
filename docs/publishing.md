@@ -11,11 +11,11 @@ python -m build
 twine check dist/*
 ```
 
-For v0.3.0 the clean build should produce exactly:
+For v0.4.0 the clean build should produce exactly:
 
 ```text
-dist/worldbench-0.3.0.tar.gz
-dist/worldbench-0.3.0-py3-none-any.whl
+dist/worldbench-0.4.0.tar.gz
+dist/worldbench-0.4.0-py3-none-any.whl
 ```
 
 ## Local Wheel Smoke Test
@@ -24,14 +24,14 @@ dist/worldbench-0.3.0-py3-none-any.whl
 python -m venv /tmp/worldbench-wheel-test
 source /tmp/worldbench-wheel-test/bin/activate
 python -m pip install --upgrade pip
-python -m pip install dist/worldbench-0.3.0-py3-none-any.whl
+python -m pip install dist/worldbench-0.4.0-py3-none-any.whl
 worldbench --help
 worldbench eval-video --help
 worldbench eval-batch --help
 worldbench gate --help
 python - <<'PY'
 import worldbench
-assert worldbench.__version__ == "0.3.0"
+assert worldbench.__version__ == "0.4.0"
 PY
 deactivate
 ```
@@ -41,8 +41,8 @@ deactivate
 Create the GitHub release after CI passes and attach both files:
 
 ```text
-worldbench-0.3.0.tar.gz
-worldbench-0.3.0-py3-none-any.whl
+worldbench-0.4.0.tar.gz
+worldbench-0.4.0-py3-none-any.whl
 ```
 
 The `publish.yml` workflow downloads those release assets and publishes the exact attached distributions. Do not rebuild during publishing.
@@ -53,7 +53,7 @@ Use the `publish` workflow with:
 
 ```text
 target: testpypi
-tag: v0.3.0
+tag: v0.4.0
 ```
 
 Then verify installation in a fresh environment using TestPyPI for WorldBench and PyPI for dependencies:
@@ -65,7 +65,7 @@ python -m pip install --upgrade pip
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple \
-  "worldbench[video]==0.3.0"
+  "worldbench[video]==0.4.0"
 worldbench --help
 worldbench eval-video --help
 worldbench eval-batch --help
@@ -81,7 +81,7 @@ Use the `publish` workflow with:
 
 ```text
 target: pypi
-tag: v0.3.0
+tag: v0.4.0
 ```
 
 After publishing:
@@ -90,7 +90,7 @@ After publishing:
 python -m venv /tmp/worldbench-pypi-test
 source /tmp/worldbench-pypi-test/bin/activate
 python -m pip install --upgrade pip
-python -m pip install "worldbench[video]==0.3.0"
+python -m pip install "worldbench[video]==0.4.0"
 worldbench --help
 worldbench eval-video --help
 worldbench eval-batch --help

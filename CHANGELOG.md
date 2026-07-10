@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.0 (unreleased)
+
+### Added
+
+- `worldbench.yml` metric profiles and gate policy
+- Schema-v2 composite-score coverage, configuration, version, and dataset identity metadata
+- Required-metric, minimum-count, minimum-coverage, weight-coverage, episode-regression, and strict-configuration gate checks
+- Complete GitHub Actions checkpoint-gate example and focused operator documentation
+
+### Changed
+
+- Renamed user-facing Overall Score to Composite Score; legacy JSON fields remain readable
+- Made the real NanoWM 50k-vs-300k checkpoint comparison the primary public proof
+- Tightened gate behavior so weaker or materially different evaluations cannot silently pass
+- Reduced public CLI help to production evaluation, gate, reporting, import, and validation workflows
+
+### Deprecated
+
+- Synthetic `demo` and `benchmark` commands and maintainer asset commands are hidden in 0.4 and planned for removal in 0.5
+
+### Validation
+
+- The committed NanoWM proof values remain unchanged: 85.67 to 87.28 (`+1.61`), 9 episodes improved, 1 regressed, gate PASS, with Visual Similarity and Temporal Stability only
+
 ## 0.3.0
 
 ### Added

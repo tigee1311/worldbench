@@ -2,6 +2,7 @@
 
 from worldbench.core import Metrics, WorldBench, WorldModelRun, evaluate, load_dataset
 from worldbench.schemas import EvaluationResult, MetricResult
+from worldbench.version import WORLD_BENCH_VERSION
 
 __all__ = [
     "EvaluationResult",
@@ -13,4 +14,4 @@ __all__ = [
     "load_dataset",
 ]
 
-__version__ = "0.3.0"
+__version__ = WORLD_BENCH_VERSION

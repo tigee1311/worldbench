@@ -8,18 +8,31 @@ from worldbench.dataset import validate_dataset
 from worldbench.utils import read_json
 
 
-def test_compare_models_command_saves_latest_artifacts(tmp_path: Path, monkeypatch) -> None:
+def test_cli_version_option() -> None:
+    result = CliRunner().invoke(app, ["--version"])
+
+    assert result.exit_code == 0
+    assert "worldbench, version 0.4.0" in result.output
+
+
+def test_compare_models_command_saves_latest_artifacts(
+    tmp_path: Path, monkeypatch
+) -> None:
     dataset_path = DemoBackend().create(tmp_path / "demo")
     monkeypatch.chdir(tmp_path)
 
-    result = CliRunner().invoke(app, ["compare", str(dataset_path), "--models", "good_model", "bad_model"])
+    result = CliRunner().invoke(
+        app, ["compare", str(dataset_path), "--models", "good_model", "bad_model"]
+    )
 
     assert result.exit_code == 0, result.output
     assert "good_model" in result.output
     assert "bad_model" in result.output
     assert "Largest gaps" in result.output
 
-    comparison_path = tmp_path / ".worldbench" / "comparisons" / "latest" / "comparison.json"
+    comparison_path = (
+        tmp_path / ".worldbench" / "comparisons" / "latest" / "comparison.json"
+    )
     report_path = tmp_path / ".worldbench" / "comparisons" / "latest" / "comparison.md"
     assert comparison_path.exists()
     assert report_path.exists()
@@ -33,7 +46,9 @@ def test_compare_models_command_saves_latest_artifacts(tmp_path: Path, monkeypat
 def test_import_lerobot_demo_command_creates_valid_dataset(tmp_path: Path) -> None:
     output_path = tmp_path / "lerobot_push_cube"
 
-    result = CliRunner().invoke(app, ["import-lerobot", "--demo", "--out", str(output_path)])
+    result = CliRunner().invoke(
+        app, ["import-lerobot", "--demo", "--out", str(output_path)]
+    )
 
     assert result.exit_code == 0, result.output
     assert "Native LeRobot import is available" in result.output
@@ -42,7 +57,9 @@ def test_import_lerobot_demo_command_creates_valid_dataset(tmp_path: Path) -> No
     assert validate_dataset(output_path).is_valid
 
 
-def test_benchmark_demo_command_saves_latest_artifacts(tmp_path: Path, monkeypatch) -> None:
+def test_benchmark_demo_command_saves_latest_artifacts(
+    tmp_path: Path, monkeypatch
+) -> None:
     monkeypatch.chdir(tmp_path)
 
     result = CliRunner().invoke(app, ["benchmark", "--demo"])
@@ -50,9 +67,13 @@ def test_benchmark_demo_command_saves_latest_artifacts(tmp_path: Path, monkeypat
     assert result.exit_code == 0, result.output
     assert "WorldBench Demo Benchmark" in result.output
     assert "good_model average" in result.output
-    assert (tmp_path / "benchmarks" / "push_cube" / "episode_001" / "frames" / "000.png").exists()
+    assert (
+        tmp_path / "benchmarks" / "push_cube" / "episode_001" / "frames" / "000.png"
+    ).exists()
 
-    benchmark_path = tmp_path / ".worldbench" / "benchmarks" / "latest" / "benchmark.json"
+    benchmark_path = (
+        tmp_path / ".worldbench" / "benchmarks" / "latest" / "benchmark.json"
+    )
     report_path = tmp_path / ".worldbench" / "benchmarks" / "latest" / "benchmark.md"
     assert benchmark_path.exists()
     assert report_path.exists()

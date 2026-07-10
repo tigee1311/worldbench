@@ -15,4 +15,45 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e ".[dev]"
-      - run: python -m pytest
+      - name: Unit and offline integration tests
+        run: python -m pytest
+      - name: Lint
+        run: ruff check worldbench tests
+      - name: Formatting check for 0.4 surfaces
+        run: >-
+          ruff format --check
+          worldbench/config.py worldbench/cli.py worldbench/schemas.py
+          worldbench/runners/evaluator.py worldbench/runners/video.py
+          worldbench/runners/regression.py worldbench/runners/reporter.py
+          worldbench/runners/comparator.py tests/test_checkpoint_regression.py
+          tests/test_config_gate.py
+
+  package-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip build
+      - run: python -m build
+      - name: Install wheel in clean virtual environment
+        run: |
+          python -m venv /tmp/worldbench-wheel
+          /tmp/worldbench-wheel/bin/python -m pip install dist/*.whl
+      - name: CLI smoke tests from built wheel
+        run: |
+          /tmp/worldbench-wheel/bin/worldbench --help
+          /tmp/worldbench-wheel/bin/worldbench eval-video --help
+          /tmp/worldbench-wheel/bin/worldbench eval-batch --help
+          /tmp/worldbench-wheel/bin/worldbench gate --help
+
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm run build
+        working-directory: website

@@ -89,7 +89,9 @@ def scramble_rollout_predictions(
 
     source_root = Path(source_dataset)
     if not source_root.is_dir():
-        raise FileNotFoundError(f"Source dataset directory does not exist: {source_root}")
+        raise FileNotFoundError(
+            f"Source dataset directory does not exist: {source_root}"
+        )
 
     destination_root = Path(output_root)
     if destination_root.exists() and overwrite:
@@ -100,7 +102,9 @@ def scramble_rollout_predictions(
 
     results: list[TemporalScrambleResult] = []
     for episode_dir in sorted(
-        path for path in source_root.iterdir() if path.is_dir() and path.name.startswith("episode_")
+        path
+        for path in source_root.iterdir()
+        if path.is_dir() and path.name.startswith("episode_")
     ):
         frames_dir = episode_dir / "frames"
         predictions_dir = destination_root / episode_dir.name / "predictions"
@@ -121,7 +125,9 @@ def _scrambled_source_order(frame_count: int, severity: float, seed: int) -> lis
         return source_order
 
     candidate_windows = list(range(1, max(1, frame_count - 2) + 1, 3))
-    candidate_windows = [start for start in candidate_windows if start + 2 < frame_count]
+    candidate_windows = [
+        start for start in candidate_windows if start + 2 < frame_count
+    ]
     target_windows = round((frame_count - 1) * severity / 3.0)
     target_windows = max(0, min(len(candidate_windows), target_windows))
     if target_windows == 0:

@@ -42,8 +42,12 @@ def run_benchmark_suite(benchmark_root: str | Path) -> dict[str, object]:
     failure_scores: dict[str, list[float]] = {}
 
     for scenario_dir in scenario_dirs:
-        good = EvaluationRunner(scenario_dir, predictions=scenario_dir / "good_model").run()
-        bad = EvaluationRunner(scenario_dir, predictions=scenario_dir / "bad_model").run()
+        good = EvaluationRunner(
+            scenario_dir, predictions=scenario_dir / "good_model"
+        ).run()
+        bad = EvaluationRunner(
+            scenario_dir, predictions=scenario_dir / "bad_model"
+        ).run()
         good_scores.append(good.score)
         bad_scores.append(bad.score)
         for name, metric in bad.metrics.items():
@@ -65,13 +69,16 @@ def run_benchmark_suite(benchmark_root: str | Path) -> dict[str, object]:
         "scenario_count": len(scenarios),
         "good_model_average": sum(good_scores) / len(good_scores),
         "bad_model_average": sum(bad_scores) / len(bad_scores),
-        "overall_delta": (sum(good_scores) / len(good_scores)) - (sum(bad_scores) / len(bad_scores)),
+        "overall_delta": (sum(good_scores) / len(good_scores))
+        - (sum(bad_scores) / len(bad_scores)),
         "largest_failure_modes": largest_failure_modes,
         "scenarios": scenarios,
     }
 
 
-def save_benchmark_artifacts(payload: dict[str, object], output_root: str | Path = ".worldbench/benchmarks") -> dict[str, Path]:
+def save_benchmark_artifacts(
+    payload: dict[str, object], output_root: str | Path = ".worldbench/benchmarks"
+) -> dict[str, Path]:
     """Save benchmark JSON/Markdown to timestamped and latest folders."""
 
     root = Path(output_root)
@@ -130,7 +137,9 @@ def generate_benchmark_markdown(payload: dict[str, object]) -> str:
     )
 
 
-def _largest_failure_modes(scenarios: list[dict[str, object]], failure_scores: dict[str, list[float]]) -> list[str]:
+def _largest_failure_modes(
+    scenarios: list[dict[str, object]], failure_scores: dict[str, list[float]]
+) -> list[str]:
     scenario_rankings = []
     for scenario in scenarios:
         metric_name = SCENARIO_FAILURE_METRICS.get(str(scenario["name"]))
@@ -142,7 +151,9 @@ def _largest_failure_modes(scenarios: list[dict[str, object]], failure_scores: d
         assert isinstance(metrics, dict)
         metric = metrics.get(metric_name)
         if isinstance(metric, dict) and metric.get("score") is not None:
-            scenario_rankings.append((FAILURE_MODE_LABELS[metric_name], float(metric["score"])))
+            scenario_rankings.append(
+                (FAILURE_MODE_LABELS[metric_name], float(metric["score"]))
+            )
 
     if scenario_rankings:
         ranked = sorted(scenario_rankings, key=lambda item: item[1])
@@ -156,4 +167,6 @@ def _largest_failure_modes(scenarios: list[dict[str, object]], failure_scores: d
         ),
         key=lambda item: item[1],
     )
-    return [FAILURE_MODE_LABELS.get(name, name.replace("_", " ")) for name, _ in ranked[:3]]
+    return [
+        FAILURE_MODE_LABELS.get(name, name.replace("_", " ")) for name, _ in ranked[:3]
+    ]

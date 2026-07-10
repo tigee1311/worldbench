@@ -1,6 +1,6 @@
 # Metric Support
 
-WorldBench scores only the metrics that the rollout can support. Unsupported metrics return N/A and are excluded from the overall score denominator.
+WorldBench scores only the metrics that the rollout can support. Unsupported metrics return N/A and are excluded from the Composite Score denominator.
 
 Default weights:
 
@@ -156,14 +156,14 @@ Known limitations:
 - real-world contact realism requires reliable robot and object tracking
 - it does not model 3D contact, force, compliance, or occlusion
 
-## Overall Score
+## Composite Score And Coverage
 
-The overall score is computed with available metrics only:
+The Composite Score is computed with available metrics only:
 
 ```text
 sum(score_i * weight_i for available metric_i) / sum(weight_i for available metric_i)
 ```
 
-If no metrics are available, the overall score is 0.
+If no metrics are available, the Composite Score is 0. Schema-v2 results also report available/configured metric count, configured-weight coverage, effective normalized weights, and unsupported metric names so the number is never presented as full coverage when it is not.
 
 Unsupported metrics are preserved in reports with `status: unsupported`, `score: null`, a reason, and any supporting details.

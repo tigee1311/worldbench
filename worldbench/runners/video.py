@@ -11,6 +11,7 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
+from worldbench.config import WorldBenchConfig
 from worldbench.runners.evaluator import EvaluationRunner
 from worldbench.schemas import EvaluationResult
 from worldbench.utils import write_json
@@ -46,6 +47,7 @@ def evaluate_video_pair(
     *,
     skip_context: int = 0,
     name: str | None = None,
+    config: WorldBenchConfig | None = None,
 ) -> EvaluationResult:
     """Evaluate a ground-truth video against a predicted video."""
 
@@ -83,7 +85,9 @@ def evaluate_video_pair(
                 "source": "video_pair",
             },
         )
-        result = EvaluationRunner(dataset_dir, predictions=predictions_dir).run()
+        result = EvaluationRunner(dataset_dir, predictions=predictions_dir).run(
+            config=config
+        )
 
     result.dataset_path = str(gt_path)
     result.predictions_path = str(pred_path)
@@ -128,7 +132,9 @@ def decode_video(path: Path, *, label: str) -> DecodedVideo:
         frames = [_as_rgb_uint8(frame) for frame in reader]
         reader.close()
     except Exception as exc:  # noqa: BLE001
-        raise VideoEvaluationError(f"{label} video is unreadable: {path} ({exc})") from exc
+        raise VideoEvaluationError(
+            f"{label} video is unreadable: {path} ({exc})"
+        ) from exc
 
     if not frames:
         raise VideoEvaluationError(f"{label} video is empty: {path}")
@@ -178,7 +184,10 @@ def validate_video_pair(
             "WorldBench requires matching future lengths."
         )
 
-    if (ground_truth.width, ground_truth.height) != (prediction.width, prediction.height):
+    if (ground_truth.width, ground_truth.height) != (
+        prediction.width,
+        prediction.height,
+    ):
         raise VideoEvaluationError(
             "Prediction resolution differs from ground truth. "
             f"Prediction: {prediction.width}x{prediction.height}; "
@@ -186,9 +195,13 @@ def validate_video_pair(
         )
 
     if ground_truth.fps is None and prediction.fps is not None:
-        raise VideoEvaluationError("Ground-truth FPS is unavailable but prediction FPS is present.")
+        raise VideoEvaluationError(
+            "Ground-truth FPS is unavailable but prediction FPS is present."
+        )
     if ground_truth.fps is not None and prediction.fps is None:
-        raise VideoEvaluationError("Prediction FPS is unavailable but ground-truth FPS is present.")
+        raise VideoEvaluationError(
+            "Prediction FPS is unavailable but ground-truth FPS is present."
+        )
     if ground_truth.fps is not None and prediction.fps is not None:
         tolerance = max(0.05, max(ground_truth.fps, prediction.fps) * 0.01)
         if abs(ground_truth.fps - prediction.fps) > tolerance:

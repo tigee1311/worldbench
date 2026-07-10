@@ -11,4 +11,3 @@ result = bench.run(
     predictions="examples/demo_dataset/good_model",
 )
 result.print_summary()
-

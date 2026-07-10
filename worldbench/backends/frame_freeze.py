@@ -83,7 +83,9 @@ def freeze_rollout_predictions(
 
     source_root = Path(source_dataset)
     if not source_root.is_dir():
-        raise FileNotFoundError(f"Source dataset directory does not exist: {source_root}")
+        raise FileNotFoundError(
+            f"Source dataset directory does not exist: {source_root}"
+        )
 
     destination_root = Path(output_root)
     if destination_root.exists() and overwrite:
@@ -94,11 +96,19 @@ def freeze_rollout_predictions(
 
     results: list[FrameFreezeResult] = []
     for episode_dir in sorted(
-        path for path in source_root.iterdir() if path.is_dir() and path.name.startswith("episode_")
+        path
+        for path in source_root.iterdir()
+        if path.is_dir() and path.name.startswith("episode_")
     ):
         frames_dir = episode_dir / "frames"
         predictions_dir = destination_root / episode_dir.name / "predictions"
-        result = freeze_frames(frames_dir, predictions_dir, severity=severity, seed=seed, overwrite=overwrite)
+        result = freeze_frames(
+            frames_dir,
+            predictions_dir,
+            severity=severity,
+            seed=seed,
+            overwrite=overwrite,
+        )
         results.append(result)
     return results
 

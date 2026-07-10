@@ -9,8 +9,14 @@ venv/
 dist/
 build/
 .worldbench/
+artifacts/demo/
+artifacts/founders-inc/
+artifacts/outreach/
 examples/yaskawa_*/
 examples/corruption_benchmark/
 examples/temporal_scramble_benchmark/
+scripts/make_launch_demo.py
+website/assets/demo/
+website/scripts/sync-assets.mjs
 quickstart_report.md
 .DS_Store

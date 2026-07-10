@@ -153,7 +153,7 @@ It validates compatibility before comparing:
 
 It compares:
 
-- aggregate overall mean
+- aggregate Composite Score mean
 - aggregate metric means available in both runs
 - per-horizon metric means available in both runs
 - per-episode overall deltas
@@ -177,7 +177,7 @@ Defaults:
 
 | Option | Default | Meaning |
 | --- | ---: | --- |
-| `--max-overall-drop` | 0.0 | Maximum allowed aggregate overall mean drop. |
+| `--max-overall-drop` | 0.0 | Backward-compatible maximum allowed Composite Score mean drop. |
 | `--max-metric-drop` | 0.0 | Maximum allowed comparable metric mean drop. |
 | `--max-horizon-drop` | 0.0 | Maximum allowed comparable per-horizon metric mean drop. |
 

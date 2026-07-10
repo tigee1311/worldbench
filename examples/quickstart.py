@@ -1,6 +1,7 @@
 """Minimal WorldBench SDK quickstart.
 
-Run `worldbench demo` first to create examples/demo_dataset.
+This example uses the deterministic development fixture. Generate it first with:
+`python scripts/dev/make_synthetic_fixture.py`.
 """
 
 from worldbench import WorldBench

@@ -46,7 +46,9 @@ def test_public_yaskawa_video_timeline_imports_episode_zero(tmp_path: Path) -> N
     assert metadata["source_control_steps"] == 4952
     assert metadata["source_unique_video_frames"] == 900
     assert metadata["exported_timesteps"] == 900
-    assert len({action["source_video_frame_index"] for action in actions}) == len(actions)
+    assert len({action["source_video_frame_index"] for action in actions}) == len(
+        actions
+    )
     assert isinstance(actions[0]["action"], list)
     assert len(actions[0]["action"]) == 7
     assert "observation_state" in states[0]

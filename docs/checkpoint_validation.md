@@ -62,7 +62,7 @@ Raw videos, dataset shards, model checkpoints, and frame data are not committed.
 
 | Score | Baseline 50k | Candidate 300k | Change |
 | --- | ---: | ---: | ---: |
-| Overall mean | 85.67 | 87.28 | +1.61 |
+| Composite Score mean | 85.67 | 87.28 | +1.61 |
 | Visual Similarity mean | 77.57 | 79.76 | +2.19 |
 | Temporal Stability mean | 95.79 | 96.69 | +0.89 |
 

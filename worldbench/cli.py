@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-import importlib.util
 from pathlib import Path
 import tempfile
 
@@ -21,6 +20,7 @@ from worldbench.backends.lerobot import (
     parse_episode_selection,
 )
 from worldbench.dashboard import launch_dashboard
+from worldbench.config import load_config
 from worldbench.dataset import validate_dataset
 from worldbench.runners.benchmark import run_benchmark_suite, save_benchmark_artifacts
 from worldbench.runners.comparator import (
@@ -39,32 +39,48 @@ from worldbench.runners.regression import (
 )
 from worldbench.runners.reporter import save_markdown_report
 from worldbench.runners.video import VideoEvaluationError, evaluate_video_pair
+from worldbench.version import WORLD_BENCH_VERSION
 
 console = Console()
 
 
-@click.group(help="Evaluate robotics world models for control-useful prediction quality.")
+@click.group(help="Regression testing for robot world-model checkpoints.")
+@click.version_option(WORLD_BENCH_VERSION, prog_name="worldbench")
 def app() -> None:
     pass
 
 
-@app.command()
+@app.command(hidden=True)
 @click.argument("path", type=click.Path(path_type=Path))
 def init(path: Path) -> None:
     """Create a sample WorldBench dataset folder structure."""
 
     created = DemoBackend().init_structure(path)
-    console.print(Panel.fit(f"Created WorldBench dataset template at [bold]{created}[/bold]"))
-    console.print("Add numbered PNG frames under episode_001/frames and predictions under episode_001/predictions.")
+    console.print(
+        Panel.fit(f"Created WorldBench dataset template at [bold]{created}[/bold]")
+    )
+    console.print(
+        "Add numbered PNG frames under episode_001/frames and predictions under episode_001/predictions."
+    )
 
 
-@app.command()
-@click.argument("output", required=False, default="examples/demo_dataset", type=click.Path(path_type=Path))
+@app.command(hidden=True)
+@click.argument(
+    "output",
+    required=False,
+    default="examples/demo_dataset",
+    type=click.Path(path_type=Path),
+)
 def demo(output: Path) -> None:
-    """Generate a complete synthetic demo dataset and good/bad model outputs."""
+    """Generate a synthetic development fixture and model outputs."""
 
+    console.print(
+        "[yellow]Deprecated:[/yellow] `worldbench demo` is a development fixture generator and will be removed in 0.5. Use `python scripts/dev/make_synthetic_fixture.py` in a repository checkout."
+    )
     created = DemoBackend().create(output)
-    console.print(Panel.fit(f"Demo dataset ready at [bold green]{created}[/bold green]"))
+    console.print(
+        Panel.fit(f"Development fixture ready at [bold green]{created}[/bold green]")
+    )
     console.print("Try:")
     console.print(f"  worldbench validate {created}")
     console.print(f"  worldbench eval {created} --predictions {created / 'good_model'}")
@@ -78,7 +94,9 @@ def validate(dataset_path: Path) -> None:
 
     report = validate_dataset(dataset_path)
     if report.is_valid:
-        console.print(f"[bold green]Valid dataset[/bold green]: {report.episode_count} episode(s), {report.frame_count} frame(s)")
+        console.print(
+            f"[bold green]Valid dataset[/bold green]: {report.episode_count} episode(s), {report.frame_count} frame(s)"
+        )
     else:
         console.print("[bold red]Dataset is invalid[/bold red]")
 
@@ -89,15 +107,22 @@ def validate(dataset_path: Path) -> None:
         table.add_column("Message")
         for issue in report.issues:
             style = "red" if issue.level == "error" else "yellow"
-            table.add_row(f"[{style}]{issue.level}[/{style}]", issue.path or "", issue.message)
+            table.add_row(
+                f"[{style}]{issue.level}[/{style}]", issue.path or "", issue.message
+            )
         console.print(table)
 
     raise click.exceptions.Exit(0 if report.is_valid else 1)
 
 
-@app.command()
+@app.command(hidden=True)
 @click.argument("benchmark_path", required=False, type=click.Path(path_type=Path))
-@click.option("--demo", is_flag=True, help="Generate the lightweight synthetic benchmark suite before running it.")
+@click.option(
+    "--demo",
+    is_flag=True,
+    hidden=True,
+    help="Generate the lightweight synthetic benchmark suite before running it.",
+)
 @click.option(
     "--output-root",
     type=click.Path(path_type=Path),
@@ -107,11 +132,16 @@ def validate(dataset_path: Path) -> None:
 def benchmark(benchmark_path: Path | None, demo: bool, output_root: Path) -> None:
     """Run WorldBench benchmark scenarios."""
 
+    console.print(
+        "[yellow]Deprecated:[/yellow] `worldbench benchmark` runs synthetic development scenarios, not a standardized robotics benchmark; it will be removed in 0.5."
+    )
     root = benchmark_path or Path("benchmarks")
     if demo:
         root = BenchmarkBackend().create(root)
     if not root.exists():
-        raise click.ClickException(f"Benchmark path does not exist: {root}. Use --demo to generate synthetic scenarios.")
+        raise click.ClickException(
+            f"Benchmark path does not exist: {root}. Use --demo to generate synthetic scenarios."
+        )
 
     payload = run_benchmark_suite(root)
     saved = save_benchmark_artifacts(payload, output_root)
@@ -132,6 +162,7 @@ def benchmark(benchmark_path: Path | None, demo: bool, output_root: Path) -> Non
 @click.option(
     "--demo",
     is_flag=True,
+    hidden=True,
     help="Generate and import a tiny synthetic LeRobot-style source folder.",
 )
 @click.option(
@@ -171,14 +202,21 @@ def import_lerobot(
 
     try:
         if demo:
+            console.print(
+                "[yellow]Deprecated:[/yellow] `import-lerobot --demo` is a development fixture path and will be removed in 0.5."
+            )
             if repo_id is not None:
                 raise click.ClickException("--demo cannot be combined with --repo-id.")
-            with tempfile.TemporaryDirectory(prefix="worldbench-lerobot-style-") as tmpdir:
+            with tempfile.TemporaryDirectory(
+                prefix="worldbench-lerobot-style-"
+            ) as tmpdir:
                 source = create_lerobot_style_demo_source(Path(tmpdir) / "source")
                 report = import_lerobot_style(source, output_path)
         elif repo_id is not None:
             if input_path is not None:
-                raise click.ClickException("Do not provide input_path when using --repo-id.")
+                raise click.ClickException(
+                    "Do not provide input_path when using --repo-id."
+                )
             selected_episodes = parse_episode_selection(episodes)
             report = import_lerobot_repo(
                 repo_id,
@@ -189,7 +227,9 @@ def import_lerobot(
             )
         else:
             if input_path is None:
-                raise click.ClickException("Provide input_path, use --demo, or use --repo-id.")
+                raise click.ClickException(
+                    "Provide input_path, use --demo, or use --repo-id."
+                )
             console.print("Using legacy local LeRobot-style folder converter.")
             report = import_lerobot_style(input_path, output_path)
     except click.ClickException:
@@ -214,29 +254,46 @@ def import_lerobot(
         table.add_column("Message")
         for issue in report.issues:
             style = "red" if issue.level == "error" else "yellow"
-            table.add_row(f"[{style}]{issue.level}[/{style}]", issue.path or "", issue.message)
+            table.add_row(
+                f"[{style}]{issue.level}[/{style}]", issue.path or "", issue.message
+            )
         console.print(table)
     raise click.exceptions.Exit(0 if report.is_valid else 1)
 
 
 @app.command(name="eval")
 @click.argument("dataset_path", type=click.Path(path_type=Path))
-@click.option("--predictions", "-p", type=click.Path(path_type=Path), default=None, help="Prediction folder or model run root.")
+@click.option(
+    "--predictions",
+    "-p",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Prediction folder or model run root.",
+)
 @click.option(
     "--output-root",
     type=click.Path(path_type=Path),
     default=Path(".worldbench/runs"),
     help="Run storage root.",
 )
-def eval_cmd(dataset_path: Path, predictions: Path | None, output_root: Path) -> None:
+@click.option("--config", "config_path", type=click.Path(path_type=Path), default=None)
+def eval_cmd(
+    dataset_path: Path,
+    predictions: Path | None,
+    output_root: Path,
+    config_path: Path | None,
+) -> None:
     """Run all WorldBench metrics and save result.json."""
 
+    config, _ = _load_project_config(config_path)
     runner = EvaluationRunner(dataset_path, predictions=predictions)
-    result = runner.run()
+    result = runner.run(config=config)
     result_path = _save_result(result, output_root)
     result.print_summary()
     console.print(f"[green]Saved result:[/green] {result_path}")
-    console.print(f"[green]Latest alias:[/green] {output_root / 'latest' / 'result.json'}")
+    console.print(
+        f"[green]Latest alias:[/green] {output_root / 'latest' / 'result.json'}"
+    )
 
 
 @app.command("eval-video")
@@ -260,12 +317,21 @@ def eval_cmd(dataset_path: Path, predictions: Path | None, output_root: Path) ->
     type=int,
     help="Number of leading context frames to exclude from scoring.",
 )
-@click.option("--name", default=None, help="Optional display name for this video evaluation.")
+@click.option(
+    "--name", default=None, help="Optional display name for this video evaluation."
+)
 @click.option(
     "--output-root",
     type=click.Path(path_type=Path),
     default=Path(".worldbench/runs"),
     help="Run storage root.",
+)
+@click.option(
+    "--config",
+    "config_path",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Path to worldbench.yml; auto-detected in the current directory.",
 )
 def eval_video(
     ground_truth: Path,
@@ -273,15 +339,18 @@ def eval_video(
     skip_context: int,
     name: str | None,
     output_root: Path,
+    config_path: Path | None,
 ) -> None:
     """Evaluate one predicted future video against one ground-truth video."""
 
     try:
+        config, _ = _load_project_config(config_path)
         result = evaluate_video_pair(
             ground_truth,
             prediction,
             skip_context=skip_context,
             name=name,
+            config=config,
         )
     except VideoEvaluationError as exc:
         raise click.ClickException(str(exc)) from exc
@@ -313,7 +382,11 @@ def eval_video(
     type=click.Path(path_type=Path),
     help="Directory of predicted episode videos for one checkpoint.",
 )
-@click.option("--name", default=None, help="Checkpoint name. Also controls the default JSON copy name.")
+@click.option(
+    "--name",
+    default=None,
+    help="Checkpoint name. Also controls the default JSON copy name.",
+)
 @click.option(
     "--skip-context",
     default=0,
@@ -333,6 +406,13 @@ def eval_video(
     default=None,
     help="Optional direct JSON output path. Defaults to <name>.json when --name is set.",
 )
+@click.option(
+    "--config",
+    "config_path",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Path to worldbench.yml; auto-detected in the current directory.",
+)
 def eval_batch(
     ground_truth: Path,
     predictions: Path,
@@ -340,10 +420,12 @@ def eval_batch(
     skip_context: int,
     output_root: Path,
     output: Path | None,
+    config_path: Path | None,
 ) -> None:
     """Evaluate one checkpoint across a directory of episode videos."""
 
     try:
+        config, _ = _load_project_config(config_path)
         payload, paths = evaluate_video_batch(
             ground_truth,
             predictions,
@@ -351,6 +433,7 @@ def eval_batch(
             skip_context=skip_context,
             output_root=output_root,
             output=output,
+            config=config,
         )
     except (ValueError, VideoEvaluationError) as exc:
         raise click.UsageError(str(exc)) from exc
@@ -380,19 +463,17 @@ def eval_batch(
     default=0.0,
     show_default=True,
     type=click.FloatRange(min=0.0),
-    help="Maximum allowed drop in aggregate overall score.",
+    help="Backward-compatible maximum allowed drop in Composite Score.",
 )
 @click.option(
     "--max-metric-drop",
-    default=0.0,
-    show_default=True,
+    default=None,
     type=click.FloatRange(min=0.0),
     help="Maximum allowed drop for any comparable metric mean.",
 )
 @click.option(
     "--max-horizon-drop",
-    default=0.0,
-    show_default=True,
+    default=None,
     type=click.FloatRange(min=0.0),
     help="Maximum allowed drop for any comparable per-horizon metric mean.",
 )
@@ -402,25 +483,112 @@ def eval_batch(
     default=Path(".worldbench/gates"),
     help="Gate result storage root.",
 )
+@click.option(
+    "--config",
+    "config_path",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Path to worldbench.yml; auto-detected in the current directory.",
+)
+@click.option(
+    "--require-metric",
+    "required_metrics",
+    multiple=True,
+    help="Metric that must be available in the candidate; repeatable.",
+)
+@click.option(
+    "--min-metric-count",
+    type=click.IntRange(min=0),
+    default=None,
+    help="Minimum number of available configured metrics.",
+)
+@click.option(
+    "--min-metric-coverage",
+    type=click.FloatRange(min=0.0, max=1.0),
+    default=None,
+    help="Minimum available/configured metric ratio.",
+)
+@click.option(
+    "--min-configured-weight-coverage",
+    type=click.FloatRange(min=0.0, max=1.0),
+    default=None,
+    help="Minimum fraction of configured metric weight represented by available metrics.",
+)
+@click.option(
+    "--strict-config-match/--no-strict-config-match",
+    default=None,
+    help="Fail on different metric profiles, weights, or horizons.",
+)
+@click.option(
+    "--max-episode-regressions",
+    type=click.IntRange(min=0),
+    default=None,
+    help="Maximum candidate episodes allowed to regress.",
+)
+@click.option(
+    "--min-composite-improvement",
+    type=float,
+    default=None,
+    help="Minimum required candidate composite-score change.",
+)
 def gate(
     baseline: Path,
     candidate: Path,
     max_overall_drop: float,
-    max_metric_drop: float,
-    max_horizon_drop: float,
+    max_metric_drop: float | None,
+    max_horizon_drop: float | None,
     output_root: Path,
+    config_path: Path | None,
+    required_metrics: tuple[str, ...],
+    min_metric_count: int | None,
+    min_metric_coverage: float | None,
+    min_configured_weight_coverage: float | None,
+    strict_config_match: bool | None,
+    max_episode_regressions: int | None,
+    min_composite_improvement: float | None,
 ) -> None:
     """Return PASS or FAIL for a candidate checkpoint regression gate."""
 
     try:
+        config, _ = _load_project_config(config_path)
+        gate_config = config.gate
         baseline_payload = load_batch_result(baseline)
         candidate_payload = load_batch_result(candidate)
         comparison = build_gate_comparison(
             baseline_payload,
             candidate_payload,
             max_overall_drop=max_overall_drop,
-            max_metric_drop=max_metric_drop,
-            max_horizon_drop=max_horizon_drop,
+            max_metric_drop=gate_config.max_metric_drop
+            if max_metric_drop is None
+            else max_metric_drop,
+            max_horizon_drop=gate_config.max_horizon_drop
+            if max_horizon_drop is None
+            else max_horizon_drop,
+            required_metrics=list(required_metrics) or config.required_metrics,
+            min_metric_count=gate_config.min_metric_count
+            if min_metric_count is None
+            else min_metric_count,
+            min_metric_coverage=gate_config.min_metric_coverage
+            if min_metric_coverage is None
+            else min_metric_coverage,
+            min_configured_weight_coverage=(
+                gate_config.min_configured_weight_coverage
+                if min_configured_weight_coverage is None
+                else min_configured_weight_coverage
+            ),
+            strict_config_match=gate_config.strict_config_match
+            if strict_config_match is None
+            else strict_config_match,
+            max_episode_regressions=(
+                gate_config.max_episode_regressions
+                if max_episode_regressions is None
+                else max_episode_regressions
+            ),
+            min_composite_improvement=(
+                gate_config.min_composite_improvement
+                if min_composite_improvement is None
+                else min_composite_improvement
+            ),
         )
     except ValueError as exc:
         raise click.UsageError(str(exc)) from exc
@@ -448,7 +616,9 @@ def gate(
     default=Path(".worldbench/comparisons"),
     help="Comparison storage root.",
 )
-def compare(target: Path, run_b: Path | None, models: tuple[str, str] | None, output_root: Path) -> None:
+def compare(
+    target: Path, run_b: Path | None, models: tuple[str, str] | None, output_root: Path
+) -> None:
     """Compare result files or two model folders inside a dataset."""
 
     if models is not None:
@@ -460,7 +630,9 @@ def compare(target: Path, run_b: Path | None, models: tuple[str, str] | None, ou
         return
 
     if run_b is None:
-        raise click.ClickException("Provide two result JSON files, or use --models MODEL_A MODEL_B with a dataset path.")
+        raise click.ClickException(
+            "Provide two result JSON files, or use --models MODEL_A MODEL_B with a dataset path."
+        )
 
     legacy = compare_results(target, run_b)
     comparison = compare_result_files(target, run_b)
@@ -471,7 +643,7 @@ def compare(target: Path, run_b: Path | None, models: tuple[str, str] | None, ou
     table.add_column("Run B", justify="right")
     table.add_column("Delta", justify="right")
     table.add_row(
-        "Overall",
+        "Composite Score",
         f"{legacy['run_a_score']:.1f}",
         f"{legacy['run_b_score']:.1f}",
         f"{legacy['delta']:+.1f}",
@@ -479,9 +651,9 @@ def compare(target: Path, run_b: Path | None, models: tuple[str, str] | None, ou
     for name, values in legacy["metrics"].items():
         table.add_row(
             name.replace("_", " ").title(),
-            f"{values['run_a']:.1f}",
-            f"{values['run_b']:.1f}",
-            f"{values['delta']:+.1f}",
+            _format_cli_score(values["run_a"]),
+            _format_cli_score(values["run_b"]),
+            _format_cli_delta(values["delta"]),
         )
     console.print(table)
     console.print(f"Winner: [bold]{legacy['winner']}[/bold]")
@@ -495,7 +667,10 @@ def report(result_json: Path, output: Path | None) -> None:
     """Generate a Markdown report from a result JSON file."""
 
     result = load_result(result_json)
-    output_path = output or (result_json.parent if result_json.is_file() else result_json) / "report.md"
+    output_path = (
+        output
+        or (result_json.parent if result_json.is_file() else result_json) / "report.md"
+    )
     saved = save_markdown_report(result, output_path)
     console.print(f"[green]Saved report:[/green] {saved}")
 
@@ -505,40 +680,36 @@ def report(result_json: Path, output: Path | None) -> None:
 @click.option("--host", default="127.0.0.1", help="Dashboard host.")
 @click.option("--port", default=8765, type=int, help="Dashboard port.")
 @click.option("--no-open", is_flag=True, help="Do not open a browser automatically.")
-def dashboard(result_json_or_dataset_path: Path, host: str, port: int, no_open: bool) -> None:
+def dashboard(
+    result_json_or_dataset_path: Path, host: str, port: int, no_open: bool
+) -> None:
     """Launch a local WorldBench dashboard."""
 
     console.print(f"Launching dashboard for [bold]{result_json_or_dataset_path}[/bold]")
     try:
-        launch_dashboard(result_json_or_dataset_path, host=host, port=port, open_browser=not no_open)
+        launch_dashboard(
+            result_json_or_dataset_path, host=host, port=port, open_browser=not no_open
+        )
     except RuntimeError as exc:
         raise click.ClickException(str(exc)) from exc
 
 
-@app.command("make-demo-video")
-@click.option("--output-dir", type=click.Path(path_type=Path), default=Path("assets/demo"), help="Demo asset output directory.")
+@app.command("make-demo-video", hidden=True)
+@click.option(
+    "--output-dir",
+    type=click.Path(path_type=Path),
+    default=Path("assets/demo"),
+    help="Demo asset output directory.",
+)
 def make_demo_video(output_dir: Path) -> None:
     """Generate README demo MP4, GIF, and thumbnail assets."""
 
-    script_path = Path(__file__).resolve().parents[1] / "scripts" / "make_demo_video.py"
-    if not script_path.is_file():
-        raise click.ClickException(
-            "Could not find scripts/make_demo_video.py. Run this command from the WorldBench repository checkout."
-        )
-    spec = importlib.util.spec_from_file_location("worldbench_make_demo_video", script_path)
-    if spec is None or spec.loader is None:
-        raise click.ClickException(f"Could not load {script_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    build_demo_video = module.make_demo_video
-
-    outputs = build_demo_video(output_dir)
-    console.print("[bold green]Generated demo assets[/bold green]")
-    for label, path in outputs.items():
-        console.print(f"  {label}: {path}")
+    raise click.ClickException(
+        "Deprecated maintainer utility. Run `python scripts/dev/make_demo_video.py` from a repository checkout."
+    )
 
 
-@app.command("make-screenshots")
+@app.command("make-screenshots", hidden=True)
 @click.option(
     "--output-dir",
     type=click.Path(path_type=Path),
@@ -548,22 +719,16 @@ def make_demo_video(output_dir: Path) -> None:
 def make_screenshots(output_dir: Path) -> None:
     """Generate README dashboard and report screenshot assets."""
 
-    script_path = Path(__file__).resolve().parents[1] / "scripts" / "make_screenshots.py"
-    if not script_path.is_file():
-        raise click.ClickException(
-            "Could not find scripts/make_screenshots.py. Run this command from the WorldBench repository checkout."
-        )
-    spec = importlib.util.spec_from_file_location("worldbench_make_screenshots", script_path)
-    if spec is None or spec.loader is None:
-        raise click.ClickException(f"Could not load {script_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    build_screenshots = module.make_screenshots
+    raise click.ClickException(
+        "Deprecated maintainer utility. Run `python scripts/dev/make_screenshots.py` from a repository checkout."
+    )
 
-    outputs = build_screenshots(output_dir)
-    console.print("[bold green]Generated screenshot assets[/bold green]")
-    for label, path in outputs.items():
-        console.print(f"  {label}: {path}")
+
+def _load_project_config(path: Path | None):
+    try:
+        return load_config(path)
+    except ValueError as exc:
+        raise click.UsageError(str(exc)) from exc
 
 
 def _save_result(result, output_root: Path) -> Path:
@@ -593,7 +758,7 @@ def _print_rich_comparison(comparison: dict[str, object]) -> None:
     else:
         summary = (
             f"[bold]{winner}[/bold] beats [bold]{loser}[/bold] by "
-            f"[bold green]+{float(overall['winner_margin']):.1f}[/bold green] overall points."
+            f"[bold green]+{float(overall['winner_margin']):.1f}[/bold green] Composite Score points."
         )
     console.print(Panel.fit(summary, title="WorldBench Model Comparison"))
 
@@ -603,7 +768,7 @@ def _print_rich_comparison(comparison: dict[str, object]) -> None:
     table.add_column(label_b, justify="right")
     table.add_column("Delta", justify="right")
     table.add_row(
-        "Overall",
+        "Composite Score",
         f"{float(overall['score_a']):.1f}",
         f"{float(overall['score_b']):.1f}",
         f"{float(overall['delta']):+.1f}",
@@ -611,9 +776,9 @@ def _print_rich_comparison(comparison: dict[str, object]) -> None:
     for metric in metrics:
         table.add_row(
             str(metric["label"]),
-            f"{float(metric['score_a']):.1f}",
-            f"{float(metric['score_b']):.1f}",
-            f"{float(metric['delta']):+.1f}",
+            _format_cli_score(metric["score_a"]),
+            _format_cli_score(metric["score_b"]),
+            _format_cli_delta(metric["delta"]),
         )
     console.print(table)
 
@@ -625,6 +790,25 @@ def _print_rich_comparison(comparison: dict[str, object]) -> None:
     console.print("\n".join(gap_lines))
     console.print("\n[bold]Conclusion:[/bold]")
     console.print(str(comparison["conclusion"]))
+    coverage = comparison.get("coverage", {})
+    if isinstance(coverage, dict):
+        console.print("\n[bold]Metric coverage:[/bold]")
+        for key, label in (("a", label_a), ("b", label_b)):
+            item = coverage.get(key, {})
+            if isinstance(item, dict):
+                console.print(
+                    f"{label}: {item.get('available_metric_count', 0)}/"
+                    f"{item.get('configured_metric_count', 0)} metrics, "
+                    f"{float(item.get('configured_weight_coverage', 0.0)):.0%} configured weight"
+                )
+
+
+def _format_cli_score(value: object) -> str:
+    return "N/A" if not isinstance(value, (int, float)) else f"{float(value):.1f}"
+
+
+def _format_cli_delta(value: object) -> str:
+    return "N/A" if not isinstance(value, (int, float)) else f"{float(value):+.1f}"
 
 
 def _print_batch_summary(payload: dict[str, object]) -> None:
@@ -638,11 +822,22 @@ def _print_batch_summary(payload: dict[str, object]) -> None:
 
     console.print(Panel.fit(f"[bold]Checkpoint:[/bold] {checkpoint}"))
     console.print(f"[bold]Episodes evaluated:[/bold] {int(payload['episode_count'])}")
-    console.print(f"[bold]Overall mean:[/bold] {float(overall['mean']):.1f}")
-    console.print(f"[bold]Overall median:[/bold] {float(overall['median']):.1f}")
+    console.print(f"[bold]Composite Score mean:[/bold] {float(overall['mean']):.2f}")
+    console.print(
+        f"[bold]Composite Score median:[/bold] {float(overall['median']):.2f}"
+    )
     console.print(f"[bold]Standard deviation:[/bold] {float(overall['std']):.1f}")
     console.print(f"[bold]Minimum:[/bold] {float(overall['min']):.1f}")
     console.print(f"[bold]Maximum:[/bold] {float(overall['max']):.1f}")
+    coverage = payload.get("coverage", {})
+    if isinstance(coverage, dict):
+        console.print(
+            f"[bold]Metric coverage:[/bold] {coverage.get('available_metric_count', 0)} of "
+            f"{coverage.get('configured_metric_count', 0)} configured metrics"
+        )
+        console.print(
+            f"[bold]Configured weight coverage:[/bold] {float(coverage.get('configured_weight_coverage', 0.0)):.0%}"
+        )
 
     table = Table(title="Metric Aggregates")
     table.add_column("Metric", style="cyan")
@@ -688,9 +883,20 @@ def _print_gate_summary(comparison: dict[str, object]) -> None:
 
     console.print(f"\nBaseline:  {baseline.get('checkpoint_name')}")
     console.print(f"Candidate: {candidate.get('checkpoint_name')}")
-    console.print("\n[bold]Overall:[/bold]")
-    console.print(f"{float(overall['baseline']):.1f} -> {float(overall['candidate']):.1f}")
+    console.print("\n[bold]Composite Score:[/bold]")
+    console.print(
+        f"{float(overall['baseline']):.1f} -> {float(overall['candidate']):.1f}"
+    )
     console.print(f"Change: {float(overall['change']):+.1f}")
+    coverage = comparison.get("coverage", {})
+    if isinstance(coverage, dict):
+        console.print(
+            f"Metric coverage: {coverage.get('available_metric_count', 0)} of "
+            f"{coverage.get('configured_metric_count', 0)}"
+        )
+        console.print(
+            f"Configured weight coverage: {float(coverage.get('configured_weight_coverage', 0.0)):.0%}"
+        )
 
     failures = comparison["failure_reasons"]
     assert isinstance(failures, list)
@@ -698,19 +904,31 @@ def _print_gate_summary(comparison: dict[str, object]) -> None:
         console.print("\n[bold red]Regression detected:[/bold red]")
         for failure in failures[:8]:
             assert isinstance(failure, dict)
-            label = str(failure["kind"])
-            if "metric" in failure:
-                label += f" {failure['metric']}"
+            label = _failure_display_label(failure)
             if "horizon" in failure:
                 label += f" {failure['horizon']} {failure.get('metric')}"
-            console.print(
-                f"{label}: {float(failure['baseline']):.1f} -> "
-                f"{float(failure['candidate']):.1f} "
-                f"({float(failure['change']):+.1f}); "
-                f"allowed drop {float(failure['allowed_drop']):.1f}"
-            )
+            elif "metric" in failure:
+                label += f" {failure['metric']}"
+            if {"baseline", "candidate", "change"}.issubset(failure):
+                threshold = failure.get(
+                    "allowed_drop", failure.get("required_improvement", "")
+                )
+                console.print(
+                    f"{label}: {float(failure['baseline']):.1f} -> {float(failure['candidate']):.1f} "
+                    f"({float(failure['change']):+.1f}); threshold {threshold}"
+                )
+            else:
+                console.print(
+                    f"{label}: {failure.get('details') or failure.get('metrics') or failure}"
+                )
     else:
         console.print("\nNo configured regression threshold was exceeded.")
+
+    warnings = comparison.get("warnings", [])
+    if isinstance(warnings, list) and warnings:
+        console.print("\n[bold yellow]Warnings:[/bold yellow]")
+        for warning in warnings:
+            console.print(f"- {warning}")
 
     console.print("\n[bold]Episodes:[/bold]")
     console.print(f"Improved:   {int(episodes['improved_count'])}")
@@ -724,10 +942,23 @@ def _print_gate_summary(comparison: dict[str, object]) -> None:
                 console.print(f"{item['episode_id']}    {float(item['change']):+.1f}")
 
 
+def _failure_display_label(failure: dict[str, object]) -> str:
+    kind = str(failure.get("kind", "failure"))
+    if kind == "overall":
+        return "Composite Score"
+    if kind == "composite_improvement":
+        return "Composite Score improvement"
+    return kind.replace("_", " ").title()
+
+
 def _print_benchmark_summary(payload: dict[str, object]) -> None:
     console.print(Panel.fit("[bold]WorldBench Demo Benchmark[/bold]"))
-    console.print(f"[bold]good_model average:[/bold] {float(payload['good_model_average']):.1f}/100")
-    console.print(f"[bold]bad_model average:[/bold] {float(payload['bad_model_average']):.1f}/100")
+    console.print(
+        f"[bold]good_model average:[/bold] {float(payload['good_model_average']):.1f}/100"
+    )
+    console.print(
+        f"[bold]bad_model average:[/bold] {float(payload['bad_model_average']):.1f}/100"
+    )
     console.print(f"[bold]overall delta:[/bold] +{float(payload['overall_delta']):.1f}")
 
     scenarios = payload["scenarios"]

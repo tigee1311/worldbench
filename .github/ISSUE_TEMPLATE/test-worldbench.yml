@@ -1,0 +1,126 @@
+name: Test WorldBench on my model
+description: Request a checkpoint comparison using your robot world-model data
+title: "[Tester Request] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for offering to test WorldBench on an external model. Please describe the data and comparison below. Do not include credentials, private download links, or confidential data in this public issue.
+
+        If your data is private, note that below and email writetoayushadi@gmail.com so access can be coordinated outside GitHub.
+
+  - type: input
+    id: model_name
+    attributes:
+      label: Model or project name
+      description: What model or project should this evaluation identify?
+      placeholder: "Example: project name and model family"
+    validations:
+      required: true
+
+  - type: textarea
+    id: model_description
+    attributes:
+      label: Short description of the model
+      description: Summarize the task, robot or environment, and what the model predicts.
+      placeholder: Describe the model and its prediction task.
+    validations:
+      required: true
+
+  - type: textarea
+    id: ground_truth_format
+    attributes:
+      label: Ground-truth data format
+      description: Describe the files, codec or image format, resolution, frame rate, episode layout, and context frames when known.
+      placeholder: "Example: one H.264 MP4 per episode, 256x256, 3 fps, with four context frames"
+    validations:
+      required: true
+
+  - type: textarea
+    id: prediction_format
+    attributes:
+      label: Prediction data format
+      description: Describe how baseline and candidate predictions are stored and aligned with ground truth.
+      placeholder: "Example: matching MP4 filenames for each checkpoint, with eight predicted future frames"
+    validations:
+      required: true
+
+  - type: input
+    id: episode_count
+    attributes:
+      label: Number of episodes
+      description: How many identical episodes are available for both checkpoints?
+      placeholder: "Example: 10"
+    validations:
+      required: true
+
+  - type: input
+    id: baseline_checkpoint
+    attributes:
+      label: Baseline checkpoint
+      description: Provide the baseline checkpoint name, step, revision, or other stable identifier.
+      placeholder: "Example: checkpoint-50000"
+    validations:
+      required: true
+
+  - type: input
+    id: candidate_checkpoint
+    attributes:
+      label: Candidate checkpoint
+      description: Provide the candidate checkpoint name, step, revision, or other stable identifier.
+      placeholder: "Example: checkpoint-300000"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: data_access
+    attributes:
+      label: Is the data public or private?
+      description: Private data access should be coordinated by email, not posted in this public issue.
+      options:
+        - "Public: links can be shared in the issue"
+        - "Private: access must be coordinated directly"
+        - "Mixed: some data is public and some is private"
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired_result
+    attributes:
+      label: What result do you want from WorldBench?
+      description: Describe the decision or regression question this evaluation should answer.
+      placeholder: "Example: determine whether the candidate improves overall without introducing episode-level regressions"
+    validations:
+      required: true
+
+  - type: input
+    id: contact_method
+    attributes:
+      label: Preferred contact method
+      description: Provide a GitHub handle or a professional contact channel that is safe to post publicly.
+      placeholder: "Example: GitHub @handle or email"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: authorization
+    attributes:
+      label: Data authorization
+      description: Confirm that WorldBench may evaluate the data you provide.
+      options:
+        - label: I am authorized to share the submitted data for this evaluation.
+          required: true
+        - label: I understand this is a public issue and will not post credentials, private links, or confidential data.
+          required: true
+
+  - type: dropdown
+    id: sharing_permission
+    attributes:
+      label: May WorldBench share submitted data or results publicly?
+      description: This does not affect whether a private evaluation can be discussed separately.
+      options:
+        - "No: keep data and results private"
+        - "Results only: aggregate results may be shared after my approval"
+        - "Yes: submitted data and results may be shared after my approval"
+    validations:
+      required: true

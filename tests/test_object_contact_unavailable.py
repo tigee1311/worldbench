@@ -11,7 +11,12 @@ from worldbench.metrics.contact import ContactRealismMetric
 from worldbench.metrics.object_permanence import ObjectPermanenceMetric
 from worldbench.runners.evaluator import weighted_score
 from worldbench.runners.reporter import generate_markdown_report
-from worldbench.schemas import EpisodeMetadata, EpisodeResult, EvaluationResult, MetricResult
+from worldbench.schemas import (
+    EpisodeMetadata,
+    EpisodeResult,
+    EvaluationResult,
+    MetricResult,
+)
 
 
 def _make_real_style_episode(tmp_path: Path) -> Episode:
@@ -50,8 +55,12 @@ def test_synthetic_demo_object_and_contact_remain_available(tmp_path: Path) -> N
 
     demo_episode = load_dataset(dataset_path).episodes[0]
 
-    object_result = ObjectPermanenceMetric().evaluate(demo_episode, demo_episode.predictions)
-    contact_result = ContactRealismMetric().evaluate(demo_episode, demo_episode.predictions)
+    object_result = ObjectPermanenceMetric().evaluate(
+        demo_episode, demo_episode.predictions
+    )
+    contact_result = ContactRealismMetric().evaluate(
+        demo_episode, demo_episode.predictions
+    )
 
     assert object_result.is_available
     assert object_result.score is not None
@@ -59,7 +68,9 @@ def test_synthetic_demo_object_and_contact_remain_available(tmp_path: Path) -> N
     assert contact_result.score is not None
 
 
-def test_real_style_rollout_marks_object_and_contact_unsupported(tmp_path: Path) -> None:
+def test_real_style_rollout_marks_object_and_contact_unsupported(
+    tmp_path: Path,
+) -> None:
     episode = _make_real_style_episode(tmp_path)
 
     object_result = ObjectPermanenceMetric().evaluate(episode, episode.predictions)
@@ -67,13 +78,21 @@ def test_real_style_rollout_marks_object_and_contact_unsupported(tmp_path: Path)
 
     assert not object_result.is_available
     assert object_result.score is None
-    assert object_result.reason == "Reliable object tracking is unavailable for this rollout."
+    assert (
+        object_result.reason
+        == "Reliable object tracking is unavailable for this rollout."
+    )
     assert not contact_result.is_available
     assert contact_result.score is None
-    assert contact_result.reason == "Reliable robot and object tracking are unavailable for this rollout."
+    assert (
+        contact_result.reason
+        == "Reliable robot and object tracking are unavailable for this rollout."
+    )
 
 
-def test_unavailable_object_and_contact_metrics_are_excluded_from_overall_score() -> None:
+def test_unavailable_object_and_contact_metrics_are_excluded_from_overall_score() -> (
+    None
+):
     metrics = {
         "visual_similarity": MetricResult(name="visual_similarity", score=80.0),
         "temporal_stability": MetricResult(name="temporal_stability", score=60.0),
@@ -129,7 +148,12 @@ def test_reports_show_na_and_reason_for_object_and_contact(capsys) -> None:
         score=99.7,
         metrics=episode.metrics,
         episodes=[episode],
-        weights={"visual_similarity": 0.25, "temporal_stability": 0.20, "object_permanence": 0.15, "contact_realism": 0.10},
+        weights={
+            "visual_similarity": 0.25,
+            "temporal_stability": 0.20,
+            "object_permanence": 0.15,
+            "contact_realism": 0.10,
+        },
     )
 
     payload.print_summary()
@@ -140,4 +164,7 @@ def test_reports_show_na_and_reason_for_object_and_contact(capsys) -> None:
     assert "Contact Realism" in output
     assert "N/A" in output
     assert "Reliable object tracking is unavailable for this rollout." in markdown
-    assert "Reliable robot and object tracking are unavailable for this rollout." in markdown
+    assert (
+        "Reliable robot and object tracking are unavailable for this rollout."
+        in markdown
+    )

@@ -12,8 +12,12 @@ def generate_markdown_report(result: EvaluationResult) -> str:
     metric_rows = [
         [
             name.replace("_", " ").title(),
-            f"{metric.score:.1f}/100" if metric.is_available and metric.score is not None else "N/A",
-            f"{result.weights.get(name, 0.0):.0%}" if metric.is_available else "N/A",
+            f"{metric.score:.1f}/100"
+            if metric.is_available and metric.score is not None
+            else "N/A",
+            f"{result.effective_normalized_weights.get(name, 0.0):.0%}"
+            if metric.is_available
+            else "N/A",
         ]
         for name, metric in result.metrics.items()
     ]
@@ -22,7 +26,9 @@ def generate_markdown_report(result: EvaluationResult) -> str:
             episode.episode,
             f"{episode.score:.1f}/100",
             ", ".join(
-                f"{name}={metric.score:.1f}" if metric.is_available and metric.score is not None else f"{name}=N/A"
+                f"{name}={metric.score:.1f}"
+                if metric.is_available and metric.score is not None
+                else f"{name}=N/A"
                 for name, metric in episode.metrics.items()
             ),
         ]
@@ -34,13 +40,25 @@ def generate_markdown_report(result: EvaluationResult) -> str:
     sections = [
         "# WorldBench Evaluation Report",
         "",
-        f"**Overall Score:** {result.score:.1f}/100",
+        f"**Composite Score:** {result.score:.2f}/100",
+        "",
+        f"**Metric coverage:** {result.coverage.get('available_metric_count', 0)} of {result.coverage.get('configured_metric_count', 0)} configured metrics",
+        "",
+        f"**Configured weight coverage:** {float(result.coverage.get('configured_weight_coverage', 0.0)):.0%}",
         "",
         f"**Main failure:** {result.main_failure}",
         "",
         "## Metric Scores",
         "",
-        markdown_table(["Metric", "Score", "Weight"], metric_rows),
+        markdown_table(["Metric", "Score", "Effective Weight"], metric_rows),
+        "",
+        "### Unsupported Metrics",
+        "",
+        "\n".join(
+            f"- {name.replace('_', ' ').title()}"
+            for name in result.coverage.get("unsupported_metrics", [])
+        )
+        or "- None",
         "",
         "## Per-Episode Scores",
         "",
@@ -48,7 +66,9 @@ def generate_markdown_report(result: EvaluationResult) -> str:
         "",
         "## Evidence",
         "",
-        "\n".join(f"- {item}" for item in evidence) if evidence else "- No major metric issues were detected.",
+        "\n".join(f"- {item}" for item in evidence)
+        if evidence
+        else "- No major metric issues were detected.",
         "",
         "## Suggested Next Steps",
         "",
@@ -59,6 +79,9 @@ def generate_markdown_report(result: EvaluationResult) -> str:
         f"- Dataset: `{result.dataset_path}`",
         f"- Predictions: `{result.predictions_path or 'episode predictions folders'}`",
         f"- Created: `{result.created_at}`",
+        f"- WorldBench version: `{result.worldbench_version or 'legacy artifact'}`",
+        f"- Schema version: `{result.schema_version}`",
+        f"- Configuration hash: `{result.configuration_hash or 'unavailable'}`",
         "",
     ]
     return "\n".join(sections)
@@ -79,7 +102,9 @@ def collect_evidence(result: EvaluationResult) -> list[str]:
         evidence.extend(metric.issues)
     for episode in result.episodes:
         for metric in episode.metrics.values():
-            evidence.extend(_metric_detail_evidence(episode.episode, metric.name, metric.details))
+            evidence.extend(
+                _metric_detail_evidence(episode.episode, metric.name, metric.details)
+            )
         for issue in episode.issues:
             tagged = f"{episode.episode}: {issue}"
             if tagged not in evidence:
@@ -87,13 +112,17 @@ def collect_evidence(result: EvaluationResult) -> list[str]:
     return list(dict.fromkeys(evidence))[:16]
 
 
-def _metric_detail_evidence(episode_name: str, metric_name: str, details: dict) -> list[str]:
+def _metric_detail_evidence(
+    episode_name: str, metric_name: str, details: dict
+) -> list[str]:
     evidence: list[str] = []
     prefix = f"{episode_name}: "
     if metric_name == "action_consistency":
         mismatch = details.get("mismatch_percentage")
         if isinstance(mismatch, (int, float)) and mismatch > 0:
-            evidence.append(f"{prefix}{mismatch:.0f}% of commanded action steps mismatched predicted visual motion.")
+            evidence.append(
+                f"{prefix}{mismatch:.0f}% of commanded action steps mismatched predicted visual motion."
+            )
         failures = details.get("failures")
         if isinstance(failures, list) and failures:
             first = failures[0]
@@ -106,38 +135,63 @@ def _metric_detail_evidence(episode_name: str, metric_name: str, details: dict) 
         first_motion = details.get("first_object_motion_frame")
         first_contact = details.get("first_contact_frame")
         if details.get("moved_before_contact"):
-            evidence.append(f"{prefix}object began moving at frame {first_motion}; estimated contact was frame {first_contact}.")
+            evidence.append(
+                f"{prefix}object began moving at frame {first_motion}; estimated contact was frame {first_contact}."
+            )
     elif metric_name == "object_permanence":
         missing = details.get("missing_frames")
         disappearance = details.get("disappearance_percentage")
         if isinstance(missing, list) and missing:
-            evidence.append(f"{prefix}object missing frames: {missing[:8]} ({float(disappearance or 0):.0f}% disappearance).")
+            evidence.append(
+                f"{prefix}object missing frames: {missing[:8]} ({float(disappearance or 0):.0f}% disappearance)."
+            )
     elif metric_name == "temporal_stability":
         flicker = details.get("flicker_frames")
         largest = details.get("largest_jump_frame")
         if isinstance(flicker, list) and flicker:
-            evidence.append(f"{prefix}flicker/jump frames: {flicker[:8]}; largest jump at frame {largest}.")
+            evidence.append(
+                f"{prefix}flicker/jump frames: {flicker[:8]}; largest jump at frame {largest}."
+            )
     return evidence
 
 
 def suggested_next_steps(result: EvaluationResult) -> list[str]:
-    ordered = sorted(result.metrics.values(), key=lambda metric: metric.score if metric.is_available and metric.score is not None else 101.0)
+    ordered = sorted(
+        result.metrics.values(),
+        key=lambda metric: (
+            metric.score if metric.is_available and metric.score is not None else 101.0
+        ),
+    )
     suggestions: list[str] = []
     for metric in ordered[:3]:
         if not metric.is_available:
-            suggestions.append(f"Review {metric.name.replace('_', ' ')} support for the current action format.")
+            suggestions.append(
+                f"Review {metric.name.replace('_', ' ')} support for the current action format."
+            )
             continue
         if metric.name == "action_consistency":
-            suggestions.append("Add stronger action conditioning and evaluate held-out action sequences.")
+            suggestions.append(
+                "Add stronger action conditioning and evaluate held-out action sequences."
+            )
         elif metric.name == "contact_realism":
-            suggestions.append("Increase interaction examples with explicit pre-contact and post-contact dynamics.")
+            suggestions.append(
+                "Increase interaction examples with explicit pre-contact and post-contact dynamics."
+            )
         elif metric.name == "temporal_stability":
-            suggestions.append("Audit prediction rollout recurrence and add losses that discourage flicker.")
+            suggestions.append(
+                "Audit prediction rollout recurrence and add losses that discourage flicker."
+            )
         elif metric.name == "object_permanence":
-            suggestions.append("Track object permanence through occlusion, contact, and gripper state changes.")
+            suggestions.append(
+                "Track object permanence through occlusion, contact, and gripper state changes."
+            )
         elif metric.name == "visual_similarity":
-            suggestions.append("Improve visual reconstruction quality before relying on generated futures for planning.")
-    suggestions.append("Run WorldBench on a held-out robot-object interaction split before comparing models.")
+            suggestions.append(
+                "Improve visual reconstruction quality before relying on generated futures for planning."
+            )
+    suggestions.append(
+        "Run WorldBench on a held-out robot-object interaction split before comparing models."
+    )
     return list(dict.fromkeys(suggestions))
 
 

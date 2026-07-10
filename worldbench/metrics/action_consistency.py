@@ -8,7 +8,13 @@ import numpy as np
 
 from worldbench.dataset import Episode
 from worldbench.schemas import ActionRecord, MetricResult
-from worldbench.utils import clamp, cosine_similarity, detect_robot_centroid, load_rgb, vector_norm
+from worldbench.utils import (
+    clamp,
+    cosine_similarity,
+    detect_robot_centroid,
+    load_rgb,
+    vector_norm,
+)
 
 
 class ActionConsistencyMetric:
@@ -26,7 +32,9 @@ class ActionConsistencyMetric:
                 issues=["Need at least two predicted frames."],
             )
 
-        unsupported_actions = [action for action in episode.actions if not _supports_motion_adapter(action)]
+        unsupported_actions = [
+            action for action in episode.actions if not _supports_motion_adapter(action)
+        ]
         if unsupported_actions:
             reason = "unsupported raw numeric action vectors require an action adapter."
             return MetricResult(
@@ -50,7 +58,9 @@ class ActionConsistencyMetric:
                 issues=[reason],
             )
 
-        centroids = [detect_robot_centroid(load_rgb(path)) for path in prediction_frames]
+        centroids = [
+            detect_robot_centroid(load_rgb(path)) for path in prediction_frames
+        ]
         step_scores: list[float] = []
         failures: list[dict[str, float | int | str]] = []
         directions: list[dict[str, float | int | str]] = []
@@ -60,12 +70,20 @@ class ActionConsistencyMetric:
             nxt = centroids[idx + 1]
             if current is None or nxt is None:
                 step_scores.append(0.0)
-                failures.append({"t": action.t, "action": action.action, "reason": "robot centroid missing"})
+                failures.append(
+                    {
+                        "t": action.t,
+                        "action": action.action,
+                        "reason": "robot centroid missing",
+                    }
+                )
                 directions.append(
                     {
                         "t": action.t,
                         "action": action.action,
-                        "commanded_direction": _direction_label(_expected_motion(action)),
+                        "commanded_direction": _direction_label(
+                            _expected_motion(action)
+                        ),
                         "predicted_motion_direction": "missing",
                     }
                 )
@@ -111,9 +129,13 @@ class ActionConsistencyMetric:
         move_right = [item for item in failures if item.get("action") == "move_right"]
         issues = []
         if failures:
-            issues.append(f"{failure_rate:.0%} of action steps did not produce matching visual robot motion.")
+            issues.append(
+                f"{failure_rate:.0%} of action steps did not produce matching visual robot motion."
+            )
             if move_right:
-                issues.append(f"{len(move_right)} move_right action(s) failed to move right.")
+                issues.append(
+                    f"{len(move_right)} move_right action(s) failed to move right."
+                )
 
         return MetricResult(
             name=self.name,
@@ -144,7 +166,12 @@ def _expected_motion(action: ActionRecord) -> tuple[float, float]:
         dy = max(abs(dy), 1.0)
     elif "up" in name:
         dy = -max(abs(dy), 1.0)
-    if "stationary" in name or "hold" in name or "close_gripper" in name or "open_gripper" in name:
+    if (
+        "stationary" in name
+        or "hold" in name
+        or "close_gripper" in name
+        or "open_gripper" in name
+    ):
         dx = 0.0
         dy = 0.0
     return float(dx), float(dy)
@@ -156,7 +183,9 @@ def _supports_motion_adapter(action: ActionRecord) -> bool:
     return abs(action.dx) > 0.0 or abs(action.dy) > 0.0
 
 
-def _score_motion(expected: tuple[float, float], observed: tuple[float, float]) -> float:
+def _score_motion(
+    expected: tuple[float, float], observed: tuple[float, float]
+) -> float:
     expected_norm = vector_norm(*expected)
     observed_norm = vector_norm(*observed)
     if expected_norm < 0.1:

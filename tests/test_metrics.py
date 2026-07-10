@@ -2,7 +2,11 @@ from pathlib import Path
 
 from worldbench.backends.demo import DemoBackend
 from worldbench.dataset import load_dataset
-from worldbench.metrics import ActionConsistencyMetric, ObjectPermanenceMetric, VisualSimilarityMetric
+from worldbench.metrics import (
+    ActionConsistencyMetric,
+    ObjectPermanenceMetric,
+    VisualSimilarityMetric,
+)
 from worldbench.runners.evaluator import resolve_prediction_frames
 
 

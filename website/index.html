@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WorldBench: Checkpoint regression testing for robotics world models</title>
+    <meta
+      name="description"
+      content="WorldBench tells robotics teams whether a new world-model checkpoint actually improved by comparing baseline and candidate predictions on the same robot episodes."
+    />
+    <meta property="og:title" content="WorldBench: Checkpoint regression testing for robotics world models" />
+    <meta
+      property="og:description"
+      content="Evaluate baseline and candidate predictions on the same robot episodes, find regressions across metrics, episodes, and horizons, and return PASS or FAIL."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://worldbench.xyz/" />
+    <meta property="og:image" content="https://worldbench.xyz/assets/screenshots/checkpoint-proof.png" />
+    <meta property="og:image:width" content="1920" />
+    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:alt" content="WorldBench checkpoint regression demo with the verified NanoWM result" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://worldbench.xyz/assets/screenshots/checkpoint-proof.png" />
+    <meta name="theme-color" content="#0a0b0d" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script>document.documentElement.classList.add("js");</script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#top">Skip to main content</a>
+    <header class="site-header">
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="brand" href="#top" aria-label="WorldBench home">
+          <span class="brand-mark" aria-hidden="true">WB</span>
+          <span>World<span>Bench</span></span>
+        </a>
+        <div class="nav-links" aria-label="Page sections">
+          <a href="#claim">Proof</a>
+          <a href="#pillars">Workflow</a>
+          <a href="#sdk">Install</a>
+          <a href="#dashboard">Evidence</a>
+          <a href="#audience">Users</a>
+        </div>
+        <div class="nav-actions">
+          <a href="https://github.com/tigee1311/worldbench/releases">v0.4</a>
+          <a class="button button-primary" href="mailto:writetoayushadi@gmail.com?subject=WorldBench%20Early%20Tester">Request evaluation</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-label="WorldBench introduction">
+        <img
+          class="hero-video"
+          src="/assets/screenshots/checkpoint-proof.png"
+          alt="Verified NanoWM checkpoint regression result"
+          preload="auto"
+        />
+        <div class="hero-shade"></div>
+        <div class="grid-bg hero-grid" aria-hidden="true"></div>
+
+        <div class="container hero-content">
+          <div class="hero-product reveal">WorldBench</div>
+          <div class="eyebrow reveal delay-1">Regression testing for robot world-model checkpoints</div>
+          <h1 class="reveal delay-2">
+            Did your new world-model checkpoint actually <span>improve?</span>
+          </h1>
+          <p class="hero-copy reveal delay-3">
+            WorldBench evaluates baseline and candidate predictions on the same robot episodes,
+            finds regressions across metrics, episodes, and prediction horizons, and returns a
+            CI-friendly PASS or FAIL.
+          </p>
+          <div class="hero-actions reveal delay-4">
+            <a class="button button-primary" href="mailto:writetoayushadi@gmail.com?subject=WorldBench%20Early%20Tester">Request an evaluation</a>
+            <a class="button button-secondary" href="#claim">View the real checkpoint proof</a>
+          </div>
+          <div class="hero-chips reveal delay-5" aria-label="WorldBench capabilities">
+            <span>eval-batch</span>
+            <span>per-horizon curves</span>
+            <span>PASS / FAIL gates</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="claim band" id="claim">
+        <div class="container">
+          <div class="section-kicker reveal">Real checkpoint proof</div>
+          <h2 class="section-title centered reveal delay-1">
+            NanoWM 50k baseline to 300k candidate on the same 10 RT-1 episodes.
+          </h2>
+
+          <div class="claim-layout">
+            <div class="chart-panel reveal delay-2" aria-label="NanoWM checkpoint comparison">
+              <div class="chart-header">
+                <span>WorldBench gate</span>
+                <span>NanoWM-B/2</span>
+              </div>
+              <div class="proof-grid" aria-label="Checkpoint regression scores">
+                <div class="score-row">
+                  <span>Composite Score</span>
+                  <strong>85.67 &rarr; 87.28</strong>
+                </div>
+                <div class="score-row">
+                  <span>Change</span>
+                  <strong>+1.61</strong>
+                </div>
+                <div class="score-row">
+                  <span>Visual</span>
+                  <strong>+2.19</strong>
+                </div>
+                <div class="score-row">
+                  <span>Temporal</span>
+                  <strong>+0.89</strong>
+                </div>
+                <div class="score-row">
+                  <span>Episodes</span>
+                  <strong>9 improved, 1 regressed</strong>
+                </div>
+                <div class="score-row">
+                  <span>Gate</span>
+                  <strong>PASS</strong>
+                </div>
+              </div>
+              <p>
+                The later checkpoint improved overall, while WorldBench still caught the episode
+                where it got worse. This is a fixed 10-episode proof, not a leaderboard result.
+              </p>
+              <p class="metric-limit">
+                Scored metrics: Visual Similarity and Temporal Stability only. Action Consistency,
+                Object Permanence, and Contact Realism were N/A for these RGB video pairs.
+              </p>
+            </div>
+
+            <div class="metric-stack">
+              <article class="metric-card reveal delay-3">
+                <strong>+1.61</strong>
+                <span>Composite Score improvement across the fixed RT-1 validation slice</span>
+              </article>
+              <article class="metric-card reveal delay-4">
+                <strong>9/10</strong>
+                <span>Episodes improved by the 300k checkpoint over the 50k checkpoint</span>
+              </article>
+              <article class="metric-card reveal delay-5">
+                <strong>1</strong>
+                <span>Small episode-level regression surfaced instead of hidden in the aggregate</span>
+              </article>
+            </div>
+          </div>
+          <div class="code-window reveal" id="sdk" aria-label="WorldBench quickstart code">
+            <div class="window-bar"><span></span><span></span><span></span><strong>checkpoint-gate.sh</strong><em>bash</em></div>
+            <pre><code><span class="line"><b>1</b>pip install "worldbench[video]"</span>
+<span class="line"><b>2</b>worldbench eval-batch --ground-truth eval_suite/ --predictions checkpoint_old/ --name checkpoint_old --config worldbench.yml</span>
+<span class="line"><b>3</b>worldbench eval-batch --ground-truth eval_suite/ --predictions checkpoint_new/ --name checkpoint_new --config worldbench.yml</span>
+<span class="line"><b>4</b>worldbench gate --baseline checkpoint_old.json --candidate checkpoint_new.json --config worldbench.yml</span></code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="pillars">
+        <div class="container">
+          <div class="section-kicker reveal">01 - What WorldBench evaluates</div>
+          <h2 class="section-title reveal delay-1">
+            Scores stay explicit about which evidence was actually available.
+          </h2>
+          <p class="section-copy reveal delay-2">
+            Your model code generates prediction videos. WorldBench evaluates them locally, keeps
+            unsupported metrics as N/A, aggregates episode and horizon behavior, and returns PASS or FAIL.
+          </p>
+
+          <div class="pillar-grid">
+            <article class="pillar reveal">
+              <span>01</span>
+              <small>Available</small>
+              <h3>Visual Similarity</h3>
+              <p>Compares aligned ground-truth and predicted RGB future frames.</p>
+            </article>
+            <article class="pillar reveal delay-1">
+              <span>02</span>
+              <small>Available</small>
+              <h3>Temporal Stability</h3>
+              <p>Measures future-frame transitions when at least two predicted frames exist.</p>
+            </article>
+            <article class="pillar reveal delay-2">
+              <span>03</span>
+              <small>Adapter</small>
+              <h3>Action Consistency</h3>
+              <p>Requires known action semantics or a robot-specific action adapter.</p>
+            </article>
+            <article class="pillar reveal delay-3">
+              <span>04</span>
+              <small>Tracker</small>
+              <h3>Object Permanence</h3>
+              <p>Requires reliable object tracking; otherwise it remains N/A.</p>
+            </article>
+            <article class="pillar reveal delay-4">
+              <span>05</span>
+              <small>Tracker</small>
+              <h3>Contact Realism</h3>
+              <p>Requires robot and object tracking; otherwise it remains N/A.</p>
+            </article>
+            <article class="pillar reveal delay-5">
+              <span>06</span>
+              <small>Transparent</small>
+              <h3>Composite Score</h3>
+              <p>Reports metric count, configured-weight coverage, effective weights, and unsupported metrics.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+
+      <section class="section dashboard-section" id="dashboard">
+        <div class="container">
+          <div class="section-kicker reveal">02 - CI regression gate</div>
+          <h2 class="section-title reveal delay-1">
+            Fail a release when the candidate loses required evidence or quality.
+          </h2>
+          <p class="section-copy reveal delay-2">
+            WorldBench writes timestamped result JSON for video, batch, and gate runs; unsupported
+            metrics stay N/A instead of being averaged as zero.
+          </p>
+
+          <div class="dashboard-layout">
+            <div class="screenshot-shell reveal delay-2">
+              <div class="tab-list" aria-label="WorldBench checkpoint evidence">
+                <button class="tab is-active" type="button" aria-pressed="true" data-shot="proof">
+                  Checkpoint proof
+                </button>
+                <button class="tab" type="button" aria-pressed="false" data-shot="terminal">
+                  Terminal gate
+                </button>
+              </div>
+              <img
+                id="dashboard-shot"
+                src="/assets/screenshots/checkpoint-proof.png"
+                alt="Verified WorldBench NanoWM checkpoint proof"
+                width="1920"
+                height="1080"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+
+            <div class="diagnosis-panel reveal delay-3">
+              <div class="panel-header">
+                <span>WorldBench Gate</span>
+                <span>gate.json</span>
+              </div>
+              <div class="score-row">
+                <span>Status</span>
+                <strong>PASS</strong>
+              </div>
+              <div class="score-row">
+                <span>Composite change</span>
+                <strong>+1.61</strong>
+              </div>
+              <div class="score-row">
+                <span>Episodes</span>
+                <strong>9 improved / 1 regressed</strong>
+              </div>
+              <div class="failure-note">
+                The candidate improved overall, but WorldBench still surfaced the one episode-level regression.
+              </div>
+              <a class="button button-secondary" href="https://github.com/tigee1311/worldbench#readme">Read the docs</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section audience-section" id="audience">
+        <div class="container">
+          <div class="section-kicker reveal">03 - Honest limitations</div>
+          <h2 class="section-title reveal delay-1">
+            WorldBench is a local regression tool, not a universal robotics benchmark.
+          </h2>
+
+          <div class="audience-grid">
+            <article class="audience-card reveal">
+              <span>01</span>
+              <h3>Metric coverage</h3>
+              <p>The NanoWM proof supports two metrics. Raw actions and real scenes need adapters for the remaining metrics.</p>
+            </article>
+            <article class="audience-card reveal delay-1">
+              <span>02</span>
+              <h3>Validation scope</h3>
+              <p>The public proof covers two checkpoints and 10 fixed episodes, not a universal ranking.</p>
+            </article>
+            <article class="audience-card reveal delay-2">
+              <span>03</span>
+              <h3>Saved predictions</h3>
+              <p>WorldBench evaluates aligned prediction artifacts; teams provide their own model inference.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta" id="cta">
+        <div class="grid-bg" aria-hidden="true"></div>
+        <div class="container cta-content">
+          <h2 class="reveal">Looking for <span>3 early testing partners.</span></h2>
+          <p class="reveal delay-1">
+            Training a robot world model? Send prediction videos from the same episodes for your baseline and candidate checkpoints. I will personally help run the first evaluation.
+          </p>
+          <div class="hero-actions reveal delay-2">
+            <a class="button button-primary" href="mailto:writetoayushadi@gmail.com?subject=WorldBench%20Early%20Tester">Request an evaluation</a>
+            <a class="button button-secondary" href="https://github.com/tigee1311/worldbench/issues/new?template=test-worldbench.yml">Open request form</a>
+            <a class="button button-secondary" href="https://github.com/tigee1311/worldbench">Documentation</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <a class="brand" href="#top" aria-label="WorldBench home">
+          <span class="brand-mark" aria-hidden="true">WB</span>
+          <span>World<span>Bench</span></span>
+        </a>
+        <p>Checkpoint regression testing for robotics world models &copy; 2026</p>
+        <div>
+          <a href="https://github.com/tigee1311/worldbench">GitHub</a>
+          <a href="https://github.com/tigee1311/worldbench/issues">Issues</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/script.js"></script>
+  </body>
+</html>

@@ -8,6 +8,7 @@ from typing import Protocol
 
 import numpy as np
 
+from worldbench.config import WorldBenchConfig, coverage_for, default_config
 from worldbench.dataset import Episode, RolloutDataset, load_dataset
 from worldbench.metrics import (
     ActionConsistencyMetric,
@@ -18,21 +19,17 @@ from worldbench.metrics import (
 )
 from worldbench.schemas import EpisodeResult, EvaluationResult, MetricResult
 from worldbench.utils import clamp, list_image_files, write_json
+from worldbench.version import RESULT_SCHEMA_VERSION, WORLD_BENCH_VERSION
 
-DEFAULT_WEIGHTS = {
-    "visual_similarity": 0.25,
-    "action_consistency": 0.30,
-    "temporal_stability": 0.20,
-    "object_permanence": 0.15,
-    "contact_realism": 0.10,
-}
+DEFAULT_WEIGHTS = default_config().configured_weights
 
 
 class EvaluatorMetric(Protocol):
     name: str
 
-    def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
-        ...
+    def evaluate(
+        self, episode: Episode, prediction_frames: list[Path]
+    ) -> MetricResult: ...
 
 
 def default_metrics() -> list[EvaluatorMetric]:
@@ -48,13 +45,39 @@ def default_metrics() -> list[EvaluatorMetric]:
 class EvaluationRunner:
     """Run WorldBench metrics over a rollout dataset and prediction folder."""
 
-    def __init__(self, dataset: RolloutDataset | str | Path, predictions: str | Path | None = None) -> None:
-        self.dataset = load_dataset(dataset) if isinstance(dataset, (str, Path)) else dataset
+    def __init__(
+        self,
+        dataset: RolloutDataset | str | Path,
+        predictions: str | Path | None = None,
+    ) -> None:
+        self.dataset = (
+            load_dataset(dataset) if isinstance(dataset, (str, Path)) else dataset
+        )
         self.predictions = Path(predictions) if predictions is not None else None
 
-    def run(self, metrics: list[EvaluatorMetric] | None = None, weights: dict[str, float] | None = None) -> EvaluationResult:
-        selected_metrics = metrics or default_metrics()
-        selected_weights = weights or DEFAULT_WEIGHTS
+    def run(
+        self,
+        metrics: list[EvaluatorMetric] | None = None,
+        weights: dict[str, float] | None = None,
+        config: WorldBenchConfig | None = None,
+    ) -> EvaluationResult:
+        effective_config = config or default_config()
+        configured_metrics = effective_config.enabled_metrics
+        if metrics is None:
+            selected_metrics = [
+                metric
+                for metric in default_metrics()
+                if metric.name in configured_metrics
+            ]
+        else:
+            selected_metrics = metrics
+            configured_metrics = [metric.name for metric in selected_metrics]
+        selected_weights = weights or {
+            name: effective_config.configured_weights.get(
+                name, DEFAULT_WEIGHTS.get(name, 0.0)
+            )
+            for name in configured_metrics
+        }
         episode_results: list[EpisodeResult] = []
         global_issues: list[str] = []
 
@@ -103,16 +126,36 @@ class EvaluationRunner:
 
         aggregate_metrics = aggregate_metric_results(episode_results, selected_metrics)
         overall = weighted_score(aggregate_metrics, selected_weights)
+        available_metrics = [
+            name for name, result in aggregate_metrics.items() if result.is_available
+        ]
+        coverage = coverage_for(configured_metrics, selected_weights, available_metrics)
         main_failure = infer_main_failure(aggregate_metrics)
         return EvaluationResult(
+            schema_version=RESULT_SCHEMA_VERSION,
             dataset_path=str(self.dataset.path),
-            predictions_path=str(self.predictions) if self.predictions is not None else None,
+            predictions_path=str(self.predictions)
+            if self.predictions is not None
+            else None,
             created_at=datetime.now(timezone.utc).isoformat(),
             score=overall,
+            composite_score=overall,
             metrics=aggregate_metrics,
             episodes=episode_results,
             horizon=aggregate_horizon_results(episode_results),
             weights=selected_weights,
+            configured_weights=selected_weights,
+            enabled_metrics=configured_metrics,
+            required_metrics=[
+                name
+                for name in effective_config.required_metrics
+                if name in configured_metrics
+            ],
+            effective_normalized_weights=coverage["effective_normalized_weights"],
+            coverage=coverage,
+            configuration=effective_config.model_dump(mode="json", by_alias=True),
+            configuration_hash=effective_config.configuration_hash,
+            worldbench_version=WORLD_BENCH_VERSION,
             issues=global_issues,
             main_failure=main_failure,
         )
@@ -131,7 +174,10 @@ class EvaluationRunner:
     def _episodes_to_evaluate(self) -> list[Episode]:
         if self.predictions is None:
             return list(self.dataset)
-        if self.predictions.name == "predictions" and self.predictions.parent.name.startswith("episode_"):
+        if (
+            self.predictions.name == "predictions"
+            and self.predictions.parent.name.startswith("episode_")
+        ):
             requested = self.predictions.parent.name
             return [episode for episode in self.dataset if episode.name == requested]
         return list(self.dataset)
@@ -149,7 +195,11 @@ def resolve_prediction_frames(episode: Episode, predictions: Path | None) -> lis
 
     direct_images = list_image_files(root)
     if direct_images:
-        if root.name == "predictions" and root.parent.name.startswith("episode_") and root.parent.name != episode.name:
+        if (
+            root.name == "predictions"
+            and root.parent.name.startswith("episode_")
+            and root.parent.name != episode.name
+        ):
             return []
         return direct_images
 
@@ -167,7 +217,9 @@ def resolve_prediction_frames(episode: Episode, predictions: Path | None) -> lis
     return []
 
 
-def weighted_score(results: dict[str, MetricResult], weights: dict[str, float]) -> float:
+def weighted_score(
+    results: dict[str, MetricResult], weights: dict[str, float]
+) -> float:
     total_weight = sum(
         weight
         for name, weight in weights.items()
@@ -179,7 +231,9 @@ def weighted_score(results: dict[str, MetricResult], weights: dict[str, float]) 
         sum(
             float(results[name].score) * weights[name]
             for name in results
-            if name in weights and results[name].is_available and results[name].score is not None
+            if name in weights
+            and results[name].is_available
+            and results[name].score is not None
         )
         / total_weight
     )
@@ -190,20 +244,37 @@ def aggregate_metric_results(
 ) -> dict[str, MetricResult]:
     aggregate: dict[str, MetricResult] = {}
     for metric in metrics:
-        metric_results = [episode.metrics[metric.name] for episode in episode_results if metric.name in episode.metrics]
-        values = [result.score for result in metric_results if result.is_available and result.score is not None]
+        metric_results = [
+            episode.metrics[metric.name]
+            for episode in episode_results
+            if metric.name in episode.metrics
+        ]
+        values = [
+            result.score
+            for result in metric_results
+            if result.is_available and result.score is not None
+        ]
         if not values or any(not result.is_available for result in metric_results):
             reasons = []
             for episode in episode_results:
                 metric_result = episode.metrics.get(metric.name)
-                if metric_result is not None and not metric_result.is_available and metric_result.reason:
+                if (
+                    metric_result is not None
+                    and not metric_result.is_available
+                    and metric_result.reason
+                ):
                     reasons.append(f"{episode.episode}: {metric_result.reason}")
             aggregate[metric.name] = MetricResult(
                 name=metric.name,
                 score=None,
                 status="unsupported",
-                reason=reasons[0].split(": ", 1)[1] if reasons else "Unsupported metric for one or more episodes.",
-                details={"available_episode_scores": values, "unsupported_episodes": reasons},
+                reason=reasons[0].split(": ", 1)[1]
+                if reasons
+                else "Unsupported metric for one or more episodes.",
+                details={
+                    "available_episode_scores": values,
+                    "unsupported_episodes": reasons,
+                },
                 issues=reasons[:20],
             )
             continue
@@ -211,7 +282,9 @@ def aggregate_metric_results(
         for episode in episode_results:
             metric_result = episode.metrics.get(metric.name)
             if metric_result is not None:
-                issues.extend(f"{episode.episode}: {issue}" for issue in metric_result.issues)
+                issues.extend(
+                    f"{episode.episode}: {issue}" for issue in metric_result.issues
+                )
         aggregate[metric.name] = MetricResult(
             name=metric.name,
             score=clamp(float(np.mean(values))),
@@ -225,11 +298,17 @@ def aggregate_metric_results(
 def infer_main_failure(metrics: dict[str, MetricResult]) -> str:
     if not metrics:
         return "No metrics were run."
-    available_metrics = [result for result in metrics.values() if result.is_available and result.score is not None]
+    available_metrics = [
+        result
+        for result in metrics.values()
+        if result.is_available and result.score is not None
+    ]
     if not available_metrics:
         return "No available metrics were scored."
     lowest = min(available_metrics, key=lambda result: result.score)
-    unsupported_count = len([result for result in metrics.values() if not result.is_available])
+    unsupported_count = len(
+        [result for result in metrics.values() if not result.is_available]
+    )
     if float(lowest.score) >= 85:
         if unsupported_count:
             return f"No dominant failure among available metrics; {unsupported_count} metrics were unsupported."
@@ -275,7 +354,9 @@ def compute_episode_horizon(
         unavailable: dict[str, object] = {}
         metric_results: dict[str, MetricResult] = {}
         for metric in metrics:
-            result = _evaluate_horizon_metric(metric, prefix_episode, prefix_predictions)
+            result = _evaluate_horizon_metric(
+                metric, prefix_episode, prefix_predictions
+            )
             metric_results[metric.name] = result
             if result.is_available:
                 available[metric.name] = result.model_dump(mode="json")
@@ -309,12 +390,16 @@ def _evaluate_horizon_metric(
             score=None,
             status="unsupported",
             reason="Temporal stability requires at least one future-frame transition.",
-            issues=["Temporal stability requires at least one future-frame transition."],
+            issues=[
+                "Temporal stability requires at least one future-frame transition."
+            ],
         )
     return metric.evaluate(episode, prediction_frames)
 
 
-def aggregate_horizon_results(episode_results: list[EpisodeResult]) -> dict[str, dict[str, object]]:
+def aggregate_horizon_results(
+    episode_results: list[EpisodeResult],
+) -> dict[str, dict[str, object]]:
     """Aggregate per-horizon metric values across episodes."""
 
     labels = sorted(
@@ -323,7 +408,11 @@ def aggregate_horizon_results(episode_results: list[EpisodeResult]) -> dict[str,
     )
     aggregate: dict[str, dict[str, object]] = {}
     for label in labels:
-        entries = [episode.horizon[label] for episode in episode_results if label in episode.horizon]
+        entries = [
+            episode.horizon[label]
+            for episode in episode_results
+            if label in episode.horizon
+        ]
         metric_names = sorted(
             {
                 name
@@ -358,7 +447,11 @@ def aggregate_horizon_results(episode_results: list[EpisodeResult]) -> dict[str,
                 if isinstance(reason, str) and reason not in reasons:
                     reasons.append(reason)
             unavailable[name] = {
-                "count": sum(1 for entry in entries if name in _as_dict(entry.get("unavailable_metrics"))),
+                "count": sum(
+                    1
+                    for entry in entries
+                    if name in _as_dict(entry.get("unavailable_metrics"))
+                ),
                 "reasons": reasons[:5],
             }
 
