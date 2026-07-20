@@ -1,27 +1,32 @@
 # Roadmap
 
-Immediate priorities are driven by external checkpoint-regression validation.
+This roadmap separates verified current behavior from future work. It does not mark unimplemented items complete.
 
-## Now
+## Working Now
 
-1. First external pilot.
-2. Metric-coverage-safe gate.
-3. Configurable metric profiles.
-4. Copy-paste CI integration.
-5. Second external pilot.
+- frame-dataset evaluation with `worldbench eval`
+- direct video-pair evaluation with `worldbench eval-video`
+- multi-episode checkpoint evaluation with `worldbench eval-batch`
+- per-horizon metric summaries for evaluated video/frame prefixes
+- baseline-vs-candidate regression gate with `worldbench gate`
+- result comparison with `worldbench compare`
+- Markdown reporting with `worldbench report`
+- local dashboard with `worldbench dashboard`
+- native LeRobot import with video and control timelines
+- unsupported metric reporting and available-weight renormalization
+- committed single-rollout NanoWM integration artifact
+- committed frame-freeze and temporal-scramble corruption artifacts
 
 ## Next
 
-1. Action adapters requested by users.
-2. Data format adapters requested by users.
-3. Shared reports.
-4. Additional real-model case study.
+1. explicit action-adapter registry
+2. evaluate more real-model rollouts
+3. evaluate a second real model
+4. get an external user
 
 ## Later
 
-1. ROS support.
-2. Simulation suite integrations, including ideas previously tracked for ManiSkill and RLBench.
-3. Hosted service.
-4. Public leaderboard.
-
-The later items remain useful possibilities, but they should not displace evidence from real external checkpoint workflows.
+- simulator adapters
+- ROS bags
+- shared reports
+- standardized leaderboard

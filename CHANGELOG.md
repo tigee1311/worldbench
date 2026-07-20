@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Refreshed README and focused docs to distinguish the single-rollout NanoWM integration artifact, checkpoint-regression workflow, LeRobot timelines, metric availability, and roadmap status using verified code, tests, and artifacts.
+- Aligned CI lint and package validation with the documented release-readiness checks.
+
 ## 0.4.0 (unreleased)
 
 ### Added

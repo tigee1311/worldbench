@@ -1,8 +1,8 @@
 # Metric Support
 
-WorldBench scores only the metrics that the rollout can support. Unsupported metrics return N/A and are excluded from the Composite Score denominator.
+WorldBench scores only the metrics that the rollout can support. Unsupported metrics are reported as `status: unsupported`, `score: null`, and display as N/A. Unsupported metrics are excluded from the Composite Score denominator, and remaining available weights are renormalized.
 
-Default weights:
+Default weights from [../worldbench/config.py](../worldbench/config.py):
 
 | Metric | Weight |
 | --- | ---: |
@@ -14,112 +14,101 @@ Default weights:
 
 ## Visual Similarity
 
-What it measures:
+Purpose: compare predicted RGB frames against ground-truth rollout frames using MSE, PSNR, and SSIM-style structure.
 
-- pixel-level and structural similarity between ground-truth rollout frames and predicted frames
-- mean squared error
-- PSNR
-- SSIM-style structure
-
-Required signals:
+Required inputs:
 
 - ground-truth image frames
 - predicted image frames
+- at least one aligned frame pair
 
-Available when:
+Availability rule:
 
-- at least one aligned ground-truth/prediction pair can be loaded
+- all aligned pairs returned by `load_aligned_pairs(episode.frames, prediction_frames)` are scored
+- predictions are resized to the ground-truth frame size before scoring
 
-N/A behavior:
+Unavailable behavior:
 
-- this metric currently does not return N/A for missing pairs
-- if no aligned frame pairs exist, it returns 0 with an issue
+- this metric currently does not return N/A for missing frame pairs
+- if no aligned pairs exist, it returns `0.0` with issue `No aligned frame pairs available.`
 
 Known limitations:
 
-- it can rate visually plausible but control-useless predictions highly
-- it does not understand actions, contact, or object identity
-- if `scikit-image` is not installed, WorldBench uses a lightweight NumPy SSIM fallback
+- visually plausible but control-useless predictions can score highly
+- the metric does not understand actions, object identity, or contact
+- if `scikit-image` is unavailable, WorldBench uses its NumPy SSIM fallback
 
 ## Temporal Stability
 
-What it measures:
+Purpose: penalize frame-to-frame jumps, flicker-like deltas, and high variance across predicted future frames.
 
-- frame-to-frame prediction stability
-- sudden jumps
-- flicker-like high deltas
-- variance in frame deltas
+Required inputs:
 
-Required signals:
+- at least two predicted image frames
 
-- predicted image frames
+Availability rule:
 
-Available when:
+- the full metric scores frame-to-frame differences across all predicted frames
+- per-horizon evaluation marks `t+1` unavailable because one frame has no future-frame transition
 
-- at least two predicted frames are available
+Unavailable behavior:
 
-N/A behavior:
-
-- this metric currently does not return N/A for short predictions
-- if fewer than two predicted frames exist, it returns 0 with an issue
+- the full metric currently returns `0.0` with issue `Need at least two predicted frames.` when fewer than two frames exist
+- the per-horizon wrapper returns N/A with reason `Temporal stability requires at least one future-frame transition.`
 
 Known limitations:
 
 - smooth but wrong videos can score well
-- temporal scrambling currently produces a weaker score response than frame freezing on the compact Yaskawa validation artifacts
-- the metric is not a replacement for per-horizon analysis
+- temporal scrambling currently causes a smaller score decrease than frame freezing in the committed corruption artifacts
 
 ## Action Consistency
 
-What it measures:
+Purpose: check whether predicted visual robot motion follows logged action direction.
 
-- whether predicted visual robot motion follows the logged action direction
+Required inputs:
 
-Required signals:
+- at least two predicted frames
+- action records aligned to predicted frame transitions
+- string actions such as `move_right`, `move_left`, `move_up`, `move_down`, `hold`, `open_gripper`, or `close_gripper`, or explicit nonzero `dx`/`dy`
+- a visible robot centroid under the current image detector
 
-- predicted image frames
-- action records
-- either string actions such as `move_right`/`move_left` or explicit `dx` and `dy`
-- visible robot centroid under the current lightweight detector
+Availability rule:
 
-Available when:
+- string actions are interpreted by name
+- non-string actions are supported only when explicit `dx` or `dy` is nonzero
+- no action adapter registry exists yet
 
-- at least two predicted frames exist
-- actions can be interpreted by the current motion adapter logic
+N/A behavior:
 
-Returns N/A when:
-
-- fewer than two predicted frames exist
-- raw arbitrary numeric action vectors are provided without explicit `dx`/`dy`
-- no actions align to predicted frames
+- fewer than two predicted frames: `Need at least two predicted frames.`
+- raw arbitrary numeric action vectors: `unsupported raw numeric action vectors require an action adapter.`
+- no actions aligned to predictions: `No actions aligned to predicted frames.`
 
 Known limitations:
 
-- raw 7D robot action vectors require an explicit adapter
-- current string/dx/dy behavior is appropriate for synthetic and simple screen-space tests, not general robot kinematics
+- raw 7D robot action vectors require an explicit adapter before scoring is meaningful
+- current motion logic is screen-space and suitable for synthetic/simple fixtures, not general robot kinematics
 
 ## Object Permanence
 
-What it measures:
+Purpose: check whether a task-relevant object remains visible and stable across predicted frames.
 
-- whether a task-relevant object remains visible and stable across predicted frames
-
-Required signals:
+Required inputs:
 
 - predicted image frames
-- rollout metadata that explicitly marks the rollout as synthetic
+- rollout metadata explicitly labeled as synthetic
 - object pixels detectable by the current green-object heuristic
 
-Available when:
+Availability rule:
 
-- the rollout is synthetic or explicitly labeled as synthetic in metadata
-- predicted frames contain detectable object pixels
+- `rollout_supports_synthetic_tracking` must return true from the episode metadata
+- at least one predicted frame must contain detectable object pixels
 
-Returns N/A when:
+N/A behavior:
 
-- the rollout is real-world data or otherwise not labeled for synthetic tracking
-- no predictions are available
-- reliable object pixels cannot be detected
+- non-synthetic or real-world rollout: `Reliable object tracking is unavailable for this rollout.`
+- no predicted frames: `No predicted frames available.`
+- no detectable object pixels: `Reliable object tracking is unavailable for this rollout.`
 
 Known limitations:
 
@@ -128,27 +117,24 @@ Known limitations:
 
 ## Contact Realism
 
-What it measures:
+Purpose: penalize object motion before plausible robot/object contact.
 
-- whether an object starts moving before plausible robot/object contact
+Required inputs:
 
-Required signals:
-
-- predicted image frames
-- rollout metadata that explicitly marks the rollout as synthetic
+- at least two predicted image frames
+- rollout metadata explicitly labeled as synthetic
 - detectable robot and object centroids
 
-Available when:
+Availability rule:
 
-- the rollout is synthetic or explicitly labeled as synthetic in metadata
-- at least two predicted frames exist
-- robot and object tracking can be estimated by the current detector
+- `rollout_supports_synthetic_tracking` must return true from the episode metadata
+- robot/object centroids are estimated from lightweight image heuristics
 
-Returns N/A when:
+N/A behavior:
 
-- the rollout is real-world data or otherwise not labeled for synthetic tracking
-- fewer than two predicted frames exist
-- reliable object or robot tracking is unavailable
+- non-synthetic or real-world rollout: `Reliable robot and object tracking are unavailable for this rollout.`
+- fewer than two predicted frames: `Need at least two predicted frames.`
+- missing tracked object: `Reliable robot and object tracking are unavailable for this rollout.`
 
 Known limitations:
 
@@ -158,12 +144,25 @@ Known limitations:
 
 ## Composite Score And Coverage
 
-The Composite Score is computed with available metrics only:
+The Composite Score is computed from available metrics only:
 
 ```text
 sum(score_i * weight_i for available metric_i) / sum(weight_i for available metric_i)
 ```
 
-If no metrics are available, the Composite Score is 0. Schema-v2 results also report available/configured metric count, configured-weight coverage, effective normalized weights, and unsupported metric names so the number is never presented as full coverage when it is not.
+If no metrics are available, the Composite Score is `0.0`.
 
-Unsupported metrics are preserved in reports with `status: unsupported`, `score: null`, a reason, and any supporting details.
+Schema-v2 results report:
+
+- available and unsupported metrics
+- available/configured metric count
+- configured-weight coverage
+- effective normalized weights
+- enabled and required metrics
+- effective configuration and configuration hash
+
+The committed NanoWM single-rollout artifact predates schema v2, but its score still follows the same available-weight denominator:
+
+```text
+(89.24097498284189 * 0.25 + 96.32682361785054 * 0.20) / 0.45 = 92.39024104284573
+```

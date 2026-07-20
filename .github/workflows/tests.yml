@@ -18,7 +18,7 @@ jobs:
       - name: Unit and offline integration tests
         run: python -m pytest
       - name: Lint
-        run: ruff check worldbench tests
+        run: ruff check .
       - name: Formatting check for 0.4 surfaces
         run: >-
           ruff format --check
@@ -35,8 +35,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: python -m pip install --upgrade pip build
+      - run: python -m pip install --upgrade pip build twine
       - run: python -m build
+      - run: python -m twine check dist/*
       - name: Install wheel in clean virtual environment
         run: |
           python -m venv /tmp/worldbench-wheel
