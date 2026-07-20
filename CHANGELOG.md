@@ -1,13 +1,6 @@
 # Changelog
 
-## Unreleased
-
-### Changed
-
-- Refreshed README and focused docs to distinguish the single-rollout NanoWM integration artifact, checkpoint-regression workflow, LeRobot timelines, metric availability, and roadmap status using verified code, tests, and artifacts.
-- Aligned CI lint and package validation with the documented release-readiness checks.
-
-## 0.4.0 (unreleased)
+## [0.4.0] - 2026-07-20
 
 ### Added
 
@@ -15,6 +8,7 @@
 - Schema-v2 composite-score coverage, configuration, version, and dataset identity metadata
 - Required-metric, minimum-count, minimum-coverage, weight-coverage, episode-regression, and strict-configuration gate checks
 - Complete GitHub Actions checkpoint-gate example and focused operator documentation
+- Focused README, release notes, and documentation for the single-rollout NanoWM artifact, checkpoint-regression proof, LeRobot timelines, metric availability, and roadmap status
 
 ### Changed
 
@@ -22,6 +16,7 @@
 - Made the real NanoWM 50k-vs-300k checkpoint comparison the primary public proof
 - Tightened gate behavior so weaker or materially different evaluations cannot silently pass
 - Reduced public CLI help to production evaluation, gate, reporting, import, and validation workflows
+- Aligned CI lint and package validation with the documented release-readiness checks
 
 ### Deprecated
 

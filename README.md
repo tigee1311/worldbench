@@ -35,6 +35,35 @@ This is a single-rollout integration proof, not a standardized leaderboard resul
 
 Artifact: [artifacts/real_model_eval/nanowm_rt1_episode0.json](artifacts/real_model_eval/nanowm_rt1_episode0.json)
 
+## Real Checkpoint Regression Proof
+
+WorldBench also compares checkpoints from the same model family on the same fixed episode suite.
+
+| Verified setup | Value |
+| --- | --- |
+| Model family | NanoWM-B/2 |
+| Baseline checkpoint | `knightnemo/nanowm-b2-rt1-abl-pred-v-50k` |
+| Candidate checkpoint | `knightnemo/nanowm-b2-rt1-300k` |
+| Dataset | RT-1 / Fractal via LeRobot |
+| Fixed episode count | 10 |
+| Episode range | 0 through 9 |
+
+| Verified result | Value |
+| --- | ---: |
+| Baseline Composite Score mean | 85.67 |
+| Candidate Composite Score mean | 87.28 |
+| Composite Score delta | +1.61 |
+| Visual Similarity delta | +2.19 |
+| Temporal Stability delta | +0.89 |
+| Improved / regressed / unchanged episodes | 9 / 1 / 0 |
+| Gate result | strict PASS; engineering-threshold PASS |
+
+WorldBench detected that the candidate improved in aggregate while still surfacing the episode that regressed: `episode_002.mp4` changed by -0.33.
+
+This is a fixed 10-episode validation proof, not a standardized leaderboard result or universal model ranking.
+
+Artifacts and documentation: [artifacts/checkpoint_validation/](artifacts/checkpoint_validation/), [docs/checkpoint_validation.md](docs/checkpoint_validation.md), and [docs/checkpoint_regression.md](docs/checkpoint_regression.md).
+
 ## Quickstart
 
 From a repository checkout, install the package and run the committed sample dataset:
