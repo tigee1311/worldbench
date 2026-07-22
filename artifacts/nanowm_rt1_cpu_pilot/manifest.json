@@ -1,0 +1,84 @@
+{
+  "schema_version": "1",
+  "adapter": "nanowm_rt1_prepare_worldbench_inputs",
+  "dataset": "RT-1 / Fractal",
+  "dataset_source": "IPEC-COMMUNITY/fractal20220817_data_lerobot",
+  "episodes": [
+    {
+      "episode_id": "rt1/episode_000000.mp4",
+      "output_relative_path": "rt1/episode_000000.mp4",
+      "frame_count": 4,
+      "context_frames": 1,
+      "prediction_frames": 3,
+      "resolution": [
+        256,
+        256
+      ],
+      "source_kind": "video"
+    }
+  ],
+  "camera": "observation.images.image",
+  "baseline_checkpoint": "knightnemo/nanowm-b2-rt1-abl-pred-v-50k",
+  "candidate_checkpoint": "knightnemo/nanowm-b2-rt1-300k",
+  "context_frames": 1,
+  "prediction_frames": 3,
+  "fps": 3.0,
+  "resolution": [
+    256,
+    256
+  ],
+  "ground_truth_directory": "ground_truth",
+  "baseline_directory": "baseline",
+  "candidate_directory": "candidate",
+  "source_files": [
+    {
+      "episode_id": "rt1/episode_000000.mp4",
+      "ground_truth": {
+        "path": "<research-workspace>/results/nanowm_rt1_pilot/ground_truth/rt1/episode_000000.mp4",
+        "kind": "video",
+        "frame_count": 4,
+        "resolution": [
+          256,
+          256
+        ],
+        "fps": 3.0,
+        "files": [
+          "<research-workspace>/results/nanowm_rt1_pilot/ground_truth/rt1/episode_000000.mp4"
+        ]
+      },
+      "baseline": {
+        "path": "<research-workspace>/results/nanowm_rt1_pilot/predictions/rt1/episode_000000.mp4",
+        "kind": "video",
+        "frame_count": 4,
+        "resolution": [
+          256,
+          256
+        ],
+        "fps": 3.0,
+        "files": [
+          "<research-workspace>/results/nanowm_rt1_pilot/predictions/rt1/episode_000000.mp4"
+        ]
+      },
+      "candidate": {
+        "path": "<research-workspace>/results/nanowm_rt1_300k_pilot/predictions/rt1/episode_000000.mp4",
+        "kind": "video",
+        "frame_count": 4,
+        "resolution": [
+          256,
+          256
+        ],
+        "fps": 3.0,
+        "files": [
+          "<research-workspace>/results/nanowm_rt1_300k_pilot/predictions/rt1/episode_000000.mp4"
+        ]
+      }
+    }
+  ],
+  "created_at": "2026-07-22T23:22:52.160824+00:00",
+  "worldbench_version": "0.4.0",
+  "worldbench_commit": "0edacbbda9f3640280252739976f40d5db7fec6e",
+  "known_limitations": [
+    "One fixed episode; CPU-only reproducibility pilot, not broad model quality evidence.",
+    "NanoWM inference ran outside WorldBench; this adapter only standardizes completed outputs."
+  ]
+}
