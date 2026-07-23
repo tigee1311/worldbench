@@ -15,6 +15,34 @@ WorldBench resolves runtime policy in this order:
 
 Evaluation commands use the selected configuration file or built-in defaults. Gate commands then apply CLI gate flags over the selected configuration.
 
+### `eval-videos`
+
+Beginner-friendly evaluation for one saved predicted robot future against its matching ground-truth future:
+
+```bash
+worldbench eval-videos --ground-truth ground_truth.mp4 --prediction predicted_future.mp4 --output results/
+```
+
+This command decodes both videos, uses safe frame-index alignment, resizes prediction frames to the ground-truth resolution when needed, rejects major frame-count mismatches, prints a readable summary, and writes:
+
+- `results/result.json`
+- `results/summary.md`
+- `results/artifacts/comparison.png`
+
+It returns `0` when evaluation completes, even if some metrics are N/A. It returns nonzero for genuine execution failures such as missing files, unreadable videos, unsafe alignment, invalid output paths, or missing video dependencies.
+
+`--ground-truth` is preferred. `--reference` remains as a backward-compatible alias, but do not pass both.
+
+`eval-videos` is not a checkpoint-regression command by itself. For checkpoint regression, evaluate baseline and candidate predictions against the same ground-truth suite with `eval-batch`, then compare the batch artifacts with `gate`.
+
+Run a no-file smoke test:
+
+```bash
+worldbench eval-videos --demo --output results/demo
+```
+
+Details: [SAVED_VIDEO_EVALUATION.md](SAVED_VIDEO_EVALUATION.md)
+
 ### `eval-video`
 
 Evaluate one aligned ground-truth/prediction video pair. Context frames are removed from both inputs and only the future is scored.
@@ -22,6 +50,8 @@ Evaluate one aligned ground-truth/prediction video pair. Context frames are remo
 ```bash
 worldbench eval-video --ground-truth gt.mp4 --prediction pred.mp4 --skip-context 4 --config worldbench.yml
 ```
+
+This strict command is retained for backward compatibility. It requires matching future-frame counts, resolution, and FPS metadata. New users with only two saved MP4 files should usually start with `eval-videos`.
 
 ### `eval-batch`
 
