@@ -1,43 +1,29 @@
-# WorldBench Robotics
+# WorldBench
 
-Testing and regression infrastructure for robotics world models.
+Regression testing for video-based robotics world models.
 
-Bring your own robot rollout and predicted futures. WorldBench evaluates the checks supported by the available data, marks unsupported metrics N/A, and saves reproducible results.
+WorldBench compares baseline and candidate checkpoints on the same prediction suite, then surfaces the individual episodes and future horizons that became worse.
+
+Did this new world-model checkpoint improve, and what became worse?
+
+```text
+Same fixed episodes
+        ->
+Baseline predictions vs candidate predictions
+        ->
+Per-episode and per-horizon deltas
+        ->
+CI-ready PASS or FAIL
+```
 
 [![Tests](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml/badge.svg)](https://github.com/tigee1311/worldbench/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 ![Version](https://img.shields.io/badge/version-0.4.0-blue)
 ![License](https://img.shields.io/github/license/tigee1311/worldbench)
 
-## Real-Model Integration Proof
-
-A single-rollout integration proof using one NanoWM RT-1 rollout and eight generated future frames.
-
-| Field | Verified value |
-| --- | --- |
-| Model | NanoWM B2 RT-1 300K (`knightnemo/nanowm-b2-rt1-300k`) |
-| Dataset | RT-1 / Fractal |
-| Scope | one rollout |
-| Generated future frames evaluated | eight |
-| Resolution | 256x256 RGB |
-| FPS | 3 |
-
-| Metric | Result |
-| --- | ---: |
-| Overall | 92.4 |
-| Visual Similarity | 89.2 |
-| Temporal Stability | 96.3 |
-| Action Consistency | N/A |
-| Object Permanence | N/A |
-| Contact Realism | N/A |
-
-This is a single-rollout integration proof, not a standardized leaderboard result and not a claim that NanoWM is 92.4% accurate.
-
-Artifact: [artifacts/real_model_eval/nanowm_rt1_episode0.json](artifacts/real_model_eval/nanowm_rt1_episode0.json)
-
 ## Real Checkpoint Regression Proof
 
-WorldBench also compares checkpoints from the same model family on the same fixed episode suite.
+WorldBench's strongest committed proof compares two NanoWM checkpoints from the same model family on the same fixed RT-1 / Fractal episode suite.
 
 | Verified setup | Value |
 | --- | --- |
@@ -60,15 +46,9 @@ WorldBench also compares checkpoints from the same model family on the same fixe
 
 WorldBench detected that the candidate improved in aggregate while still surfacing the episode that regressed: `episode_002.mp4` changed by -0.33.
 
-This is a fixed 10-episode validation proof, not a standardized leaderboard result or universal model ranking.
+This is a fixed 10-episode validation proof, not a public cross-model ranking or a claim of universal model quality.
 
 Artifacts and documentation: [artifacts/checkpoint_validation/](artifacts/checkpoint_validation/), [docs/checkpoint_validation.md](docs/checkpoint_validation.md), and [docs/checkpoint_regression.md](docs/checkpoint_regression.md).
-
-### Reproducible NanoWM RT-1 integration
-
-WorldBench includes a lightweight adapter and guide for evaluating public NanoWM RT-1 checkpoint predictions after NanoWM has generated RGB rollout clips. A one-episode pilot reproduced the 50k-versus-300k comparison on a 16 GB CPU-only Mac with no paid compute; the 10-episode validation above remains the flagship proof.
-
-See: [docs/NANOWM_RT1.md](docs/NANOWM_RT1.md)
 
 ## Quickstart
 
@@ -81,21 +61,140 @@ worldbench eval examples/demo_dataset --predictions examples/demo_dataset/good_m
 worldbench report artifacts/real_model_eval/nanowm_rt1_episode0.json --output .worldbench/readme-quickstart/nanowm_report.md
 ```
 
-The sample dataset is synthetic and exists to verify the local setup. The real-model proof above is the committed NanoWM artifact.
+The sample dataset is synthetic and exists to verify the local setup. The committed real-model NanoWM artifact is documented below.
 
-## How It Works
+## Who It Is For
 
-WorldBench has three verified evaluation paths:
+WorldBench is for researchers and engineers who train video-based robot world models and release multiple prediction checkpoints. It is useful when a team already has a fixed validation rollout suite, is relying on ad hoc comparison scripts, and needs reproducible regression reports before accepting a new checkpoint.
 
-- `eval` scores a WorldBench frame dataset and an optional prediction folder.
-- `eval-video` scores one aligned ground-truth/prediction video pair after removing `--skip-context` frames.
-- `eval-batch` scores a checkpoint folder across matching episode videos, and `gate` compares baseline and candidate batch artifacts.
+For the primary checkpoint-regression workflow, users provide:
+
+- matching ground-truth future videos
+- baseline checkpoint predictions
+- candidate checkpoint predictions
+- consistent episode alignment
+
+A single prediction set can still be evaluated with `eval-video` or `eval-batch`, but the main product workflow is baseline-versus-candidate regression testing.
+
+## Checkpoint Regression Workflow
+
+1. Freeze a fixed suite of robot episodes.
+2. Generate predictions with the baseline checkpoint.
+3. Generate predictions with the candidate checkpoint.
+4. Run WorldBench on matching episodes.
+5. Inspect aggregate, episode, and horizon changes.
+6. Use the gate result to accept or reject the candidate.
+
+```bash
+worldbench eval-batch \
+  --ground-truth eval_suite \
+  --predictions baseline_predictions \
+  --name baseline \
+  --skip-context 4 \
+  --output baseline.json
+
+worldbench eval-batch \
+  --ground-truth eval_suite \
+  --predictions candidate_predictions \
+  --name candidate \
+  --skip-context 4 \
+  --output candidate.json
+
+worldbench gate \
+  --baseline baseline.json \
+  --candidate candidate.json \
+  --strict-config-match \
+  --max-episode-regressions 0
+```
+
+`eval-video` scores one aligned ground-truth/prediction video pair. `eval-batch` scores one checkpoint folder across matching episode videos. `gate` compares baseline and candidate batch artifacts and returns PASS or FAIL.
 
 Results include JSON output, metric coverage, effective normalized weights, unavailable metric reasons, and per-horizon metric summaries when enough frames are available. `compare`, `report`, and `dashboard` provide local comparison, Markdown, and HTML inspection surfaces.
 
+## Scores, Regressions, And Benchmarks
+
+An isolated WorldBench Composite Score does not establish that one unrelated model is universally better than another. The reliable use is:
+
+```text
+same dataset
+same episodes
+same preprocessing
+same context
+same prediction horizon
+baseline versus candidate
+```
+
+Cross-model or cross-dataset score comparisons may be invalid when protocols differ.
+
+General robotics benchmarks ask: how capable is this model or robot?
+
+WorldBench asks: did this new video-based world-model checkpoint regress?
+
+These workflows are complementary. Standardized benchmarks compare models under a shared public protocol; WorldBench tests a team's own model changes on its own fixed prediction suite.
+
+## Compatibility
+
+Directly compatible:
+
+- models that export aligned predicted future RGB frames or videos for robot episodes
+- action-conditioned robot video predictors
+- image-to-video robot world models
+- visual dynamics models
+- latent world models with an RGB decoder
+- simulators or learned models that render predicted visual futures
+
+Requires an adapter before WorldBench can score it correctly:
+
+- robot-specific action vectors
+- state-trajectory predictions
+- latent-only outputs
+- native 3D, 4D, or point-cloud predictions
+
+Not the current target:
+
+- action-only policies
+- VLAs that do not predict future observations
+- text-only environment models
+- symbolic planners
+- closed-loop robot-task evaluation
+
+WorldBench evaluates saved predicted visual futures. It does not run robot control, execute real-world tasks, or provide a universal measure of robot capability.
+
+## Reproducible NanoWM RT-1 Integration
+
+WorldBench includes a lightweight adapter and guide for evaluating public NanoWM RT-1 checkpoint predictions after NanoWM has generated RGB rollout clips. A one-episode pilot reproduced the 50k-versus-300k comparison on a 16 GB CPU-only Mac with no paid compute; the 10-episode validation above remains the flagship proof.
+
+See: [docs/NANOWM_RT1.md](docs/NANOWM_RT1.md)
+
+## Real-Model Integration Proof
+
+A separate single-rollout integration proof verifies that actual NanoWM RT-1 generated future frames can pass through WorldBench. It is retained as integration evidence, not as the primary product proof.
+
+| Field | Verified value |
+| --- | --- |
+| Model | NanoWM B2 RT-1 300K (`knightnemo/nanowm-b2-rt1-300k`) |
+| Dataset | RT-1 / Fractal |
+| Scope | one rollout |
+| Generated future frames evaluated | eight |
+| Resolution | 256x256 RGB |
+| FPS | 3 |
+
+| Metric | Result |
+| --- | ---: |
+| Overall | 92.4 |
+| Visual Similarity | 89.2 |
+| Temporal Stability | 96.3 |
+| Action Consistency | N/A |
+| Object Permanence | N/A |
+| Contact Realism | N/A |
+
+This is a single-rollout integration proof, not a public cross-model ranking and not a claim that NanoWM is 92.4% accurate.
+
+Artifact: [artifacts/real_model_eval/nanowm_rt1_episode0.json](artifacts/real_model_eval/nanowm_rt1_episode0.json)
+
 ## Supported Metrics And N/A Behavior
 
-WorldBench does not invent semantic scores. A metric returns N/A when the rollout does not provide the semantics or signals needed for reliable evaluation. Unsupported metrics are excluded from the weighted overall score, and the remaining available weights are renormalized.
+WorldBench does not invent semantic scores. A metric returns N/A when the rollout does not provide the semantics or signals needed for reliable evaluation. Unsupported metrics are excluded from the weighted overall score, and the remaining available weights are renormalized. Visual Similarity alone does not prove task success or physical correctness.
 
 | Metric | Required input | Current unavailable behavior |
 | --- | --- | --- |
@@ -221,11 +320,12 @@ Details: [docs/DATA_FORMAT.md](docs/DATA_FORMAT.md)
 ## Current Limitations
 
 - The public single-rollout NanoWM artifact covers one rollout and eight generated future frames.
-- The NanoWM artifact is not a standardized leaderboard result or model accuracy claim.
+- The NanoWM artifact is not a public cross-model ranking or model accuracy claim.
 - Arbitrary numeric robot actions require explicit semantics or an action adapter before Action Consistency is meaningful.
 - Real-world Object Permanence and Contact Realism require reliable tracking support.
 - Temporal scrambling currently causes a smaller score decrease than frame freezing in the committed corruption artifacts.
 - WorldBench evaluates saved predictions; it does not run arbitrary model inference.
+- WorldBench performs offline prediction evaluation, not closed-loop task execution.
 - Normal CI does not download LeRobot datasets or run network integration tests.
 
 ## Roadmap
@@ -249,10 +349,9 @@ Details: [docs/DATA_FORMAT.md](docs/DATA_FORMAT.md)
 
 ### Later
 
-- simulator adapters
-- ROS bags
+- adapters for simulator-rendered prediction videos
+- adapters for common robot-video export formats
 - shared reports
-- standardized leaderboard
 
 Details: [docs/ROADMAP.md](docs/ROADMAP.md)
 

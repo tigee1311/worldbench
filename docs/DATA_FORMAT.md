@@ -10,6 +10,19 @@ candidate/episode_001.mp4
 
 Videos must have matching future-frame counts after `--skip-context`, resolution, and FPS. WorldBench rejects silent truncation and resampling. Batch artifacts store episode IDs, skip-context settings, horizon identities, and a SHA-256 identity of the ground-truth video set.
 
+## Compatibility
+
+WorldBench is directly compatible with models that export aligned predicted future RGB frames or videos for robot episodes. This includes action-conditioned robot video predictors, image-to-video robot world models, visual dynamics models, latent world models with an RGB decoder, and simulators or learned models that render predicted visual futures.
+
+These outputs require an adapter before WorldBench can score them correctly:
+
+- robot-specific action vectors
+- state-trajectory predictions
+- latent-only outputs
+- native 3D, 4D, or point-cloud predictions
+
+Without a converter to aligned RGB futures, those formats are not valid `eval-video` or `eval-batch` inputs. WorldBench is not currently a target for action-only policies, VLAs that do not predict future observations, text-only environment models, symbolic planners, or closed-loop robot-task evaluation.
+
 The advanced frame dataset layout is:
 
 ```text

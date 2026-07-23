@@ -44,7 +44,7 @@ from worldbench.version import WORLD_BENCH_VERSION
 console = Console()
 
 
-@click.group(help="Regression testing for robot world-model checkpoints.")
+@click.group(help="Regression testing for video-based robotics world models.")
 @click.version_option(WORLD_BENCH_VERSION, prog_name="worldbench")
 def app() -> None:
     pass

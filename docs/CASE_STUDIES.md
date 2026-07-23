@@ -2,7 +2,7 @@
 
 ## NanoWM Checkpoint Regression
 
-WorldBench compared NanoWM-B/2 checkpoints at 50k and 300k using the same 10 RT-1 / Fractal episodes. The Composite Score changed from 85.67 to 87.28 (`+1.61`), 9 episodes improved, 1 regressed, and the candidate passed the aggregate gate.
+WorldBench compared saved video predictions from NanoWM-B/2 checkpoints at 50k and 300k using the same 10 RT-1 / Fractal episodes. The Composite Score changed from 85.67 to 87.28 (`+1.61`), 9 episodes improved, 1 regressed, and the candidate passed the aggregate gate.
 
 Only Visual Similarity and Temporal Stability were supported. The configured default profile therefore had 2 of 5 metrics and 45% configured-weight coverage. Action Consistency, Object Permanence, and Contact Realism remained `N/A`.
 

@@ -2,7 +2,7 @@
 
 Initial public MVP for evaluating robotics world-model predictions locally.
 
-WorldBench catches when generated robot futures look plausible but fail the checks that matter for control: action consistency, temporal stability, object permanence, contact realism, and visual similarity against ground truth.
+WorldBench catches when generated robot futures look plausible but regress under the available saved-prediction checks: action consistency, temporal stability, object permanence, contact realism, and visual similarity against ground truth.
 
 ## Highlights
 
@@ -24,4 +24,4 @@ WorldBench catches when generated robot futures look plausible but fail the chec
 
 ## Notes
 
-The LeRobot adapter is experimental and local-folder-only. This release does not include official LeRobot integration, ROS bag import, real robot support, cloud run sharing, or a leaderboard.
+The LeRobot adapter is experimental and local-folder-only. This release does not include official LeRobot integration, ROS bag import, real robot support, cloud run sharing, or a public ranking.

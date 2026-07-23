@@ -1,6 +1,8 @@
 # Metric Support
 
-WorldBench scores only the metrics that the rollout can support. Unsupported metrics are reported as `status: unsupported`, `score: null`, and display as N/A. Unsupported metrics are excluded from the Composite Score denominator, and remaining available weights are renormalized.
+WorldBench scores only the metrics that the saved prediction rollout can support. Unsupported metrics are reported as `status: unsupported`, `score: null`, and display as N/A. Unsupported metrics are excluded from the Composite Score denominator, and remaining available weights are renormalized.
+
+WorldBench performs offline prediction evaluation. It does not execute closed-loop robot tasks, and Visual Similarity alone does not prove task success or physical correctness.
 
 Default weights from [../worldbench/config.py](../worldbench/config.py):
 

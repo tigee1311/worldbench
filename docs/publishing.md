@@ -102,5 +102,5 @@ deactivate
 
 - Keep `version` in `pyproject.toml`, `worldbench.__version__`, and the Git tag aligned.
 - Keep release notes accurate about implemented features only.
-- Do not publish claims for unfinished adapters, cloud features, hosted services, or standardized leaderboard status.
+- Do not publish claims for unfinished adapters, cloud features, hosted services, or public ranking status.
 - Do not commit generated videos, PNG frame dumps, model checkpoints, dataset shards, build output, or credentials.
