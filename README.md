@@ -50,6 +50,62 @@ This is a fixed 10-episode validation proof, not a public cross-model ranking or
 
 Artifacts and documentation: [artifacts/checkpoint_validation/](artifacts/checkpoint_validation/), [docs/checkpoint_validation.md](docs/checkpoint_validation.md), and [docs/checkpoint_regression.md](docs/checkpoint_regression.md).
 
+## Evaluate Two Saved Videos in One Command
+
+If you only have one ground-truth video and one generated prediction video, start here:
+
+```bash
+python -m pip install "worldbench[video]"
+
+worldbench eval-videos \
+  --ground-truth ground_truth.mp4 \
+  --prediction predicted_future.mp4 \
+  --output results/
+```
+
+This is a beginner-friendly way to evaluate one saved predicted robot future against its matching ground-truth future. It is not, by itself, checkpoint regression testing. To test checkpoint regression, evaluate baseline and candidate predictions separately against the same ground truth, then use `eval-batch` and `gate`.
+
+The command decodes both videos, aligns future frames by index, resizes the prediction to the ground-truth resolution when needed, rejects unsafe frame-count mismatches, runs every metric that is valid for video-only inputs, and writes:
+
+```text
+results/
+  result.json
+  summary.md
+  artifacts/comparison.png
+```
+
+Expected terminal output resembles:
+
+```text
+WorldBench Saved Video Evaluation
+Frames: ground truth 8 | prediction 8 | scored 8
+Composite Score: 96.10/100
+Metric coverage: 2 of 5 configured metrics
+
+Metric Scores
+Visual Similarity   94.7
+Temporal Stability  97.9
+Action Consistency  N/A
+Object Permanence   N/A
+Contact Realism     N/A
+
+Saved JSON: results/result.json
+Saved Markdown: results/summary.md
+Saved comparison image: results/artifacts/comparison.png
+```
+
+The Composite Score is a weighted summary of available metrics for this specific ground-truth/prediction pair. It is not accuracy, not task success, and not a universal robotics capability score. For video-only inputs, Visual Similarity and Temporal Stability are usually available. Action Consistency needs action semantics, Object Permanence needs reliable object tracking metadata, and Contact Realism needs reliable robot/object contact tracking; without those signals they are reported as N/A and excluded from the weighted score.
+
+Try a no-file demo:
+
+```bash
+worldbench eval-videos --demo --output results/demo
+```
+
+Colab notebook: [examples/colab/worldbench_saved_video_demo.ipynb](examples/colab/worldbench_saved_video_demo.ipynb)
+
+Details: [docs/SAVED_VIDEO_EVALUATION.md](docs/SAVED_VIDEO_EVALUATION.md)
+
 ## Quickstart
 
 From a repository checkout, install the package and run the committed sample dataset:
@@ -272,8 +328,9 @@ Temporal-scramble artifact: [artifacts/temporal_scramble_benchmark.json](artifac
 | Command | Verified purpose |
 | --- | --- |
 | `worldbench validate DATASET_PATH` | validate a WorldBench frame dataset |
+| `worldbench eval-videos --ground-truth PATH --prediction PATH --output DIR` | beginner workflow for one saved ground-truth/prediction video pair |
 | `worldbench eval DATASET_PATH --predictions PATH` | score a frame dataset against prediction frames |
-| `worldbench eval-video --ground-truth PATH --prediction PATH --skip-context INTEGER` | score one matching video pair |
+| `worldbench eval-video --ground-truth PATH --prediction PATH --skip-context INTEGER` | strict backward-compatible single-video evaluator |
 | `worldbench eval-batch --ground-truth PATH --predictions PATH --name TEXT` | score a checkpoint folder across matching episode videos |
 | `worldbench gate --baseline PATH --candidate PATH` | compare batch artifacts and return PASS or FAIL |
 | `worldbench import-lerobot --out PATH` | import LeRobot data into WorldBench format |
