@@ -12,7 +12,7 @@ def test_cli_version_option() -> None:
     result = CliRunner().invoke(app, ["--version"])
 
     assert result.exit_code == 0
-    assert "worldbench, version 0.4.0" in result.output
+    assert "worldbench, version 0.4.1" in result.output
 
 
 def test_compare_models_command_saves_latest_artifacts(

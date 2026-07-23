@@ -108,7 +108,10 @@ def test_eval_videos_help_includes_beginner_example() -> None:
     result = CliRunner().invoke(app, ["eval-videos", "--help"])
 
     assert result.exit_code == 0
-    assert "Evaluate one saved predicted robot future against ground truth" in result.output
+    assert (
+        "Evaluate one saved predicted robot future against ground truth"
+        in result.output
+    )
     assert "Example:" in result.output
     assert "worldbench eval-videos" in result.output
     assert "--ground-truth ground_truth.mp4" in result.output

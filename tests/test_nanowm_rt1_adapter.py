@@ -103,7 +103,9 @@ def test_missing_baseline_prediction_rejected(tmp_path: Path) -> None:
     baseline = _episode_tree(tmp_path / "baseline", ["episode_001"])
 
     with pytest.raises(adapter.AdapterError, match="missing baseline: episode_002"):
-        _prepare(tmp_path, ground_truth=gt, baseline=baseline, output_dir=tmp_path / "out")
+        _prepare(
+            tmp_path, ground_truth=gt, baseline=baseline, output_dir=tmp_path / "out"
+        )
 
 
 def test_mismatched_episode_names_rejected(tmp_path: Path) -> None:
@@ -111,7 +113,9 @@ def test_mismatched_episode_names_rejected(tmp_path: Path) -> None:
     baseline = _episode_tree(tmp_path / "baseline", ["episode_002"])
 
     with pytest.raises(adapter.AdapterError, match="episode_001"):
-        _prepare(tmp_path, ground_truth=gt, baseline=baseline, output_dir=tmp_path / "out")
+        _prepare(
+            tmp_path, ground_truth=gt, baseline=baseline, output_dir=tmp_path / "out"
+        )
 
 
 def test_mismatched_frame_counts_rejected(tmp_path: Path) -> None:
@@ -220,7 +224,7 @@ def test_manifest_creation_records_required_fields(tmp_path: Path) -> None:
     assert manifest["baseline_checkpoint"] == "nanowm-50k"
     assert manifest["context_frames"] == 1
     assert manifest["prediction_frames"] == 2
-    assert manifest["worldbench_version"] == "0.4.0"
+    assert manifest["worldbench_version"] == "0.4.1"
     assert manifest["source_files"][0]["ground_truth"]["kind"] == "frames"
 
 
@@ -344,7 +348,9 @@ def _frame_dir(
 
 def _video(path: Path, *, frame_count: int = 3, fps: int = 3, delta: int = 0) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    imageio.mimwrite(path, _frames(frame_count, delta=delta), fps=fps, macro_block_size=1)
+    imageio.mimwrite(
+        path, _frames(frame_count, delta=delta), fps=fps, macro_block_size=1
+    )
     return path
 
 
