@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.1] - 2026-07-23
+
+### Added
+
+- Beginner-friendly `worldbench eval-videos` command for evaluating one saved predicted robot future against matching ground truth
+- `--ground-truth` input with backward-compatible `--reference` alias
+- Built-in `eval-videos --demo` mode for a tiny synthetic smoke test
+- Saved-video JSON and Markdown reports with preprocessing provenance
+- Saved `artifacts/comparison.png` labeled `Ground truth` and `Prediction`
+- Safe frame-count alignment that records exactly how many frames were trimmed
+- Prediction resizing to ground-truth resolution with explicit warnings
+- FPS mismatch warnings for frame-index alignment
+- Fresh Colab workflow for uploaded MP4 files
+
+### Clarified
+
+- `eval-videos` evaluates one prediction against matching ground truth; it is not checkpoint regression by itself
+- Checkpoint regression still uses `eval-batch` plus `gate`
+- Video-only evaluation normally supports Visual Similarity and Temporal Stability
+- Action Consistency, Object Permanence, and Contact Realism return N/A without the required semantics or tracking signals
+- Demo results are synthetic and are not model-quality evidence or benchmark evidence
+
 ## [0.4.0] - 2026-07-20
 
 ### Added
