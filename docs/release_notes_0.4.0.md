@@ -2,7 +2,7 @@
 
 ## Highlights
 
-WorldBench 0.4.0 sharpens the project around regression testing for robot world-model checkpoints. It adds schema-v2 Composite Score transparency, `worldbench.yml` metric and gate policy, configuration and dataset identities, coverage-safe gates, Markdown batch/gate evidence, and a CI checkpoint-gate example.
+WorldBench 0.4.0 sharpens the project around regression testing for video-based robotics world-model checkpoints. It adds schema-v2 Composite Score transparency, `worldbench.yml` metric and gate policy, configuration and dataset identities, coverage-safe gates, Markdown batch/gate evidence, and a CI checkpoint-gate example.
 
 ## Real Checkpoint-Regression Proof
 
@@ -25,7 +25,7 @@ WorldBench detected that the candidate improved in aggregate while still surfaci
 
 The single-rollout NanoWM RT-1 artifact remains committed separately. It evaluates one rollout with eight generated future frames and reports Composite Score 92.39, Visual Similarity 89.24, and Temporal Stability 96.33. Action Consistency, Object Permanence, and Contact Realism are N/A for that artifact.
 
-This single-rollout artifact is not a standardized leaderboard result and is not a claim that NanoWM is 92.4% accurate.
+This single-rollout artifact is not a public cross-model ranking and is not a claim that NanoWM is 92.4% accurate.
 
 ## Metric Honesty
 
@@ -49,9 +49,9 @@ python -m pip install "worldbench[video]==0.4.0"
 
 ## Limitations
 
-- The checkpoint proof covers 10 fixed episodes and is not a standardized leaderboard result or universal model ranking.
+- The checkpoint proof covers 10 fixed episodes and is not a public cross-model ranking or a claim of universal model quality.
 - The single-rollout NanoWM artifact covers one rollout and eight generated future frames.
 - Raw video-pair evaluations support Visual Similarity and Temporal Stability; action, object, and contact metrics require reliable semantics or tracking inputs.
-- WorldBench evaluates saved rollouts and predictions. It does not run model inference.
+- WorldBench evaluates saved visual rollouts and predictions. It does not run model inference or closed-loop robot tasks.
 
 See [migration guidance](MIGRATION_V0_4.md) for field compatibility and stricter gate behavior.

@@ -1,6 +1,6 @@
 # WorldBench v0.3.0 - Checkpoint regression testing
 
-WorldBench v0.3.0 turns robotics world-model evaluation into checkpoint regression testing.
+WorldBench v0.3.0 turns video-based robotics world-model evaluation into checkpoint regression testing.
 
 Teams can now evaluate identical episode suites for baseline and candidate checkpoints, compare aggregate and per-horizon behavior, inspect episode-level regressions, and fail CI when configured thresholds are exceeded.
 
@@ -31,4 +31,4 @@ Teams can now evaluate identical episode suites for baseline and candidate check
 
 Visual similarity improved at every evaluated horizon from t+1 through t+8. Temporal stability improved at every measurable horizon from t+2 through t+8. WorldBench still detected one small episode-level regression.
 
-This validation is a fixed 10-episode proof, not a standardized leaderboard result or universal model ranking.
+This validation is a fixed 10-episode proof, not a public cross-model ranking or a claim of universal model quality.

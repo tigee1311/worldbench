@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "worldbench"
 version = "0.4.0"
-description = "Regression testing for robot world-model checkpoints."
+description = "Regression testing for video-based robotics world models."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -16,9 +16,9 @@ authors = [
 keywords = [
   "robotics",
   "world-models",
-  "evaluation",
-  "benchmarking",
-  "simulation",
+  "regression-testing",
+  "checkpoint-regression",
+  "video-prediction",
   "computer-vision",
 ]
 classifiers = [

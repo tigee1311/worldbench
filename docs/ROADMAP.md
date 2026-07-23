@@ -2,6 +2,8 @@
 
 This roadmap separates verified current behavior from future work. It does not mark unimplemented items complete.
 
+WorldBench is intentionally scoped to regression testing for saved predictions from video-based robotics world models. Future work should preserve that boundary.
+
 ## Working Now
 
 - frame-dataset evaluation with `worldbench eval`
@@ -26,7 +28,6 @@ This roadmap separates verified current behavior from future work. It does not m
 
 ## Later
 
-- simulator adapters
-- ROS bags
+- adapters for simulator-rendered prediction videos
+- adapters for common robot-video export formats
 - shared reports
-- standardized leaderboard

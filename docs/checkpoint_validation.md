@@ -6,7 +6,7 @@ Question:
 When I train a new world-model checkpoint, did it actually improve?
 ```
 
-WorldBench answered this by comparing two real NanoWM checkpoints from the same model family on the same RT-1 / Fractal episodes.
+WorldBench answered this by comparing saved predictions from two real NanoWM checkpoints from the same model family on the same RT-1 / Fractal episodes.
 
 ## Comparison
 
@@ -23,7 +23,7 @@ WorldBench answered this by comparing two real NanoWM checkpoints from the same 
 | WorldBench version | `0.3.0.dev0` |
 | WorldBench commit | `75f2f7b0549653c955671dc695fcdaec5e742377` |
 
-The comparison is valid because both checkpoints use the same NanoWM-B/2 family and compatible RT-1 / Fractal setup. The intended experimental difference is checkpoint training stage.
+The comparison is valid as a regression test because both checkpoints use the same NanoWM-B/2 family, the same fixed episodes, the same preprocessing, the same context, and a compatible RT-1 / Fractal setup. The intended experimental difference is checkpoint training stage.
 
 ## Controls
 
@@ -146,7 +146,7 @@ Compact committed artifacts:
 
 ## Limitations
 
-- Ten episodes are useful for an engineering proof, not a standardized leaderboard.
+- Ten episodes are useful for an engineering proof, not a public cross-model ranking.
 - Only one sample was generated per checkpoint per episode.
 - The evaluation uses the supported video-pair metrics available today: Visual Similarity and Temporal Stability.
 - Action Consistency, Object Permanence, and Contact Realism were N/A because the committed video-pair evaluation artifacts do not contain the required action alignment or reliable tracking semantics.

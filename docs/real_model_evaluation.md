@@ -1,12 +1,12 @@
 # Real Model Evaluation
 
-This document records the committed single-rollout NanoWM integration artifact.
+This document records the committed single-rollout NanoWM integration artifact for generated RGB future frames.
 
 Artifact: [../artifacts/real_model_eval/nanowm_rt1_episode0.json](../artifacts/real_model_eval/nanowm_rt1_episode0.json)
 
 ## Scope
 
-This is a single-rollout integration proof, not a standardized leaderboard result and not a claim that NanoWM is 92.4% accurate.
+This is a single-rollout integration proof, not a public cross-model ranking and not a claim that NanoWM is 92.4% accurate.
 
 | Field | Verified value |
 | --- | --- |
@@ -55,4 +55,4 @@ Contact Realism was not scored because reliable robot and object tracking are un
 - Eight evaluated generated future frames only.
 - The temporary image dataset and prediction frames are not committed.
 - The command used to create the artifact cannot be reconstructed as a runnable repository command from committed files.
-- The result should be treated as an integration proof, not a benchmark, leaderboard entry, or accuracy claim.
+- The result should be treated as an integration proof for saved robot-video predictions, not a benchmark, public ranking, or accuracy claim.

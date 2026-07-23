@@ -1,6 +1,6 @@
 # CLI Reference
 
-WorldBench's primary workflow is checkpoint evaluation and gating.
+WorldBench's primary workflow is checkpoint regression testing for video-based robotics world models: evaluate baseline and candidate predictions on the same fixed episode suite, then gate the candidate.
 
 ## Primary commands
 
@@ -25,7 +25,7 @@ worldbench eval-video --ground-truth gt.mp4 --prediction pred.mp4 --skip-context
 
 ### `eval-batch`
 
-Evaluate one checkpoint folder against a fixed suite. Videos are paired by relative POSIX path; missing or extra predictions are rejected.
+Evaluate one checkpoint folder against a fixed suite of ground-truth robot episode videos. Videos are paired by relative POSIX path; missing or extra predictions are rejected.
 
 ```bash
 worldbench eval-batch --ground-truth suite/ --predictions checkpoint/ --name checkpoint --config worldbench.yml
@@ -35,7 +35,7 @@ Outputs include timestamped and `latest/` JSON and Markdown artifacts. A named r
 
 ### `gate`
 
-Compare baseline and candidate batch artifacts:
+Compare baseline and candidate batch artifacts produced from the same suite:
 
 ```bash
 worldbench gate --baseline baseline.json --candidate candidate.json \

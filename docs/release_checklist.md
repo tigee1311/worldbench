@@ -1,6 +1,6 @@
 # Release Checklist
 
-WorldBench 0.4.0 sharpens WorldBench around checkpoint regression testing with metric-coverage-safe gating and explicit configuration.
+WorldBench 0.4.0 sharpens WorldBench around video-based world-model checkpoint regression testing with metric-coverage-safe gating and explicit configuration.
 
 ## 0.4.0 Scope
 
@@ -24,12 +24,13 @@ WorldBench 0.4.0 sharpens WorldBench around checkpoint regression testing with m
 - New metrics
 - New action adapters
 - New model experiments
-- Leaderboards
+- Public cross-model rankings
 - Cloud sharing
 - ROS support
 - Hosted services
 - Statistical hypothesis testing
 - A standardized public robotics benchmark
+- Closed-loop robot-task evaluation
 
 ## Pre-Release Checks
 
@@ -85,9 +86,9 @@ WorldBench v0.4.0 - Metric-coverage-safe checkpoint gates
 Suggested release summary:
 
 ```text
-WorldBench v0.4.0 makes checkpoint regression testing more transparent and harder to misuse.
+WorldBench v0.4.0 makes video-based world-model checkpoint regression testing more transparent and harder to misuse.
 
-Teams can evaluate identical episode suites for baseline and candidate checkpoints, inspect episode-level regressions, and fail CI when configured thresholds are exceeded. Results now report Composite Score coverage explicitly, store the effective WorldBench configuration, and make the gate fail or warn when runs were produced under incomparable conditions.
+Teams can evaluate identical robot-video episode suites for baseline and candidate checkpoints, inspect episode-level regressions, and fail CI when configured thresholds are exceeded. Results now report Composite Score coverage explicitly, store the effective WorldBench configuration, and make the gate fail or warn when runs were produced under incomparable conditions.
 
 Real validation:
 - NanoWM-B/2 50k vs 300k
@@ -99,7 +100,7 @@ Real validation:
 - Gate: PASS
 - Metrics available in this proof: Visual Similarity and Temporal Stability
 
-This validation is a fixed 10-episode proof, not a standardized leaderboard result or universal model ranking.
+This validation is a fixed 10-episode proof, not a public cross-model ranking or a claim of universal model quality.
 ```
 
 Attach:

@@ -1,23 +1,25 @@
 # Checkpoint Regression
 
-WorldBench checkpoint regression answers one question:
+WorldBench checkpoint regression answers one question for video-based robotics world models:
 
 ```text
-When I train a new checkpoint, did it actually improve?
+Did this new world-model checkpoint improve, and what became worse?
 ```
 
-The workflow is model-agnostic. Your model code generates videos. WorldBench evaluates and compares those videos.
+The workflow is runtime-agnostic but output-format specific. Your model code generates aligned robot future videos or RGB frame folders. WorldBench evaluates and compares those saved predictions.
 
 ```text
-ground-truth evaluation episodes
-        +
+fixed validation episodes
+        ->
 baseline checkpoint predictions
-        +
+        ->
 candidate checkpoint predictions
-        ↓
-WorldBench
-        ↓
-PASS or FAIL
+        ->
+episode and horizon comparison
+        ->
+regression report
+        ->
+PASS or FAIL gate
 ```
 
 ## Directory Structure
@@ -160,6 +162,19 @@ It compares:
 
 N/A is never treated as zero. Metrics unavailable in either run are not used for regression failures.
 
+## Score Interpretation
+
+A single Composite Score is not a universal model-quality result. The strongest use of WorldBench is a controlled comparison with:
+
+- the same dataset
+- the same episodes
+- the same preprocessing
+- the same context frames
+- the same prediction horizon
+- baseline versus candidate checkpoints from a compatible workflow
+
+Cross-model or cross-dataset score comparisons may be invalid when protocols differ.
+
 ## Thresholds
 
 The first version uses engineering thresholds, not statistically validated benchmark thresholds.
@@ -210,5 +225,6 @@ A regression FAIL exits nonzero and fails the CI job.
 - The video workflow requires videos with matching future lengths after context removal.
 - The command does not resample FPS, resize frames, or repair mismatched inputs.
 - Raw video pairs do not provide action semantics, object tracks, or robot/object contact tracks, so those metrics remain N/A.
+- WorldBench performs offline prediction evaluation, not closed-loop robot-task execution.
 - No hypothesis testing or statistical significance model is included yet.
 - The gate compares batch artifacts from the same evaluation suite; it intentionally rejects mismatched episode sets.

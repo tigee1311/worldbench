@@ -1,11 +1,11 @@
-name: Test WorldBench on my model
-description: Request a checkpoint comparison using your robot world-model data
+name: Test WorldBench on my video world model
+description: Request a checkpoint comparison using your robot-video prediction data
 title: "[Tester Request] "
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for offering to test WorldBench on an external model. Please describe the data and comparison below. Do not include credentials, private download links, or confidential data in this public issue.
+        Thanks for offering to test WorldBench on an external video-based robot world model. Please describe the saved prediction data and checkpoint comparison below. Do not include credentials, private download links, or confidential data in this public issue.
 
         If your data is private, note that below and email writetoayushadi@gmail.com so access can be coordinated outside GitHub.
 
@@ -13,7 +13,7 @@ body:
     id: model_name
     attributes:
       label: Model or project name
-      description: What model or project should this evaluation identify?
+      description: What video world-model project should this evaluation identify?
       placeholder: "Example: project name and model family"
     validations:
       required: true
@@ -22,8 +22,8 @@ body:
     id: model_description
     attributes:
       label: Short description of the model
-      description: Summarize the task, robot or environment, and what the model predicts.
-      placeholder: Describe the model and its prediction task.
+      description: Summarize the task, robot or environment, and the future observations the model predicts.
+      placeholder: Describe the model and its robot-video prediction task.
     validations:
       required: true
 
@@ -40,7 +40,7 @@ body:
     id: prediction_format
     attributes:
       label: Prediction data format
-      description: Describe how baseline and candidate predictions are stored and aligned with ground truth.
+      description: Describe how baseline and candidate predicted RGB futures are stored and aligned with ground truth.
       placeholder: "Example: matching MP4 filenames for each checkpoint, with eight predicted future frames"
     validations:
       required: true
@@ -106,7 +106,7 @@ body:
     id: authorization
     attributes:
       label: Data authorization
-      description: Confirm that WorldBench may evaluate the data you provide.
+      description: Confirm that WorldBench may evaluate the saved prediction data you provide.
       options:
         - label: I am authorized to share the submitted data for this evaluation.
           required: true

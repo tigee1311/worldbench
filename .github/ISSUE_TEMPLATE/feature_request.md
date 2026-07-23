@@ -6,7 +6,7 @@ labels: enhancement
 
 ## Problem
 
-What robotics world-model workflow would this improve?
+What video-based robotics world-model regression workflow would this improve?
 
 ## Proposed solution
 

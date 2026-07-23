@@ -14,7 +14,7 @@ Record a short local fixture walkthrough that shows:
 - the real-model proof artifact
 - native LeRobot import status
 
-Do not claim ROS support, cloud sharing, a hosted leaderboard, standardized benchmark status, or that the synthetic fixture is WorldBench's main validation proof.
+Do not claim ROS support, cloud sharing, a hosted public ranking, standardized benchmark status, or that the synthetic fixture is WorldBench's main validation proof.
 
 ## Recording Outline
 
@@ -65,12 +65,12 @@ bad_model produces plausible frames but violates robot action/contact dynamics.
 5. Close with the positioning:
 
 ```text
-WorldBench catches regressions in robot world-model checkpoints before deployment.
+WorldBench helps detect regressions in saved predictions from video-based robot world-model checkpoints before a team accepts a candidate.
 ```
 
 ## Suggested Narration
 
-WorldBench is regression testing for robot world-model checkpoints. It compares baseline and candidate predictions on the same episodes and reports both aggregate changes and episode-level regressions.
+WorldBench is regression testing for video-based robotics world models. It compares baseline and candidate predictions on the same episodes and reports aggregate changes, episode-level regressions, and horizon-level degradation.
 
 In this fixture, the corrupted output produces frames that look plausible at a glance, but the robot motion does not follow the action log and the cube moves before contact. The fixture is useful for development checks, not as a real-model benchmark.
 
