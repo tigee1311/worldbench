@@ -41,6 +41,7 @@ def test_eval_videos_beginner_command_saves_json_summary_and_artifact(
     assert "Ground truth:" in result.output
     assert "Composite Score" in result.output
     assert "Saved JSON" in result.output
+    assert "Saved comparison image" in result.output
     assert (output_dir / "result.json").exists()
     assert (output_dir / "summary.md").exists()
     assert (output_dir / "artifacts" / "comparison.png").exists()
@@ -101,6 +102,18 @@ def test_eval_videos_reference_alias_defaults_to_local_output_directory(
     assert result.exit_code == 0, result.output
     assert (tmp_path / "worldbench-video-results" / "result.json").exists()
     assert not (tmp_path / "worldbench-video-results" / "artifacts").exists()
+
+
+def test_eval_videos_help_includes_beginner_example() -> None:
+    result = CliRunner().invoke(app, ["eval-videos", "--help"])
+
+    assert result.exit_code == 0
+    assert "Evaluate one saved predicted robot future against ground truth" in result.output
+    assert "Example:" in result.output
+    assert "worldbench eval-videos" in result.output
+    assert "--ground-truth ground_truth.mp4" in result.output
+    assert "--prediction predicted_future.mp4" in result.output
+    assert "--output results/" in result.output
 
 
 def test_eval_videos_rejects_both_ground_truth_and_reference(
@@ -352,6 +365,8 @@ def test_eval_videos_reports_missing_and_corrupted_files(tmp_path: Path) -> None
 
     assert corrupt_result.exit_code != 0
     assert "unreadable" in corrupt_result.output
+    assert "Re-encode it as a standard MP4/H.264 file" in corrupt_result.output
+    assert "ffmpeg version" not in corrupt_result.output
 
 
 def test_eval_videos_reports_unsupported_extension(tmp_path: Path) -> None:

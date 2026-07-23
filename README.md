@@ -91,7 +91,7 @@ Contact Realism     N/A
 
 Saved JSON: results/result.json
 Saved Markdown: results/summary.md
-Saved comparison_png: results/artifacts/comparison.png
+Saved comparison image: results/artifacts/comparison.png
 ```
 
 The Composite Score is a weighted summary of available metrics for this specific ground-truth/prediction pair. It is not accuracy, not task success, and not a universal robotics capability score. For video-only inputs, Visual Similarity and Temporal Stability are usually available. Action Consistency needs action semantics, Object Permanence needs reliable object tracking metadata, and Contact Realism needs reliable robot/object contact tracking; without those signals they are reported as N/A and excluded from the weighted score.

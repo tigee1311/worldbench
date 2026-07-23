@@ -458,7 +458,15 @@ def eval_videos(
     max_frame_mismatch_frames: int,
     config_path: Path | None,
 ) -> None:
-    """Evaluate one saved predicted robot future against ground truth."""
+    """Evaluate one saved predicted robot future against ground truth.
+
+    \b
+    Example:
+      worldbench eval-videos \\
+        --ground-truth ground_truth.mp4 \\
+        --prediction predicted_future.mp4 \\
+        --output results/
+    """
 
     if demo:
         if ground_truth is not None or reference is not None or prediction is not None:
@@ -977,7 +985,10 @@ def _print_saved_video_summary(
     console.print(f"[green]Saved Markdown:[/green] {report_path}")
     if artifact_paths:
         for label, path in artifact_paths.items():
-            console.print(f"[green]Saved {label}:[/green] {path}")
+            artifact_label = (
+                "comparison image" if label == "comparison_image" else label
+            )
+            console.print(f"[green]Saved {artifact_label}:[/green] {path}")
 
 
 def _save_saved_video_report(result, path: Path) -> Path:

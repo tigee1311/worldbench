@@ -182,7 +182,9 @@ def decode_video(path: Path, *, label: str) -> DecodedVideo:
         reader.close()
     except Exception as exc:  # noqa: BLE001
         raise VideoEvaluationError(
-            f"{label} video is unreadable: {path} ({exc})"
+            f"{label} video is unreadable: {path}. "
+            "Re-encode it as a standard MP4/H.264 file and try again. "
+            f"Decoder detail: {_short_error(exc)}"
         ) from exc
 
     if not frames:
@@ -488,7 +490,7 @@ def save_comparison_artifacts(
         contact_sheet,
         max_frames=max_frames,
     )
-    return {"comparison_png": contact_sheet}
+    return {"comparison_image": contact_sheet}
 
 
 def create_saved_video_demo_pair(output_dir: str | Path) -> tuple[Path, Path]:
@@ -537,22 +539,25 @@ def _write_contact_sheet(
     )
     selected = [int(round(index)) for index in indices]
     height, width = ground_truth_frames[0].shape[:2]
-    label_height = 18
-    gap = 4
+    label_height = 22
+    gap = 8
+    column_width = max(width, 132)
     sheet = Image.new(
         "RGB",
-        (width * 2 + gap, (height + label_height) * count),
+        (column_width * 2 + gap, (height + label_height) * count),
         color=(245, 245, 245),
     )
     for row, index in enumerate(selected):
         y = row * (height + label_height)
         ref = Image.fromarray(ground_truth_frames[index], mode="RGB")
         pred = Image.fromarray(prediction_frames[index], mode="RGB")
+        ref_x = (column_width - width) // 2
+        pred_x = column_width + gap + (column_width - width) // 2
         draw = ImageDraw.Draw(sheet)
-        draw.text((2, y + 2), "Ground truth", fill=(20, 20, 20))
-        draw.text((width + gap + 2, y + 2), "Prediction", fill=(20, 20, 20))
-        sheet.paste(ref, (0, y + label_height))
-        sheet.paste(pred, (width + gap, y + label_height))
+        draw.text((4, y + 4), "Ground truth", fill=(20, 20, 20))
+        draw.text((column_width + gap + 4, y + 4), "Prediction", fill=(20, 20, 20))
+        sheet.paste(ref, (ref_x, y + label_height))
+        sheet.paste(pred, (pred_x, y + label_height))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(output_path)
 
@@ -586,3 +591,13 @@ def _read_fps(metadata: dict[str, Any]) -> float | None:
     if isinstance(fps, (int, float)) and float(fps) > 0:
         return float(fps)
     return None
+
+
+def _short_error(exc: Exception) -> str:
+    text = str(exc).strip()
+    if not text:
+        return exc.__class__.__name__
+    first_line = next((line.strip() for line in text.splitlines() if line.strip()), "")
+    if len(first_line) > 180:
+        return first_line[:177] + "..."
+    return first_line
