@@ -69,3 +69,6 @@ addopts = "-q -m 'not integration'"
 markers = [
   "integration: downloads public LeRobot datasets from Hugging Face",
 ]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

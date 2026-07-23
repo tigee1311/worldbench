@@ -543,9 +543,7 @@ def eval_videos(
                 max_frame_mismatch_frames=max_frame_mismatch_frames,
             )
         except VideoEvaluationError as exc:
-            console.print(
-                f"[yellow]Comparison artifact skipped:[/yellow] {exc}"
-            )
+            console.print(f"[yellow]Comparison artifact skipped:[/yellow] {exc}")
 
     _print_saved_video_summary(
         result,
@@ -959,7 +957,9 @@ def _print_saved_video_summary(
     console.print(Panel.fit("[bold]WorldBench Saved Video Evaluation[/bold]"))
     if provenance.get("demo"):
         console.print("[yellow]Synthetic demonstration data[/yellow]")
-        console.print("[yellow]Not a model-quality result. Not a benchmark result.[/yellow]")
+        console.print(
+            "[yellow]Not a model-quality result. Not a benchmark result.[/yellow]"
+        )
     console.print(f"[bold]Ground truth:[/bold] {ground_truth}")
     console.print(f"[bold]Prediction:[/bold] {prediction}")
     console.print(
