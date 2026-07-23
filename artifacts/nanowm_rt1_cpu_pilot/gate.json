@@ -1,0 +1,161 @@
+{
+  "schema_version": "2",
+  "result_type": "gate_comparison",
+  "worldbench_version": "0.4.0",
+  "created_at": "2026-07-22T23:23:11.020613+00:00",
+  "status": "PASS",
+  "passed": true,
+  "baseline": {
+    "checkpoint_name": "nanowm_rt1_cpu_pilot",
+    "score": 93.05048757845444,
+    "episode_count": 1
+  },
+  "candidate": {
+    "checkpoint_name": "nanowm_rt1_300k_cpu_pilot",
+    "score": 93.66032664135399,
+    "episode_count": 1
+  },
+  "thresholds": {
+    "max_overall_drop": 0.0,
+    "max_metric_drop": 2.0,
+    "max_horizon_drop": 2.0,
+    "required_metrics": [
+      "visual_similarity",
+      "temporal_stability"
+    ],
+    "min_metric_count": 2,
+    "min_metric_coverage": 0.4,
+    "min_configured_weight_coverage": 0.45,
+    "strict_config_match": true,
+    "max_episode_regressions": 0,
+    "min_composite_improvement": 0.0,
+    "unchanged_tolerance": 0.01
+  },
+  "overall": {
+    "baseline": 93.05048757845444,
+    "candidate": 93.66032664135399,
+    "change": 0.6098390628995531
+  },
+  "metrics": [
+    {
+      "metric": "temporal_stability",
+      "baseline": 98.67469606399536,
+      "candidate": 98.0134339094162,
+      "change": -0.6612621545791626,
+      "available_count_baseline": 1,
+      "available_count_candidate": 1
+    },
+    {
+      "metric": "visual_similarity",
+      "baseline": 88.55112079002168,
+      "candidate": 90.1778408269042,
+      "change": 1.6267200368825172,
+      "available_count_baseline": 1,
+      "available_count_candidate": 1
+    }
+  ],
+  "horizon": [
+    {
+      "horizon": "t+1",
+      "metric": "visual_similarity",
+      "baseline": 91.13104196530733,
+      "candidate": 91.59206483997914,
+      "change": 0.46102287467181213,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+2",
+      "metric": "temporal_stability",
+      "baseline": 100.0,
+      "candidate": 100.0,
+      "change": 0.0,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+2",
+      "metric": "visual_similarity",
+      "baseline": 89.73302724373852,
+      "candidate": 90.9379901070547,
+      "change": 1.204962863316183,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+3",
+      "metric": "temporal_stability",
+      "baseline": 98.67469606399536,
+      "candidate": 98.0134339094162,
+      "change": -0.6612621545791626,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+3",
+      "metric": "visual_similarity",
+      "baseline": 88.55112079002168,
+      "candidate": 90.1778408269042,
+      "change": 1.6267200368825172,
+      "baseline_count": 1,
+      "candidate_count": 1
+    }
+  ],
+  "episodes": {
+    "improved_count": 1,
+    "regressed_count": 0,
+    "unchanged_count": 0,
+    "deltas": [
+      {
+        "episode_id": "rt1/episode_000000.mp4",
+        "baseline": 93.05048757845444,
+        "candidate": 93.66032664135399,
+        "change": 0.6098390628995531
+      }
+    ],
+    "worst_regressions": [
+      {
+        "episode_id": "rt1/episode_000000.mp4",
+        "baseline": 93.05048757845444,
+        "candidate": 93.66032664135399,
+        "change": 0.6098390628995531
+      }
+    ],
+    "best_improvements": [
+      {
+        "episode_id": "rt1/episode_000000.mp4",
+        "baseline": 93.05048757845444,
+        "candidate": 93.66032664135399,
+        "change": 0.6098390628995531
+      }
+    ]
+  },
+  "coverage": {
+    "available_metrics": [
+      "visual_similarity",
+      "temporal_stability"
+    ],
+    "unsupported_metrics": [
+      "action_consistency",
+      "object_permanence",
+      "contact_realism"
+    ],
+    "configured_metrics": [
+      "visual_similarity",
+      "action_consistency",
+      "temporal_stability",
+      "object_permanence",
+      "contact_realism"
+    ],
+    "available_metric_count": 2,
+    "configured_metric_count": 5,
+    "metric_coverage": 0.4,
+    "configured_weight_coverage": 0.45,
+    "effective_normalized_weights": {
+      "visual_similarity": 0.5555555555555556,
+      "temporal_stability": 0.4444444444444445
+    }
+  },
+  "warnings": [],
+  "failure_reasons": []
+}

@@ -64,6 +64,12 @@ This is a fixed 10-episode validation proof, not a standardized leaderboard resu
 
 Artifacts and documentation: [artifacts/checkpoint_validation/](artifacts/checkpoint_validation/), [docs/checkpoint_validation.md](docs/checkpoint_validation.md), and [docs/checkpoint_regression.md](docs/checkpoint_regression.md).
 
+### Reproducible NanoWM RT-1 integration
+
+WorldBench includes a lightweight adapter and guide for evaluating public NanoWM RT-1 checkpoint predictions after NanoWM has generated RGB rollout clips. A one-episode pilot reproduced the 50k-versus-300k comparison on a 16 GB CPU-only Mac with no paid compute; the 10-episode validation above remains the flagship proof.
+
+See: [docs/NANOWM_RT1.md](docs/NANOWM_RT1.md)
+
 ## Quickstart
 
 From a repository checkout, install the package and run the committed sample dataset:
