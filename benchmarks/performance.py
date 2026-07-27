@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import platform
 import tempfile
 import time
 import tracemalloc
@@ -15,6 +16,7 @@ import numpy as np
 
 from worldbench.runners.regression import evaluate_video_batch
 from worldbench.runners.video import evaluate_video_pair, save_comparison_artifacts
+from worldbench.version import WORLD_BENCH_VERSION
 
 
 def run_benchmarks(*, quick: bool = False) -> dict[str, Any]:
@@ -26,6 +28,7 @@ def run_benchmarks(*, quick: bool = False) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "status": "informational",
         "strict_timing_gate": False,
+        "environment": _environment(),
         "cases": {},
     }
     with tempfile.TemporaryDirectory(prefix="worldbench-perf-") as tmpdir:
@@ -121,6 +124,16 @@ def _measure(func: Callable[[], Any]) -> tuple[Any, dict[str, Any]]:
     return result, {
         "wall_time_seconds": round(wall_time, 6),
         "peak_tracemalloc_mb": round(peak / (1024 * 1024), 3),
+    }
+
+
+def _environment() -> dict[str, str]:
+    return {
+        "worldbench_version": WORLD_BENCH_VERSION,
+        "python_version": platform.python_version(),
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "processor": platform.processor() or "unknown",
     }
 
 

@@ -18,6 +18,7 @@ python -m benchmarks.performance --quick --output /tmp/worldbench-performance.js
 
 The harness measures:
 
+- Python, OS, architecture, processor, and WorldBench version
 - wall-clock time
 - peak `tracemalloc` memory
 - frames per second
