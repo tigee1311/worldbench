@@ -9,7 +9,7 @@ once they finish.
 | pytest | passed: 157 tests | passed: 157 tests | passed: 159 tests | not applicable locally; docs-only |
 | coverage | not applicable | passed: 81.15%, threshold 80% | inherited CI check pending GitHub | not applicable |
 | Ruff | passed | passed | passed | passed |
-| format | workflow surface passed; broad check deferred to PR 2 | passed broad check | passed broad check | not applicable locally; docs-only |
+| format | workflow surface passed; broad check deferred to PR 2 | passed: `worldbench tests examples` | passed: `worldbench tests examples benchmarks` | not applicable locally; docs-only |
 | mypy | not applicable | passed: 9 files checked | inherited CI check pending GitHub | not applicable |
 | Bandit | not applicable | configured scan passed | inherited CI check pending GitHub | not applicable |
 | pip-audit | not applicable | clean-environment audit passed | inherited CI check pending GitHub | not applicable |
