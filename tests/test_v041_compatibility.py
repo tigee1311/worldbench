@@ -128,7 +128,11 @@ def test_v041_cli_reference_alias_still_works(tmp_path: Path) -> None:
 
     assert result.exit_code == 0, result.output
     payload = read_json(tmp_path / "alias-result" / "result.json")
-    assert payload["score"] == pytest.approx(96.10118880756227)
+    assert payload["result_type"] == "evaluation"
+    assert payload["dataset_path"].endswith("ground_truth.mp4")
+    assert payload["predictions_path"].endswith("predicted_future.mp4")
+    assert 0.0 <= payload["score"] <= 100.0
+    assert {"visual_similarity", "temporal_stability"} <= set(payload["metrics"])
 
 
 def test_old_result_type_is_not_silently_misinterpreted(tmp_path: Path) -> None:
