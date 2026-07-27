@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Iterator
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from worldbench.schemas import (
     ActionRecord,
@@ -41,7 +41,7 @@ class RolloutDataset:
     def episode_names(self) -> list[str]:
         return [episode.name for episode in self.episodes]
 
-    def __iter__(self) -> Iterable[Episode]:
+    def __iter__(self) -> Iterator[Episode]:
         return iter(self.episodes)
 
     def __len__(self) -> int:
@@ -186,7 +186,7 @@ def load_dataset(path: str | Path) -> RolloutDataset:
 
 
 def _validate_json_records(
-    path: Path, model: type, label: str, issues: list[ValidationIssue]
+    path: Path, model: type[BaseModel], label: str, issues: list[ValidationIssue]
 ) -> None:
     if not path.is_file():
         issues.append(
@@ -195,7 +195,7 @@ def _validate_json_records(
         return
     try:
         data = read_json(path)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         issues.append(
             ValidationIssue(
                 level="error", message=f"Could not parse {label}: {exc}", path=str(path)
@@ -232,7 +232,7 @@ def _validate_metadata(path: Path, issues: list[ValidationIssue]) -> None:
         return
     try:
         EpisodeMetadata.model_validate(read_json(path))
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         issues.append(
             ValidationIssue(
                 level="error", message=f"Invalid metadata.json: {exc}", path=str(path)

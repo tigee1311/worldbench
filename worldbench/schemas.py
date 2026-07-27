@@ -189,6 +189,14 @@ class EvaluationResult(BaseModel):
         console.rule("[bold]WorldBench Evaluation Report[/bold]")
         console.print(f"[bold]Composite Score:[/bold] {self.score:.2f}/100")
         if self.coverage:
+            available = [
+                str(name).replace("_", " ").title()
+                for name in self.coverage.get("available_metrics", [])
+            ]
+            unavailable = [
+                str(name).replace("_", " ").title()
+                for name in self.coverage.get("unsupported_metrics", [])
+            ]
             console.print(
                 f"[bold]Metric coverage:[/bold] {self.coverage.get('available_metric_count', 0)} of "
                 f"{self.coverage.get('configured_metric_count', 0)} configured metrics"
@@ -197,6 +205,18 @@ class EvaluationResult(BaseModel):
                 f"[bold]Configured weight coverage:[/bold] "
                 f"{float(self.coverage.get('configured_weight_coverage', 0.0)):.0%}"
             )
+            console.print(
+                f"[bold]Available metrics:[/bold] {', '.join(available) or 'None'}"
+            )
+            console.print(
+                f"[bold]Unavailable metrics:[/bold] {', '.join(unavailable) or 'None'}"
+            )
+            if self.coverage.get("available_metric_count", 0) < self.coverage.get(
+                "configured_metric_count", 0
+            ):
+                console.print(
+                    "[yellow]Composite Score uses available metrics only; unavailable metrics are N/A, not zero.[/yellow]"
+                )
         console.print(f"[bold]Main failure:[/bold] {self.main_failure}")
 
         table = Table(title="Metric Scores", show_lines=False)

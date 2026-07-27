@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import importlib
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
-import importlib
 
 import numpy as np
 import pytest

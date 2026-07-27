@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 
 from worldbench.dataset import Episode
+from worldbench.plugins import MetricRequirements
 from worldbench.schemas import MetricResult
 from worldbench.utils import clamp, load_aligned_pairs
 
@@ -16,6 +17,12 @@ class VisualSimilarityMetric:
     """Compare predicted frames against ground-truth rollout frames."""
 
     name = "visual_similarity"
+    version = "1.0"
+    requirements = MetricRequirements(
+        input_modalities=("rgb_frames",),
+        supports_video_pairs=True,
+        notes="Requires at least one aligned RGB ground-truth/prediction frame pair.",
+    )
 
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
         pairs = load_aligned_pairs(episode.frames, prediction_frames)
@@ -85,7 +92,7 @@ def _ssim(gt: np.ndarray, pred: np.ndarray) -> float:
                 data_range=255,
             )
         )
-    except Exception:  # noqa: BLE001
+    except Exception:
         return _fallback_ssim(gt, pred)
 
 

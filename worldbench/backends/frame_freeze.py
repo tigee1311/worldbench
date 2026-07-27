@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import random
 import shutil
+from dataclasses import dataclass
 from pathlib import Path
 
 from worldbench.utils import ensure_dir, list_image_files
@@ -123,5 +123,5 @@ def _frozen_positions(frame_count: int, severity: float, seed: int) -> set[int]:
         return set()
 
     positions = list(range(1, frame_count))
-    random.Random(seed).shuffle(positions)
+    random.Random(seed).shuffle(positions)  # nosec B311
     return set(sorted(positions[:freeze_count]))

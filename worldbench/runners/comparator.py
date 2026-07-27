@@ -23,7 +23,7 @@ def compare_results(
 ) -> dict[str, object]:
     a = load_result(run_a) if not isinstance(run_a, EvaluationResult) else run_a
     b = load_result(run_b) if not isinstance(run_b, EvaluationResult) else run_b
-    metrics: dict[str, dict[str, float]] = {}
+    metrics: dict[str, dict[str, float | None]] = {}
     for name in sorted(set(a.metrics) | set(b.metrics)):
         metric_a = a.metrics.get(name)
         metric_b = b.metrics.get(name)
@@ -100,7 +100,7 @@ def build_comparison(
 ) -> dict[str, object]:
     """Build a serializable comparison payload."""
 
-    metrics = []
+    metrics: list[dict[str, object]] = []
     for name in sorted(set(result_a.metrics) | set(result_b.metrics)):
         metric_a = result_a.metrics.get(name)
         metric_b = result_b.metrics.get(name)
@@ -141,10 +141,10 @@ def build_comparison(
     weakest_loser_metrics = _weakest_metrics(
         result_a if loser == label_a else result_b if loser == label_b else result_b
     )
-    comparable_metrics = [
+    comparable_metrics: list[dict[str, object]] = [
         metric for metric in metrics if metric["winner_delta"] is not None
     ]
-    comparison = {
+    comparison: dict[str, object] = {
         "schema_version": "2",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "source": source,
@@ -168,7 +168,7 @@ def build_comparison(
         },
         "largest_gaps": sorted(
             comparable_metrics,
-            key=lambda item: float(item["winner_delta"]),
+            key=_winner_delta_sort_value,
             reverse=True,
         )[:3],
         "conclusion": _comparison_conclusion(loser, weakest_loser_metrics),
@@ -178,6 +178,11 @@ def build_comparison(
         },
     }
     return comparison
+
+
+def _winner_delta_sort_value(item: dict[str, object]) -> float:
+    value = item.get("winner_delta")
+    return float(value) if isinstance(value, (int, float)) else 0.0
 
 
 def save_comparison_artifacts(
@@ -214,25 +219,13 @@ def generate_comparison_markdown(comparison: dict[str, object]) -> str:
     largest_gaps = comparison["largest_gaps"]
     assert isinstance(largest_gaps, list)
     coverage = comparison.get("coverage", {})
+    coverage_map = coverage if isinstance(coverage, dict) else {}
 
     rows = [
-        [
-            str(metric["label"]),
-            "N/A"
-            if metric["score_a"] is None
-            else f"{float(metric['score_a']):.1f}/100",
-            "N/A"
-            if metric["score_b"] is None
-            else f"{float(metric['score_b']):.1f}/100",
-            "N/A" if metric["delta"] is None else f"{float(metric['delta']):+.1f}",
-        ]
-        for metric in metrics
-        if metric["delta"] is not None
-        or metric["score_a"] is not None
-        or metric["score_b"] is not None
+        _metric_markdown_row(metric) for metric in metrics if _metric_has_value(metric)
     ]
     gap_rows = [
-        [str(metric["label"]), f"{float(metric['winner_delta']):.1f}"]
+        [str(metric["label"]), f"{_winner_delta_sort_value(metric):.1f}"]
         for metric in largest_gaps
     ]
     winner = str(overall["winner"])
@@ -267,8 +260,8 @@ def generate_comparison_markdown(comparison: dict[str, object]) -> str:
             markdown_table(
                 ["Run", "Metrics", "Configured Weight"],
                 [
-                    [label_a, *_format_coverage(coverage.get("a", {}))],
-                    [label_b, *_format_coverage(coverage.get("b", {}))],
+                    [label_a, *_format_coverage(coverage_map.get("a", {}))],
+                    [label_b, *_format_coverage(coverage_map.get("b", {}))],
                 ],
             ),
             "",
@@ -320,6 +313,35 @@ def _comparison_conclusion(loser: str, weak_metrics: set[str]) -> str:
 
 def _format_optional_score(score: float | None) -> str:
     return "N/A" if score is None else f"{float(score):.1f}/100"
+
+
+def _metric_has_value(metric: object) -> bool:
+    if not isinstance(metric, dict):
+        return False
+    return (
+        metric.get("delta") is not None
+        or metric.get("score_a") is not None
+        or metric.get("score_b") is not None
+    )
+
+
+def _metric_markdown_row(metric: object) -> list[str]:
+    if not isinstance(metric, dict):
+        return ["unknown", "N/A", "N/A", "N/A"]
+    return [
+        str(metric.get("label", "unknown")),
+        _format_payload_score(metric.get("score_a")),
+        _format_payload_score(metric.get("score_b")),
+        _format_payload_delta(metric.get("delta")),
+    ]
+
+
+def _format_payload_score(value: object) -> str:
+    return "N/A" if not isinstance(value, (int, float)) else f"{float(value):.1f}/100"
+
+
+def _format_payload_delta(value: object) -> str:
+    return "N/A" if not isinstance(value, (int, float)) else f"{float(value):+.1f}"
 
 
 def _format_coverage(coverage: object) -> tuple[str, str]:

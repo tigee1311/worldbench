@@ -17,6 +17,12 @@ from worldbench.metrics import (
     TemporalStabilityMetric,
     VisualSimilarityMetric,
 )
+from worldbench.plugins import (
+    MetricRequirements,
+    evaluate_metric_plugin,
+    metric_plugin_provenance,
+)
+from worldbench.provenance import environment_provenance, sha256_json
 from worldbench.schemas import EpisodeResult, EvaluationResult, MetricResult
 from worldbench.utils import clamp, list_image_files, write_json
 from worldbench.version import RESULT_SCHEMA_VERSION, WORLD_BENCH_VERSION
@@ -26,6 +32,8 @@ DEFAULT_WEIGHTS = default_config().configured_weights
 
 class EvaluatorMetric(Protocol):
     name: str
+    version: str
+    requirements: MetricRequirements
 
     def evaluate(
         self, episode: Episode, prediction_frames: list[Path]
@@ -71,6 +79,7 @@ class EvaluationRunner:
             ]
         else:
             selected_metrics = metrics
+            _validate_metric_plugins(selected_metrics)
             configured_metrics = [metric.name for metric in selected_metrics]
         selected_weights = weights or {
             name: effective_config.configured_weights.get(
@@ -100,7 +109,7 @@ class EvaluationRunner:
                 global_issues.append(issue)
 
             for metric in selected_metrics:
-                result = metric.evaluate(episode, prediction_frames)
+                result = evaluate_metric_plugin(metric, episode, prediction_frames)
                 metric_results[metric.name] = result
                 episode_issues.extend(result.issues)
                 if not result.is_available and result.reason:
@@ -156,6 +165,14 @@ class EvaluationRunner:
             configuration=effective_config.model_dump(mode="json", by_alias=True),
             configuration_hash=effective_config.configuration_hash,
             worldbench_version=WORLD_BENCH_VERSION,
+            provenance={
+                "metric_plugins": metric_plugin_provenance(selected_metrics),
+                "adapter_plugins": {},
+                "environment": environment_provenance(),
+                "report_configuration_sha256": sha256_json(
+                    effective_config.model_dump(mode="json", by_alias=True)
+                ),
+            },
             issues=global_issues,
             main_failure=main_failure,
         )
@@ -217,26 +234,30 @@ def resolve_prediction_frames(episode: Episode, predictions: Path | None) -> lis
     return []
 
 
+def _validate_metric_plugins(metrics: list[EvaluatorMetric]) -> None:
+    seen: set[str] = set()
+    for metric in metrics:
+        if not metric.name:
+            raise ValueError("Metric plugin name must be a non-empty string.")
+        if metric.name in seen:
+            raise ValueError(f"Duplicate metric plugin name: {metric.name}")
+        seen.add(metric.name)
+
+
 def weighted_score(
     results: dict[str, MetricResult], weights: dict[str, float]
 ) -> float:
-    total_weight = sum(
-        weight
-        for name, weight in weights.items()
-        if name in results and results[name].is_available
-    )
+    total_weight = 0.0
+    weighted_total = 0.0
+    for name, weight in weights.items():
+        result = results.get(name)
+        if result is None or not result.is_available or result.score is None:
+            continue
+        total_weight += weight
+        weighted_total += float(result.score) * weight
     if total_weight <= 0:
         return 0.0
-    return clamp(
-        sum(
-            float(results[name].score) * weights[name]
-            for name in results
-            if name in weights
-            and results[name].is_available
-            and results[name].score is not None
-        )
-        / total_weight
-    )
+    return clamp(weighted_total / total_weight)
 
 
 def aggregate_metric_results(
@@ -250,7 +271,7 @@ def aggregate_metric_results(
             if metric.name in episode.metrics
         ]
         values = [
-            result.score
+            float(result.score)
             for result in metric_results
             if result.is_available and result.score is not None
         ]
@@ -278,7 +299,7 @@ def aggregate_metric_results(
                 issues=reasons[:20],
             )
             continue
-        issues = []
+        issues: list[str] = []
         for episode in episode_results:
             metric_result = episode.metrics.get(metric.name)
             if metric_result is not None:
@@ -305,11 +326,12 @@ def infer_main_failure(metrics: dict[str, MetricResult]) -> str:
     ]
     if not available_metrics:
         return "No available metrics were scored."
-    lowest = min(available_metrics, key=lambda result: result.score)
+    lowest = min(available_metrics, key=_metric_score)
     unsupported_count = len(
         [result for result in metrics.values() if not result.is_available]
     )
-    if float(lowest.score) >= 85:
+    lowest_score = 0.0 if lowest.score is None else float(lowest.score)
+    if lowest_score >= 85:
         if unsupported_count:
             return f"No dominant failure among available metrics; {unsupported_count} metrics were unsupported."
         return "No dominant failure detected; the run is strong across core world-model checks."
@@ -321,6 +343,10 @@ def infer_main_failure(metrics: dict[str, MetricResult]) -> str:
         "contact_realism": "The model moves objects before plausible robot/object contact.",
     }
     return messages.get(lowest.name, f"The weakest metric is {lowest.name}.")
+
+
+def _metric_score(result: MetricResult) -> float:
+    return float(result.score) if result.score is not None else 0.0
 
 
 def compute_episode_horizon(

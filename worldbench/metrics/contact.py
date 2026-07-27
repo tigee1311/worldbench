@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from worldbench.dataset import Episode
+from worldbench.plugins import MetricRequirements
 from worldbench.schemas import MetricResult
 from worldbench.utils import (
     clamp,
@@ -22,6 +23,13 @@ class ContactRealismMetric:
     """Penalize object motion before robot/object contact."""
 
     name = "contact_realism"
+    version = "1.0"
+    requirements = MetricRequirements(
+        input_modalities=("rgb_frames", "tracking"),
+        requires_tracking=True,
+        supports_video_pairs=False,
+        notes="Current implementation supports synthetic-labeled robot/object centroid tracking.",
+    )
 
     def __init__(
         self, contact_threshold_px: float = 23.0, motion_threshold_px: float = 3.0
@@ -69,16 +77,25 @@ class ContactRealismMetric:
             )
 
         for idx in range(1, len(images)):
-            if robot[idx - 1] is None or obj[idx - 1] is None or obj[idx] is None:
+            previous_robot = robot[idx - 1]
+            previous_object = obj[idx - 1]
+            current_object = obj[idx]
+            if (
+                previous_robot is None
+                or previous_object is None
+                or current_object is None
+            ):
                 distances.append(None)
                 object_motion.append(0.0)
                 continue
             distance = vector_norm(
-                robot[idx - 1][0] - obj[idx - 1][0], robot[idx - 1][1] - obj[idx - 1][1]
+                previous_robot[0] - previous_object[0],
+                previous_robot[1] - previous_object[1],
             )
             distances.append(distance)
             moved = vector_norm(
-                obj[idx][0] - first_object[0], obj[idx][1] - first_object[1]
+                current_object[0] - first_object[0],
+                current_object[1] - first_object[1],
             )
             object_motion.append(moved)
             if (

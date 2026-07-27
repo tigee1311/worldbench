@@ -10,7 +10,6 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-
 METRIC_NAMES = (
     "visual_similarity",
     "action_consistency",

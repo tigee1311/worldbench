@@ -36,6 +36,24 @@ def generate_markdown_report(result: EvaluationResult) -> str:
     ]
     evidence = collect_evidence(result)
     next_steps = suggested_next_steps(result)
+    available_metrics = [
+        name.replace("_", " ").title()
+        for name in result.coverage.get("available_metrics", [])
+    ]
+    unavailable_metrics = [
+        name.replace("_", " ").title()
+        for name in result.coverage.get("unsupported_metrics", [])
+    ]
+    subset_warning = (
+        [
+            "",
+            "> Composite Score uses available metrics only; unavailable metrics are N/A, not zero.",
+            "",
+        ]
+        if result.coverage.get("available_metric_count", 0)
+        < result.coverage.get("configured_metric_count", 0)
+        else []
+    )
 
     sections = [
         "# WorldBench Evaluation Report",
@@ -45,6 +63,7 @@ def generate_markdown_report(result: EvaluationResult) -> str:
         f"**Metric coverage:** {result.coverage.get('available_metric_count', 0)} of {result.coverage.get('configured_metric_count', 0)} configured metrics",
         "",
         f"**Configured weight coverage:** {float(result.coverage.get('configured_weight_coverage', 0.0)):.0%}",
+        *subset_warning,
         "",
         f"**Main failure:** {result.main_failure}",
         "",
@@ -52,13 +71,13 @@ def generate_markdown_report(result: EvaluationResult) -> str:
         "",
         markdown_table(["Metric", "Score", "Effective Weight"], metric_rows),
         "",
+        "### Available Metrics",
+        "",
+        "\n".join(f"- {name}" for name in available_metrics) or "- None",
+        "",
         "### Unsupported Metrics",
         "",
-        "\n".join(
-            f"- {name.replace('_', ' ').title()}"
-            for name in result.coverage.get("unsupported_metrics", [])
-        )
-        or "- None",
+        "\n".join(f"- {name}" for name in unavailable_metrics) or "- None",
         "",
         "## Per-Episode Scores",
         "",

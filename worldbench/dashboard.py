@@ -39,7 +39,7 @@ def launch_dashboard(
         result_json = json.dumps(result.to_dict(), indent=2)
 
     class DashboardHandler(BaseHTTPRequestHandler):
-        def do_GET(self) -> None:  # noqa: N802
+        def do_GET(self) -> None:
             parsed = urlparse(self.path)
             if parsed.path == "/":
                 self._send_text(html_payload, "text/html; charset=utf-8")
@@ -64,7 +64,7 @@ def launch_dashboard(
                 return
             self.send_error(404)
 
-        def log_message(self, format: str, *args: object) -> None:  # noqa: A002
+        def log_message(self, format: str, *args: object) -> None:
             return
 
         def _send_text(self, payload: str, content_type: str) -> None:
@@ -143,7 +143,7 @@ def load_comparison_if_present(path: Path) -> dict[str, object] | None:
         return None
     try:
         data = read_json(candidate)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     if isinstance(data, dict) and {
         "overall",
@@ -167,7 +167,7 @@ def _report_for_target(path: Path) -> Path | None:
 def build_frame_index(result: EvaluationResult) -> dict[str, dict[str, list[Path]]]:
     try:
         dataset = load_dataset(result.dataset_path)
-    except Exception:  # noqa: BLE001
+    except Exception:
         return {}
 
     predictions_root = (

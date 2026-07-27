@@ -10,7 +10,6 @@ from PIL import Image, ImageDraw
 
 from worldbench.utils import ensure_dir, write_json
 
-
 SCENARIO_NAMES = [
     "push_cube",
     "action_mismatch",

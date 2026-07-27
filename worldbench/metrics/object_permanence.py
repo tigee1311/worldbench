@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from worldbench.dataset import Episode
+from worldbench.plugins import MetricRequirements
 from worldbench.schemas import MetricResult
 from worldbench.utils import (
     clamp,
@@ -20,6 +21,13 @@ class ObjectPermanenceMetric:
     """Track whether the main object remains visible over the rollout."""
 
     name = "object_permanence"
+    version = "1.0"
+    requirements = MetricRequirements(
+        input_modalities=("rgb_frames", "tracking"),
+        requires_tracking=True,
+        supports_video_pairs=False,
+        notes="Current implementation supports only synthetic-labeled color/blob tracking.",
+    )
 
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
         if not rollout_supports_synthetic_tracking(episode):

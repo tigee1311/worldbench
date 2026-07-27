@@ -2,21 +2,27 @@
 
 from __future__ import annotations
 
+import math
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
-import math
 from pathlib import Path
-import tempfile
 from typing import Any
 
 import numpy as np
 from PIL import Image, ImageDraw
 
 from worldbench.config import WorldBenchConfig
+from worldbench.provenance import (
+    codec_metadata,
+    environment_provenance,
+    input_file_record,
+    safe_display_path,
+    sha256_json,
+)
 from worldbench.runners.evaluator import EvaluationRunner
 from worldbench.schemas import EvaluationResult
 from worldbench.utils import write_json
-
 
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 
@@ -32,6 +38,8 @@ class DecodedVideo:
     fps: float | None
     width: int
     height: int
+    metadata: dict[str, Any]
+    decoder_backend: str = "imageio.v2"
 
     @property
     def frame_count(self) -> int:
@@ -108,13 +116,25 @@ def evaluate_video_pair(
             config=config
         )
 
+    evaluation_provenance = dict(result.provenance)
+    ground_truth_display, _ = safe_display_path(gt_path)
+    prediction_display, _ = safe_display_path(pred_path)
+    input_files = [
+        input_file_record("ground_truth_video", gt_path),
+        input_file_record("prediction_video", pred_path),
+    ]
     result.dataset_path = str(gt_path)
     result.predictions_path = str(pred_path)
     result.provenance = {
         "source": "video_pair",
         "name": name,
-        "ground_truth_path": str(gt_path),
-        "prediction_path": str(pred_path),
+        "metric_plugins": evaluation_provenance.get("metric_plugins", {}),
+        "adapter_plugins": evaluation_provenance.get("adapter_plugins", {}),
+        "input_files": input_files,
+        "ground_truth_path": ground_truth_display,
+        "prediction_path": prediction_display,
+        "ground_truth_sha256": input_files[0]["sha256"],
+        "prediction_sha256": input_files[1]["sha256"],
         "skip_context": skip_context,
         "alignment_policy": alignment,
         "alignment_method": aligned.details["alignment_method"],
@@ -142,10 +162,15 @@ def evaluate_video_pair(
         "resizing_occurred": aligned.details["resizing_occurred"],
         "ground_truth_original_fps": gt_video.fps,
         "prediction_original_fps": pred_video.fps,
+        "ground_truth_codec_metadata": codec_metadata(gt_video.metadata),
+        "prediction_codec_metadata": codec_metadata(pred_video.metadata),
+        "decoder_backend": gt_video.decoder_backend,
+        "environment": environment_provenance(decoder_backend=gt_video.decoder_backend),
         "fps_differed": aligned.details["fps_differed"],
         "fps": gt_video.fps,
         "prediction_fps": pred_video.fps,
         "resolution": aligned.details["evaluated_resolution"],
+        "report_configuration_sha256": sha256_json(result.configuration),
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     if aligned.warnings:
@@ -176,11 +201,11 @@ def decode_video(path: Path, *, label: str) -> DecodedVideo:
         ) from exc
 
     try:
-        reader = imageio.get_reader(path)
+        reader: Any = imageio.get_reader(path)
         metadata = reader.get_meta_data()
         frames = [_as_rgb_uint8(frame) for frame in reader]
         reader.close()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise VideoEvaluationError(
             f"{label} video is unreadable: {path}. "
             "Re-encode it as a standard MP4/H.264 file and try again. "
@@ -204,6 +229,7 @@ def decode_video(path: Path, *, label: str) -> DecodedVideo:
         fps=_read_fps(metadata),
         width=width,
         height=height,
+        metadata=metadata if isinstance(metadata, dict) else {},
     )
 
 
@@ -510,8 +536,10 @@ def create_saved_video_demo_pair(output_dir: str | Path) -> tuple[Path, Path]:
     prediction = output / "predicted_future.mp4"
     frames = [_demo_frame(index, delta=0) for index in range(8)]
     predicted = [_demo_frame(index, delta=6 if index >= 3 else 2) for index in range(8)]
-    imageio.mimwrite(ground_truth, frames, fps=6, macro_block_size=1)
-    imageio.mimwrite(prediction, predicted, fps=6, macro_block_size=1)
+    frames_for_write: list[Any] = frames
+    predicted_for_write: list[Any] = predicted
+    imageio.mimwrite(ground_truth, frames_for_write, fps=6, macro_block_size=1)
+    imageio.mimwrite(prediction, predicted_for_write, fps=6, macro_block_size=1)
     return ground_truth, prediction
 
 
