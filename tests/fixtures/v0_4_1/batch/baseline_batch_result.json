@@ -1,0 +1,2385 @@
+{
+  "schema_version": "2",
+  "result_type": "batch_evaluation",
+  "worldbench_version": "0.4.1",
+  "created_at": "2026-07-27T23:07:00.125649+00:00",
+  "checkpoint_name": "baseline_v041",
+  "ground_truth_root": "tests/fixtures/v0_4_1/batch/ground_truth",
+  "predictions_root": "tests/fixtures/v0_4_1/batch/baseline_predictions",
+  "skip_context": 0,
+  "pairing_rule": "Videos are paired by relative POSIX path under each root.",
+  "episode_count": 1,
+  "episode_ids": [
+    "episode_000.mp4"
+  ],
+  "dataset_identifier": "sha256:f481e0a89c3af9fd0a1e4c15f76c676176ceb6d2c6b731fca4237b165fe1ef72",
+  "episodes": [
+    {
+      "episode_id": "episode_000.mp4",
+      "ground_truth_path": "tests/fixtures/v0_4_1/batch/ground_truth/episode_000.mp4",
+      "prediction_path": "tests/fixtures/v0_4_1/batch/baseline_predictions/episode_000.mp4",
+      "result_path": "/Users/ayush/worldbench-review/v041-batch-artifacts/20260727-160700-016516/episodes/episode_000.mp4.json",
+      "score": 96.10118880756227,
+      "metrics": {
+        "visual_similarity": {
+          "name": "visual_similarity",
+          "score": 94.6616323025311,
+          "status": "available",
+          "reason": null,
+          "details": {
+            "episode_scores": [
+              94.6616323025311
+            ]
+          },
+          "issues": []
+        },
+        "action_consistency": {
+          "name": "action_consistency",
+          "score": null,
+          "status": "unsupported",
+          "reason": "No actions aligned to predicted frames.",
+          "details": {
+            "available_episode_scores": [],
+            "unsupported_episodes": [
+              "episode_001: No actions aligned to predicted frames."
+            ]
+          },
+          "issues": [
+            "episode_001: No actions aligned to predicted frames."
+          ]
+        },
+        "temporal_stability": {
+          "name": "temporal_stability",
+          "score": 97.90063443885123,
+          "status": "available",
+          "reason": null,
+          "details": {
+            "episode_scores": [
+              97.90063443885123
+            ]
+          },
+          "issues": []
+        },
+        "object_permanence": {
+          "name": "object_permanence",
+          "score": null,
+          "status": "unsupported",
+          "reason": "Reliable object tracking is unavailable for this rollout.",
+          "details": {
+            "available_episode_scores": [],
+            "unsupported_episodes": [
+              "episode_001: Reliable object tracking is unavailable for this rollout."
+            ]
+          },
+          "issues": [
+            "episode_001: Reliable object tracking is unavailable for this rollout."
+          ]
+        },
+        "contact_realism": {
+          "name": "contact_realism",
+          "score": null,
+          "status": "unsupported",
+          "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+          "details": {
+            "available_episode_scores": [],
+            "unsupported_episodes": [
+              "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+            ]
+          },
+          "issues": [
+            "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        }
+      },
+      "horizon": {
+        "t+1": {
+          "horizon_index": 1,
+          "sample_count": 1,
+          "metrics": {
+            "visual_similarity": {
+              "count": 1,
+              "mean": 98.97492370472335,
+              "median": 98.97492370472335,
+              "std": 0.0,
+              "min": 98.97492370472335,
+              "max": 98.97492370472335,
+              "p10": 98.97492370472335,
+              "p25": 98.97492370472335,
+              "p50": 98.97492370472335,
+              "p75": 98.97492370472335,
+              "p90": 98.97492370472335
+            }
+          },
+          "unavailable_metrics": {
+            "action_consistency": {
+              "count": 1,
+              "reasons": [
+                "Need at least two predicted frames."
+              ]
+            },
+            "contact_realism": {
+              "count": 1,
+              "reasons": [
+                "Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "object_permanence": {
+              "count": 1,
+              "reasons": [
+                "Reliable object tracking is unavailable for this rollout."
+              ]
+            },
+            "temporal_stability": {
+              "count": 1,
+              "reasons": [
+                "Temporal stability requires at least one future-frame transition."
+              ]
+            }
+          }
+        },
+        "t+2": {
+          "horizon_index": 2,
+          "sample_count": 1,
+          "metrics": {
+            "temporal_stability": {
+              "count": 1,
+              "mean": 100.0,
+              "median": 100.0,
+              "std": 0.0,
+              "min": 100.0,
+              "max": 100.0,
+              "p10": 100.0,
+              "p25": 100.0,
+              "p50": 100.0,
+              "p75": 100.0,
+              "p90": 100.0
+            },
+            "visual_similarity": {
+              "count": 1,
+              "mean": 98.4819510760804,
+              "median": 98.4819510760804,
+              "std": 0.0,
+              "min": 98.4819510760804,
+              "max": 98.4819510760804,
+              "p10": 98.4819510760804,
+              "p25": 98.4819510760804,
+              "p50": 98.4819510760804,
+              "p75": 98.4819510760804,
+              "p90": 98.4819510760804
+            }
+          },
+          "unavailable_metrics": {
+            "action_consistency": {
+              "count": 1,
+              "reasons": [
+                "No actions aligned to predicted frames."
+              ]
+            },
+            "contact_realism": {
+              "count": 1,
+              "reasons": [
+                "Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "object_permanence": {
+              "count": 1,
+              "reasons": [
+                "Reliable object tracking is unavailable for this rollout."
+              ]
+            }
+          }
+        },
+        "t+3": {
+          "horizon_index": 3,
+          "sample_count": 1,
+          "metrics": {
+            "temporal_stability": {
+              "count": 1,
+              "mean": 99.73750014305115,
+              "median": 99.73750014305115,
+              "std": 0.0,
+              "min": 99.73750014305115,
+              "max": 99.73750014305115,
+              "p10": 99.73750014305115,
+              "p25": 99.73750014305115,
+              "p50": 99.73750014305115,
+              "p75": 99.73750014305115,
+              "p90": 99.73750014305115
+            },
+            "visual_similarity": {
+              "count": 1,
+              "mean": 98.31931531257052,
+              "median": 98.31931531257052,
+              "std": 0.0,
+              "min": 98.31931531257052,
+              "max": 98.31931531257052,
+              "p10": 98.31931531257052,
+              "p25": 98.31931531257052,
+              "p50": 98.31931531257052,
+              "p75": 98.31931531257052,
+              "p90": 98.31931531257052
+            }
+          },
+          "unavailable_metrics": {
+            "action_consistency": {
+              "count": 1,
+              "reasons": [
+                "No actions aligned to predicted frames."
+              ]
+            },
+            "contact_realism": {
+              "count": 1,
+              "reasons": [
+                "Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "object_permanence": {
+              "count": 1,
+              "reasons": [
+                "Reliable object tracking is unavailable for this rollout."
+              ]
+            }
+          }
+        },
+        "t+4": {
+          "horizon_index": 4,
+          "sample_count": 1,
+          "metrics": {
+            "temporal_stability": {
+              "count": 1,
+              "mean": 97.26627764400351,
+              "median": 97.26627764400351,
+              "std": 0.0,
+              "min": 97.26627764400351,
+              "max": 97.26627764400351,
+              "p10": 97.26627764400351,
+              "p25": 97.26627764400351,
+              "p50": 97.26627764400351,
+              "p75": 97.26627764400351,
+              "p90": 97.26627764400351
+            },
+            "visual_similarity": {
+              "count": 1,
+              "mean": 96.6593472305342,
+              "median": 96.6593472305342,
+              "std": 0.0,
+              "min": 96.6593472305342,
+              "max": 96.6593472305342,
+              "p10": 96.6593472305342,
+              "p25": 96.6593472305342,
+              "p50": 96.6593472305342,
+              "p75": 96.6593472305342,
+              "p90": 96.6593472305342
+            }
+          },
+          "unavailable_metrics": {
+            "action_consistency": {
+              "count": 1,
+              "reasons": [
+                "No actions aligned to predicted frames."
+              ]
+            },
+            "contact_realism": {
+              "count": 1,
+              "reasons": [
+                "Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "object_permanence": {
+              "count": 1,
+              "reasons": [
+                "Reliable object tracking is unavailable for this rollout."
+              ]
+            }
+          }
+        },
+        "t+5": {
+          "horizon_index": 5,
+          "sample_count": 1,
+          "metrics": {
+            "temporal_stability": {
+              "count": 1,
+              "mean": 97.59492981120357,
+              "median": 97.59492981120357,
+              "std": 0.0,
+              "min": 97.59492981120357,
+              "max": 97.59492981120357,
+              "p10": 97.59492981120357,
+              "p25": 97.59492981120357,
+              "p50": 97.59492981120357,
+              "p75": 97.59492981120357,
+              "p90": 97.59492981120357
+            },
+            "visual_similarity": {
+              "count": 1,
+              "mean": 95.88413825925441,
+              "median": 95.88413825925441,
+              "std": 0.0,
+              "min": 95.88413825925441,
+              "max": 95.88413825925441,
+              "p10": 95.88413825925441,
+              "p25": 95.88413825925441,
+              "p50": 95.88413825925441,
+              "p75": 95.88413825925441,
+              "p90": 95.88413825925441
+            }
+          },
+          "unavailable_metrics": {
+            "action_consistency": {
+              "count": 1,
+              "reasons": [
+                "No actions aligned to predicted frames."
+              ]
+            },
+            "contact_realism": {
+              "count": 1,
+              "reasons": [
+                "Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "object_permanence": {
+              "count": 1,
+              "reasons": [
+                "Reliable object tracking is unavailable for this rollout."
+              ]
+            }
+          }
+        },
+        "t+6": {
+          "horizon_index": 6,
+          "sample_count": 1,
+          "metrics": {
+            "temporal_stability": {
+              "count": 1,
+              "mean": 97.58885252676531,
+              "median": 97.58885252676531,
+              "std": 0.0,
+              "min": 97.58885252676531,
+              "max": 97.58885252676531,
+              "p10": 97.58885252676531,
+              "p25": 97.58885252676531,
+              "p50": 97.58885252676531,
+              "p75": 97.58885252676531,
+              "p90": 97.58885252676531
+            },
+            "visual_similarity": {
+              "count": 1,
+              "mean": 95.40518068349354,
+              "median": 95.40518068349354,
+              "std": 0.0,
+              "min": 95.40518068349354,
+              "max": 95.40518068349354,
+              "p10": 95.40518068349354,
+              "p25": 95.40518068349354,
+              "p50": 95.40518068349354,
+              "p75": 95.40518068349354,
+              "p90": 95.40518068349354
+            }
+          },
+          "unavailable_metrics": {
+            "action_consistency": {
+              "count": 1,
+              "reasons": [
+                "No actions aligned to predicted frames."
+              ]
+            },
+            "contact_realism": {
+              "count": 1,
+              "reasons": [
+                "Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "object_permanence": {
+              "count": 1,
+              "reasons": [
+                "Reliable object tracking is unavailable for this rollout."
+              ]
+            }
+          }
+        },
+        "t+7": {
+          "horizon_index": 7,
+          "sample_count": 1,
+          "metrics": {
+            "temporal_stability": {
+              "count": 1,
+              "mean": 97.78758694039198,
+              "median": 97.78758694039198,
+              "std": 0.0,
+              "min": 97.78758694039198,
+              "max": 97.78758694039198,
+              "p10": 97.78758694039198,
+              "p25": 97.78758694039198,
+              "p50": 97.78758694039198,
+              "p75": 97.78758694039198,
+              "p90": 97.78758694039198
+            },
+            "visual_similarity": {
+              "count": 1,
+              "mean": 94.98476749518218,
+              "median": 94.98476749518218,
+              "std": 0.0,
+              "min": 94.98476749518218,
+              "max": 94.98476749518218,
+              "p10": 94.98476749518218,
+              "p25": 94.98476749518218,
+              "p50": 94.98476749518218,
+              "p75": 94.98476749518218,
+              "p90": 94.98476749518218
+            }
+          },
+          "unavailable_metrics": {
+            "action_consistency": {
+              "count": 1,
+              "reasons": [
+                "No actions aligned to predicted frames."
+              ]
+            },
+            "contact_realism": {
+              "count": 1,
+              "reasons": [
+                "Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "object_permanence": {
+              "count": 1,
+              "reasons": [
+                "Reliable object tracking is unavailable for this rollout."
+              ]
+            }
+          }
+        },
+        "t+8": {
+          "horizon_index": 8,
+          "sample_count": 1,
+          "metrics": {
+            "temporal_stability": {
+              "count": 1,
+              "mean": 97.90063443885123,
+              "median": 97.90063443885123,
+              "std": 0.0,
+              "min": 97.90063443885123,
+              "max": 97.90063443885123,
+              "p10": 97.90063443885123,
+              "p25": 97.90063443885123,
+              "p50": 97.90063443885123,
+              "p75": 97.90063443885123,
+              "p90": 97.90063443885123
+            },
+            "visual_similarity": {
+              "count": 1,
+              "mean": 94.6616323025311,
+              "median": 94.6616323025311,
+              "std": 0.0,
+              "min": 94.6616323025311,
+              "max": 94.6616323025311,
+              "p10": 94.6616323025311,
+              "p25": 94.6616323025311,
+              "p50": 94.6616323025311,
+              "p75": 94.6616323025311,
+              "p90": 94.6616323025311
+            }
+          },
+          "unavailable_metrics": {
+            "action_consistency": {
+              "count": 1,
+              "reasons": [
+                "No actions aligned to predicted frames."
+              ]
+            },
+            "contact_realism": {
+              "count": 1,
+              "reasons": [
+                "Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "object_permanence": {
+              "count": 1,
+              "reasons": [
+                "Reliable object tracking is unavailable for this rollout."
+              ]
+            }
+          }
+        }
+      },
+      "issues": [
+        "episode_001: No actions aligned to predicted frames.",
+        "episode_001: Reliable object tracking is unavailable for this rollout.",
+        "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+      ],
+      "main_failure": "No dominant failure among available metrics; 3 metrics were unsupported.",
+      "result": {
+        "schema_version": "2",
+        "result_type": "evaluation",
+        "dataset_path": "tests/fixtures/v0_4_1/batch/ground_truth/episode_000.mp4",
+        "predictions_path": "tests/fixtures/v0_4_1/batch/baseline_predictions/episode_000.mp4",
+        "created_at": "2026-07-27T23:07:00.121935+00:00",
+        "score": 96.10118880756227,
+        "composite_score": 96.10118880756227,
+        "metrics": {
+          "visual_similarity": {
+            "name": "visual_similarity",
+            "score": 94.6616323025311,
+            "status": "available",
+            "reason": null,
+            "details": {
+              "episode_scores": [
+                94.6616323025311
+              ]
+            },
+            "issues": []
+          },
+          "action_consistency": {
+            "name": "action_consistency",
+            "score": null,
+            "status": "unsupported",
+            "reason": "No actions aligned to predicted frames.",
+            "details": {
+              "available_episode_scores": [],
+              "unsupported_episodes": [
+                "episode_001: No actions aligned to predicted frames."
+              ]
+            },
+            "issues": [
+              "episode_001: No actions aligned to predicted frames."
+            ]
+          },
+          "temporal_stability": {
+            "name": "temporal_stability",
+            "score": 97.90063443885123,
+            "status": "available",
+            "reason": null,
+            "details": {
+              "episode_scores": [
+                97.90063443885123
+              ]
+            },
+            "issues": []
+          },
+          "object_permanence": {
+            "name": "object_permanence",
+            "score": null,
+            "status": "unsupported",
+            "reason": "Reliable object tracking is unavailable for this rollout.",
+            "details": {
+              "available_episode_scores": [],
+              "unsupported_episodes": [
+                "episode_001: Reliable object tracking is unavailable for this rollout."
+              ]
+            },
+            "issues": [
+              "episode_001: Reliable object tracking is unavailable for this rollout."
+            ]
+          },
+          "contact_realism": {
+            "name": "contact_realism",
+            "score": null,
+            "status": "unsupported",
+            "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+            "details": {
+              "available_episode_scores": [],
+              "unsupported_episodes": [
+                "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+              ]
+            },
+            "issues": [
+              "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+            ]
+          }
+        },
+        "episodes": [
+          {
+            "episode": "episode_001",
+            "score": 96.10118880756227,
+            "metrics": {
+              "visual_similarity": {
+                "name": "visual_similarity",
+                "score": 94.6616323025311,
+                "status": "available",
+                "reason": null,
+                "details": {
+                  "mse": 30.033067226409912,
+                  "psnr": 34.34475292231042,
+                  "ssim": 0.9691209441402024,
+                  "frame_pairs": 8,
+                  "components": {
+                    "mse_score": 99.95381304540345,
+                    "psnr_score": 85.86188230577605,
+                    "ssim_score": 96.91209441402025
+                  }
+                },
+                "issues": []
+              },
+              "action_consistency": {
+                "name": "action_consistency",
+                "score": null,
+                "status": "unsupported",
+                "reason": "No actions aligned to predicted frames.",
+                "details": {},
+                "issues": [
+                  "No actions aligned to predicted frames."
+                ]
+              },
+              "temporal_stability": {
+                "name": "temporal_stability",
+                "score": 97.90063443885123,
+                "status": "available",
+                "reason": null,
+                "details": {
+                  "mean_frame_delta": 6.671006952013288,
+                  "median_frame_delta": 6.34461784362793,
+                  "max_frame_delta": 9.410590171813965,
+                  "std_frame_delta": 1.1663142006382083,
+                  "jump_indices": [],
+                  "flicker_frames": [],
+                  "largest_jump_frame": 2,
+                  "largest_jump_delta": 9.410590171813965
+                },
+                "issues": []
+              },
+              "object_permanence": {
+                "name": "object_permanence",
+                "score": null,
+                "status": "unsupported",
+                "reason": "Reliable object tracking is unavailable for this rollout.",
+                "details": {},
+                "issues": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              },
+              "contact_realism": {
+                "name": "contact_realism",
+                "score": null,
+                "status": "unsupported",
+                "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                "details": {},
+                "issues": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              }
+            },
+            "horizon": {
+              "t+1": {
+                "horizon_index": 1,
+                "sample_count": 1,
+                "frame_pairs": 1,
+                "mode": "cumulative_prefix",
+                "score": 98.97492370472335,
+                "metrics": {
+                  "visual_similarity": {
+                    "name": "visual_similarity",
+                    "score": 98.97492370472335,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mse": 8.106120109558105,
+                      "psnr": 39.042673264101936,
+                      "ssim": 0.991350911783292,
+                      "frame_pairs": 1,
+                      "components": {
+                        "mse_score": 99.98753384066197,
+                        "psnr_score": 97.60668316025483,
+                        "ssim_score": 99.1350911783292
+                      }
+                    },
+                    "issues": []
+                  }
+                },
+                "unavailable_metrics": {
+                  "action_consistency": {
+                    "status": "unsupported",
+                    "reason": "Need at least two predicted frames.",
+                    "issues": [
+                      "Need at least two predicted frames."
+                    ]
+                  },
+                  "temporal_stability": {
+                    "status": "unsupported",
+                    "reason": "Temporal stability requires at least one future-frame transition.",
+                    "issues": [
+                      "Temporal stability requires at least one future-frame transition."
+                    ]
+                  },
+                  "object_permanence": {
+                    "status": "unsupported",
+                    "reason": "Reliable object tracking is unavailable for this rollout.",
+                    "issues": [
+                      "Reliable object tracking is unavailable for this rollout."
+                    ]
+                  },
+                  "contact_realism": {
+                    "status": "unsupported",
+                    "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                    "issues": [
+                      "Reliable robot and object tracking are unavailable for this rollout."
+                    ]
+                  }
+                }
+              },
+              "t+2": {
+                "horizon_index": 2,
+                "sample_count": 1,
+                "frame_pairs": 2,
+                "mode": "cumulative_prefix",
+                "score": 99.15663948671133,
+                "metrics": {
+                  "visual_similarity": {
+                    "name": "visual_similarity",
+                    "score": 98.4819510760804,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mse": 9.3505859375,
+                      "psnr": 38.46122302172236,
+                      "ssim": 0.9897447658545915,
+                      "frame_pairs": 2,
+                      "components": {
+                        "mse_score": 99.98562001393695,
+                        "psnr_score": 96.1530575543059,
+                        "ssim_score": 98.97447658545914
+                      }
+                    },
+                    "issues": []
+                  },
+                  "temporal_stability": {
+                    "name": "temporal_stability",
+                    "score": 100.0,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mean_frame_delta": 6.052951335906982,
+                      "median_frame_delta": 6.052951335906982,
+                      "max_frame_delta": 6.052951335906982,
+                      "std_frame_delta": 0.0,
+                      "jump_indices": [],
+                      "flicker_frames": [],
+                      "largest_jump_frame": 0,
+                      "largest_jump_delta": 6.052951335906982
+                    },
+                    "issues": []
+                  }
+                },
+                "unavailable_metrics": {
+                  "action_consistency": {
+                    "status": "unsupported",
+                    "reason": "No actions aligned to predicted frames.",
+                    "issues": [
+                      "No actions aligned to predicted frames."
+                    ]
+                  },
+                  "object_permanence": {
+                    "status": "unsupported",
+                    "reason": "Reliable object tracking is unavailable for this rollout.",
+                    "issues": [
+                      "Reliable object tracking is unavailable for this rollout."
+                    ]
+                  },
+                  "contact_realism": {
+                    "status": "unsupported",
+                    "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                    "issues": [
+                      "Reliable robot and object tracking are unavailable for this rollout."
+                    ]
+                  }
+                }
+              },
+              "t+3": {
+                "horizon_index": 3,
+                "sample_count": 1,
+                "frame_pairs": 3,
+                "mode": "cumulative_prefix",
+                "score": 98.94961968167301,
+                "metrics": {
+                  "visual_similarity": {
+                    "name": "visual_similarity",
+                    "score": 98.31931531257052,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mse": 9.321036020914713,
+                      "psnr": 38.46207726905561,
+                      "ssim": 0.9850792700149943,
+                      "frame_pairs": 3,
+                      "components": {
+                        "mse_score": 99.98566545786865,
+                        "psnr_score": 96.15519317263903,
+                        "ssim_score": 98.50792700149943
+                      }
+                    },
+                    "issues": []
+                  },
+                  "temporal_stability": {
+                    "name": "temporal_stability",
+                    "score": 99.73750014305115,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mean_frame_delta": 6.198784589767456,
+                      "median_frame_delta": 6.198784589767456,
+                      "max_frame_delta": 6.34461784362793,
+                      "std_frame_delta": 0.14583325386047363,
+                      "jump_indices": [],
+                      "flicker_frames": [],
+                      "largest_jump_frame": 1,
+                      "largest_jump_delta": 6.34461784362793
+                    },
+                    "issues": []
+                  }
+                },
+                "unavailable_metrics": {
+                  "action_consistency": {
+                    "status": "unsupported",
+                    "reason": "No actions aligned to predicted frames.",
+                    "issues": [
+                      "No actions aligned to predicted frames."
+                    ]
+                  },
+                  "object_permanence": {
+                    "status": "unsupported",
+                    "reason": "Reliable object tracking is unavailable for this rollout.",
+                    "issues": [
+                      "Reliable object tracking is unavailable for this rollout."
+                    ]
+                  },
+                  "contact_realism": {
+                    "status": "unsupported",
+                    "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                    "issues": [
+                      "Reliable robot and object tracking are unavailable for this rollout."
+                    ]
+                  }
+                }
+              },
+              "t+4": {
+                "horizon_index": 4,
+                "sample_count": 1,
+                "frame_pairs": 4,
+                "mode": "cumulative_prefix",
+                "score": 96.929094080965,
+                "metrics": {
+                  "visual_similarity": {
+                    "name": "visual_similarity",
+                    "score": 96.6593472305342,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mse": 19.42567253112793,
+                      "psnr": 36.63750352451726,
+                      "ssim": 0.976905015518328,
+                      "frame_pairs": 4,
+                      "components": {
+                        "mse_score": 99.97012584001365,
+                        "psnr_score": 91.59375881129314,
+                        "ssim_score": 97.6905015518328
+                      }
+                    },
+                    "issues": []
+                  },
+                  "temporal_stability": {
+                    "name": "temporal_stability",
+                    "score": 97.26627764400351,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mean_frame_delta": 7.269386450449626,
+                      "median_frame_delta": 6.34461784362793,
+                      "max_frame_delta": 9.410590171813965,
+                      "std_frame_delta": 1.5187346422202714,
+                      "jump_indices": [],
+                      "flicker_frames": [],
+                      "largest_jump_frame": 2,
+                      "largest_jump_delta": 9.410590171813965
+                    },
+                    "issues": []
+                  }
+                },
+                "unavailable_metrics": {
+                  "action_consistency": {
+                    "status": "unsupported",
+                    "reason": "No actions aligned to predicted frames.",
+                    "issues": [
+                      "No actions aligned to predicted frames."
+                    ]
+                  },
+                  "object_permanence": {
+                    "status": "unsupported",
+                    "reason": "Reliable object tracking is unavailable for this rollout.",
+                    "issues": [
+                      "Reliable object tracking is unavailable for this rollout."
+                    ]
+                  },
+                  "contact_realism": {
+                    "status": "unsupported",
+                    "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                    "issues": [
+                      "Reliable robot and object tracking are unavailable for this rollout."
+                    ]
+                  }
+                }
+              },
+              "t+5": {
+                "horizon_index": 5,
+                "sample_count": 1,
+                "frame_pairs": 5,
+                "mode": "cumulative_prefix",
+                "score": 96.6444900601207,
+                "metrics": {
+                  "visual_similarity": {
+                    "name": "visual_similarity",
+                    "score": 95.88413825925441,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mse": 23.205728912353514,
+                      "psnr": 35.76917758342023,
+                      "ssim": 0.9734213045745156,
+                      "frame_pairs": 5,
+                      "components": {
+                        "mse_score": 99.96431260451772,
+                        "psnr_score": 89.42294395855058,
+                        "ssim_score": 97.34213045745156
+                      }
+                    },
+                    "issues": []
+                  },
+                  "temporal_stability": {
+                    "name": "temporal_stability",
+                    "score": 97.59492981120357,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mean_frame_delta": 7.133517742156982,
+                      "median_frame_delta": 6.535264730453491,
+                      "max_frame_delta": 9.410590171813965,
+                      "std_frame_delta": 1.3361501048869047,
+                      "jump_indices": [],
+                      "flicker_frames": [],
+                      "largest_jump_frame": 2,
+                      "largest_jump_delta": 9.410590171813965
+                    },
+                    "issues": []
+                  }
+                },
+                "unavailable_metrics": {
+                  "action_consistency": {
+                    "status": "unsupported",
+                    "reason": "No actions aligned to predicted frames.",
+                    "issues": [
+                      "No actions aligned to predicted frames."
+                    ]
+                  },
+                  "object_permanence": {
+                    "status": "unsupported",
+                    "reason": "Reliable object tracking is unavailable for this rollout.",
+                    "issues": [
+                      "Reliable object tracking is unavailable for this rollout."
+                    ]
+                  },
+                  "contact_realism": {
+                    "status": "unsupported",
+                    "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                    "issues": [
+                      "Reliable robot and object tracking are unavailable for this rollout."
+                    ]
+                  }
+                }
+              },
+              "t+6": {
+                "horizon_index": 6,
+                "sample_count": 1,
+                "frame_pairs": 6,
+                "mode": "cumulative_prefix",
+                "score": 96.37570150272543,
+                "metrics": {
+                  "visual_similarity": {
+                    "name": "visual_similarity",
+                    "score": 95.40518068349354,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mse": 25.578558603922527,
+                      "psnr": 35.207169854031356,
+                      "ssim": 0.9718163162197014,
+                      "frame_pairs": 6,
+                      "components": {
+                        "mse_score": 99.96066350080135,
+                        "psnr_score": 88.01792463507839,
+                        "ssim_score": 97.18163162197014
+                      }
+                    },
+                    "issues": []
+                  },
+                  "temporal_stability": {
+                    "name": "temporal_stability",
+                    "score": 97.58885252676531,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mean_frame_delta": 6.83098955154419,
+                      "median_frame_delta": 6.34461784362793,
+                      "max_frame_delta": 9.410590171813965,
+                      "std_frame_delta": 1.3395263740192764,
+                      "jump_indices": [],
+                      "flicker_frames": [],
+                      "largest_jump_frame": 2,
+                      "largest_jump_delta": 9.410590171813965
+                    },
+                    "issues": []
+                  }
+                },
+                "unavailable_metrics": {
+                  "action_consistency": {
+                    "status": "unsupported",
+                    "reason": "No actions aligned to predicted frames.",
+                    "issues": [
+                      "No actions aligned to predicted frames."
+                    ]
+                  },
+                  "object_permanence": {
+                    "status": "unsupported",
+                    "reason": "Reliable object tracking is unavailable for this rollout.",
+                    "issues": [
+                      "Reliable object tracking is unavailable for this rollout."
+                    ]
+                  },
+                  "contact_realism": {
+                    "status": "unsupported",
+                    "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                    "issues": [
+                      "Reliable robot and object tracking are unavailable for this rollout."
+                    ]
+                  }
+                }
+              },
+              "t+7": {
+                "horizon_index": 7,
+                "sample_count": 1,
+                "frame_pairs": 7,
+                "mode": "cumulative_prefix",
+                "score": 96.23046502638653,
+                "metrics": {
+                  "visual_similarity": {
+                    "name": "visual_similarity",
+                    "score": 94.98476749518218,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mse": 27.97498103550502,
+                      "psnr": 34.72927543968253,
+                      "ssim": 0.9700819592954125,
+                      "frame_pairs": 7,
+                      "components": {
+                        "mse_score": 99.95697811451672,
+                        "psnr_score": 86.82318859920632,
+                        "ssim_score": 97.00819592954126
+                      }
+                    },
+                    "issues": []
+                  },
+                  "temporal_stability": {
+                    "name": "temporal_stability",
+                    "score": 97.78758694039198,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mean_frame_delta": 6.775390625,
+                      "median_frame_delta": 6.421006917953491,
+                      "max_frame_delta": 9.410590171813965,
+                      "std_frame_delta": 1.2291183664489043,
+                      "jump_indices": [],
+                      "flicker_frames": [],
+                      "largest_jump_frame": 2,
+                      "largest_jump_delta": 9.410590171813965
+                    },
+                    "issues": []
+                  }
+                },
+                "unavailable_metrics": {
+                  "action_consistency": {
+                    "status": "unsupported",
+                    "reason": "No actions aligned to predicted frames.",
+                    "issues": [
+                      "No actions aligned to predicted frames."
+                    ]
+                  },
+                  "object_permanence": {
+                    "status": "unsupported",
+                    "reason": "Reliable object tracking is unavailable for this rollout.",
+                    "issues": [
+                      "Reliable object tracking is unavailable for this rollout."
+                    ]
+                  },
+                  "contact_realism": {
+                    "status": "unsupported",
+                    "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                    "issues": [
+                      "Reliable robot and object tracking are unavailable for this rollout."
+                    ]
+                  }
+                }
+              },
+              "t+8": {
+                "horizon_index": 8,
+                "sample_count": 1,
+                "frame_pairs": 8,
+                "mode": "cumulative_prefix",
+                "score": 96.10118880756227,
+                "metrics": {
+                  "visual_similarity": {
+                    "name": "visual_similarity",
+                    "score": 94.6616323025311,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mse": 30.033067226409912,
+                      "psnr": 34.34475292231042,
+                      "ssim": 0.9691209441402024,
+                      "frame_pairs": 8,
+                      "components": {
+                        "mse_score": 99.95381304540345,
+                        "psnr_score": 85.86188230577605,
+                        "ssim_score": 96.91209441402025
+                      }
+                    },
+                    "issues": []
+                  },
+                  "temporal_stability": {
+                    "name": "temporal_stability",
+                    "score": 97.90063443885123,
+                    "status": "available",
+                    "reason": null,
+                    "details": {
+                      "mean_frame_delta": 6.671006952013288,
+                      "median_frame_delta": 6.34461784362793,
+                      "max_frame_delta": 9.410590171813965,
+                      "std_frame_delta": 1.1663142006382083,
+                      "jump_indices": [],
+                      "flicker_frames": [],
+                      "largest_jump_frame": 2,
+                      "largest_jump_delta": 9.410590171813965
+                    },
+                    "issues": []
+                  }
+                },
+                "unavailable_metrics": {
+                  "action_consistency": {
+                    "status": "unsupported",
+                    "reason": "No actions aligned to predicted frames.",
+                    "issues": [
+                      "No actions aligned to predicted frames."
+                    ]
+                  },
+                  "object_permanence": {
+                    "status": "unsupported",
+                    "reason": "Reliable object tracking is unavailable for this rollout.",
+                    "issues": [
+                      "Reliable object tracking is unavailable for this rollout."
+                    ]
+                  },
+                  "contact_realism": {
+                    "status": "unsupported",
+                    "reason": "Reliable robot and object tracking are unavailable for this rollout.",
+                    "issues": [
+                      "Reliable robot and object tracking are unavailable for this rollout."
+                    ]
+                  }
+                }
+              }
+            },
+            "issues": [
+              "No actions aligned to predicted frames.",
+              "No actions aligned to predicted frames.",
+              "Reliable object tracking is unavailable for this rollout.",
+              "Reliable object tracking is unavailable for this rollout.",
+              "Reliable robot and object tracking are unavailable for this rollout.",
+              "Reliable robot and object tracking are unavailable for this rollout."
+            ]
+          }
+        ],
+        "horizon": {
+          "t+1": {
+            "horizon_index": 1,
+            "sample_count": 1,
+            "metrics": {
+              "visual_similarity": {
+                "count": 1,
+                "mean": 98.97492370472335,
+                "median": 98.97492370472335,
+                "std": 0.0,
+                "min": 98.97492370472335,
+                "max": 98.97492370472335,
+                "p10": 98.97492370472335,
+                "p25": 98.97492370472335,
+                "p50": 98.97492370472335,
+                "p75": 98.97492370472335,
+                "p90": 98.97492370472335
+              }
+            },
+            "unavailable_metrics": {
+              "action_consistency": {
+                "count": 1,
+                "reasons": [
+                  "Need at least two predicted frames."
+                ]
+              },
+              "contact_realism": {
+                "count": 1,
+                "reasons": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              },
+              "object_permanence": {
+                "count": 1,
+                "reasons": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              },
+              "temporal_stability": {
+                "count": 1,
+                "reasons": [
+                  "Temporal stability requires at least one future-frame transition."
+                ]
+              }
+            }
+          },
+          "t+2": {
+            "horizon_index": 2,
+            "sample_count": 1,
+            "metrics": {
+              "temporal_stability": {
+                "count": 1,
+                "mean": 100.0,
+                "median": 100.0,
+                "std": 0.0,
+                "min": 100.0,
+                "max": 100.0,
+                "p10": 100.0,
+                "p25": 100.0,
+                "p50": 100.0,
+                "p75": 100.0,
+                "p90": 100.0
+              },
+              "visual_similarity": {
+                "count": 1,
+                "mean": 98.4819510760804,
+                "median": 98.4819510760804,
+                "std": 0.0,
+                "min": 98.4819510760804,
+                "max": 98.4819510760804,
+                "p10": 98.4819510760804,
+                "p25": 98.4819510760804,
+                "p50": 98.4819510760804,
+                "p75": 98.4819510760804,
+                "p90": 98.4819510760804
+              }
+            },
+            "unavailable_metrics": {
+              "action_consistency": {
+                "count": 1,
+                "reasons": [
+                  "No actions aligned to predicted frames."
+                ]
+              },
+              "contact_realism": {
+                "count": 1,
+                "reasons": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              },
+              "object_permanence": {
+                "count": 1,
+                "reasons": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              }
+            }
+          },
+          "t+3": {
+            "horizon_index": 3,
+            "sample_count": 1,
+            "metrics": {
+              "temporal_stability": {
+                "count": 1,
+                "mean": 99.73750014305115,
+                "median": 99.73750014305115,
+                "std": 0.0,
+                "min": 99.73750014305115,
+                "max": 99.73750014305115,
+                "p10": 99.73750014305115,
+                "p25": 99.73750014305115,
+                "p50": 99.73750014305115,
+                "p75": 99.73750014305115,
+                "p90": 99.73750014305115
+              },
+              "visual_similarity": {
+                "count": 1,
+                "mean": 98.31931531257052,
+                "median": 98.31931531257052,
+                "std": 0.0,
+                "min": 98.31931531257052,
+                "max": 98.31931531257052,
+                "p10": 98.31931531257052,
+                "p25": 98.31931531257052,
+                "p50": 98.31931531257052,
+                "p75": 98.31931531257052,
+                "p90": 98.31931531257052
+              }
+            },
+            "unavailable_metrics": {
+              "action_consistency": {
+                "count": 1,
+                "reasons": [
+                  "No actions aligned to predicted frames."
+                ]
+              },
+              "contact_realism": {
+                "count": 1,
+                "reasons": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              },
+              "object_permanence": {
+                "count": 1,
+                "reasons": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              }
+            }
+          },
+          "t+4": {
+            "horizon_index": 4,
+            "sample_count": 1,
+            "metrics": {
+              "temporal_stability": {
+                "count": 1,
+                "mean": 97.26627764400351,
+                "median": 97.26627764400351,
+                "std": 0.0,
+                "min": 97.26627764400351,
+                "max": 97.26627764400351,
+                "p10": 97.26627764400351,
+                "p25": 97.26627764400351,
+                "p50": 97.26627764400351,
+                "p75": 97.26627764400351,
+                "p90": 97.26627764400351
+              },
+              "visual_similarity": {
+                "count": 1,
+                "mean": 96.6593472305342,
+                "median": 96.6593472305342,
+                "std": 0.0,
+                "min": 96.6593472305342,
+                "max": 96.6593472305342,
+                "p10": 96.6593472305342,
+                "p25": 96.6593472305342,
+                "p50": 96.6593472305342,
+                "p75": 96.6593472305342,
+                "p90": 96.6593472305342
+              }
+            },
+            "unavailable_metrics": {
+              "action_consistency": {
+                "count": 1,
+                "reasons": [
+                  "No actions aligned to predicted frames."
+                ]
+              },
+              "contact_realism": {
+                "count": 1,
+                "reasons": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              },
+              "object_permanence": {
+                "count": 1,
+                "reasons": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              }
+            }
+          },
+          "t+5": {
+            "horizon_index": 5,
+            "sample_count": 1,
+            "metrics": {
+              "temporal_stability": {
+                "count": 1,
+                "mean": 97.59492981120357,
+                "median": 97.59492981120357,
+                "std": 0.0,
+                "min": 97.59492981120357,
+                "max": 97.59492981120357,
+                "p10": 97.59492981120357,
+                "p25": 97.59492981120357,
+                "p50": 97.59492981120357,
+                "p75": 97.59492981120357,
+                "p90": 97.59492981120357
+              },
+              "visual_similarity": {
+                "count": 1,
+                "mean": 95.88413825925441,
+                "median": 95.88413825925441,
+                "std": 0.0,
+                "min": 95.88413825925441,
+                "max": 95.88413825925441,
+                "p10": 95.88413825925441,
+                "p25": 95.88413825925441,
+                "p50": 95.88413825925441,
+                "p75": 95.88413825925441,
+                "p90": 95.88413825925441
+              }
+            },
+            "unavailable_metrics": {
+              "action_consistency": {
+                "count": 1,
+                "reasons": [
+                  "No actions aligned to predicted frames."
+                ]
+              },
+              "contact_realism": {
+                "count": 1,
+                "reasons": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              },
+              "object_permanence": {
+                "count": 1,
+                "reasons": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              }
+            }
+          },
+          "t+6": {
+            "horizon_index": 6,
+            "sample_count": 1,
+            "metrics": {
+              "temporal_stability": {
+                "count": 1,
+                "mean": 97.58885252676531,
+                "median": 97.58885252676531,
+                "std": 0.0,
+                "min": 97.58885252676531,
+                "max": 97.58885252676531,
+                "p10": 97.58885252676531,
+                "p25": 97.58885252676531,
+                "p50": 97.58885252676531,
+                "p75": 97.58885252676531,
+                "p90": 97.58885252676531
+              },
+              "visual_similarity": {
+                "count": 1,
+                "mean": 95.40518068349354,
+                "median": 95.40518068349354,
+                "std": 0.0,
+                "min": 95.40518068349354,
+                "max": 95.40518068349354,
+                "p10": 95.40518068349354,
+                "p25": 95.40518068349354,
+                "p50": 95.40518068349354,
+                "p75": 95.40518068349354,
+                "p90": 95.40518068349354
+              }
+            },
+            "unavailable_metrics": {
+              "action_consistency": {
+                "count": 1,
+                "reasons": [
+                  "No actions aligned to predicted frames."
+                ]
+              },
+              "contact_realism": {
+                "count": 1,
+                "reasons": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              },
+              "object_permanence": {
+                "count": 1,
+                "reasons": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              }
+            }
+          },
+          "t+7": {
+            "horizon_index": 7,
+            "sample_count": 1,
+            "metrics": {
+              "temporal_stability": {
+                "count": 1,
+                "mean": 97.78758694039198,
+                "median": 97.78758694039198,
+                "std": 0.0,
+                "min": 97.78758694039198,
+                "max": 97.78758694039198,
+                "p10": 97.78758694039198,
+                "p25": 97.78758694039198,
+                "p50": 97.78758694039198,
+                "p75": 97.78758694039198,
+                "p90": 97.78758694039198
+              },
+              "visual_similarity": {
+                "count": 1,
+                "mean": 94.98476749518218,
+                "median": 94.98476749518218,
+                "std": 0.0,
+                "min": 94.98476749518218,
+                "max": 94.98476749518218,
+                "p10": 94.98476749518218,
+                "p25": 94.98476749518218,
+                "p50": 94.98476749518218,
+                "p75": 94.98476749518218,
+                "p90": 94.98476749518218
+              }
+            },
+            "unavailable_metrics": {
+              "action_consistency": {
+                "count": 1,
+                "reasons": [
+                  "No actions aligned to predicted frames."
+                ]
+              },
+              "contact_realism": {
+                "count": 1,
+                "reasons": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              },
+              "object_permanence": {
+                "count": 1,
+                "reasons": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              }
+            }
+          },
+          "t+8": {
+            "horizon_index": 8,
+            "sample_count": 1,
+            "metrics": {
+              "temporal_stability": {
+                "count": 1,
+                "mean": 97.90063443885123,
+                "median": 97.90063443885123,
+                "std": 0.0,
+                "min": 97.90063443885123,
+                "max": 97.90063443885123,
+                "p10": 97.90063443885123,
+                "p25": 97.90063443885123,
+                "p50": 97.90063443885123,
+                "p75": 97.90063443885123,
+                "p90": 97.90063443885123
+              },
+              "visual_similarity": {
+                "count": 1,
+                "mean": 94.6616323025311,
+                "median": 94.6616323025311,
+                "std": 0.0,
+                "min": 94.6616323025311,
+                "max": 94.6616323025311,
+                "p10": 94.6616323025311,
+                "p25": 94.6616323025311,
+                "p50": 94.6616323025311,
+                "p75": 94.6616323025311,
+                "p90": 94.6616323025311
+              }
+            },
+            "unavailable_metrics": {
+              "action_consistency": {
+                "count": 1,
+                "reasons": [
+                  "No actions aligned to predicted frames."
+                ]
+              },
+              "contact_realism": {
+                "count": 1,
+                "reasons": [
+                  "Reliable robot and object tracking are unavailable for this rollout."
+                ]
+              },
+              "object_permanence": {
+                "count": 1,
+                "reasons": [
+                  "Reliable object tracking is unavailable for this rollout."
+                ]
+              }
+            }
+          }
+        },
+        "provenance": {
+          "source": "video_pair",
+          "name": "episode_000.mp4",
+          "ground_truth_path": "tests/fixtures/v0_4_1/batch/ground_truth/episode_000.mp4",
+          "prediction_path": "tests/fixtures/v0_4_1/batch/baseline_predictions/episode_000.mp4",
+          "skip_context": 0,
+          "alignment_policy": "strict",
+          "alignment_method": "strict_frame_index_alignment",
+          "alignment": {
+            "mode": "strict",
+            "alignment_method": "strict_frame_index_alignment",
+            "frame_alignment": "all_future_frames",
+            "resolution_policy": "exact_match",
+            "fps_policy": "exact_with_tolerance",
+            "frame_count_policy": "exact_match_after_context",
+            "ground_truth_original_frame_count": 8,
+            "prediction_original_frame_count": 8,
+            "ground_truth_future_frame_count": 8,
+            "prediction_future_frame_count": 8,
+            "ground_truth_frames_trimmed": 0,
+            "prediction_frames_trimmed": 0,
+            "evaluated_frame_count": 8,
+            "ground_truth_original_resolution": "48x32",
+            "prediction_original_resolution": "48x32",
+            "evaluated_resolution": "48x32",
+            "resizing_occurred": false,
+            "ground_truth_original_fps": 6.0,
+            "prediction_original_fps": 6.0,
+            "fps_differed": false
+          },
+          "alignment_warnings": [],
+          "warnings": [],
+          "ground_truth_original_frame_count": 8,
+          "prediction_original_frame_count": 8,
+          "ground_truth_frame_count": 8,
+          "prediction_frame_count": 8,
+          "evaluated_frame_count": 8,
+          "evaluated_ground_truth_frames": 8,
+          "evaluated_prediction_frames": 8,
+          "ground_truth_frames_trimmed": 0,
+          "prediction_frames_trimmed": 0,
+          "ground_truth_context_frames_skipped": 0,
+          "prediction_context_frames_skipped": 0,
+          "ground_truth_original_resolution": "48x32",
+          "prediction_original_resolution": "48x32",
+          "evaluated_resolution": "48x32",
+          "resizing_occurred": false,
+          "ground_truth_original_fps": 6.0,
+          "prediction_original_fps": 6.0,
+          "fps_differed": false,
+          "fps": 6.0,
+          "prediction_fps": 6.0,
+          "resolution": "48x32",
+          "created_at": "2026-07-27T23:07:00.124368+00:00"
+        },
+        "weights": {
+          "visual_similarity": 0.25,
+          "action_consistency": 0.3,
+          "temporal_stability": 0.2,
+          "object_permanence": 0.15,
+          "contact_realism": 0.1
+        },
+        "configured_weights": {
+          "visual_similarity": 0.25,
+          "action_consistency": 0.3,
+          "temporal_stability": 0.2,
+          "object_permanence": 0.15,
+          "contact_realism": 0.1
+        },
+        "enabled_metrics": [
+          "visual_similarity",
+          "action_consistency",
+          "temporal_stability",
+          "object_permanence",
+          "contact_realism"
+        ],
+        "required_metrics": [
+          "visual_similarity",
+          "temporal_stability"
+        ],
+        "effective_normalized_weights": {
+          "visual_similarity": 0.5555555555555556,
+          "temporal_stability": 0.4444444444444445
+        },
+        "coverage": {
+          "available_metrics": [
+            "visual_similarity",
+            "temporal_stability"
+          ],
+          "unsupported_metrics": [
+            "action_consistency",
+            "object_permanence",
+            "contact_realism"
+          ],
+          "configured_metrics": [
+            "visual_similarity",
+            "action_consistency",
+            "temporal_stability",
+            "object_permanence",
+            "contact_realism"
+          ],
+          "available_metric_count": 2,
+          "configured_metric_count": 5,
+          "metric_coverage": 0.4,
+          "configured_weight_coverage": 0.45,
+          "effective_normalized_weights": {
+            "visual_similarity": 0.5555555555555556,
+            "temporal_stability": 0.4444444444444445
+          }
+        },
+        "configuration": {
+          "metrics": {
+            "visual_similarity": {
+              "enabled": true,
+              "required": true,
+              "weight": 0.25
+            },
+            "temporal_stability": {
+              "enabled": true,
+              "required": true,
+              "weight": 0.2
+            },
+            "action_consistency": {
+              "enabled": true,
+              "required": false,
+              "weight": 0.3
+            },
+            "object_permanence": {
+              "enabled": true,
+              "required": false,
+              "weight": 0.15
+            },
+            "contact_realism": {
+              "enabled": true,
+              "required": false,
+              "weight": 0.1
+            }
+          },
+          "gate": {
+            "min_composite_improvement": 0.0,
+            "max_episode_regressions": 1,
+            "max_metric_drop": 2.0,
+            "max_horizon_drop": 2.0,
+            "min_metric_coverage": 0.4,
+            "min_metric_count": 2,
+            "min_configured_weight_coverage": 0.45,
+            "strict_config_match": true
+          },
+          "output": {
+            "json": true,
+            "markdown": true
+          }
+        },
+        "configuration_hash": "9efc6fa61da4df5d701a5cd6338f4ad73ff3e50f661c6a9ed03bdb0032cf783e",
+        "worldbench_version": "0.4.1",
+        "issues": [
+          "episode_001: No actions aligned to predicted frames.",
+          "episode_001: Reliable object tracking is unavailable for this rollout.",
+          "episode_001: Reliable robot and object tracking are unavailable for this rollout."
+        ],
+        "main_failure": "No dominant failure among available metrics; 3 metrics were unsupported."
+      }
+    }
+  ],
+  "aggregate": {
+    "composite_score": {
+      "count": 1,
+      "mean": 96.10118880756227,
+      "median": 96.10118880756227,
+      "std": 0.0,
+      "min": 96.10118880756227,
+      "max": 96.10118880756227,
+      "p10": 96.10118880756227,
+      "p25": 96.10118880756227,
+      "p50": 96.10118880756227,
+      "p75": 96.10118880756227,
+      "p90": 96.10118880756227
+    },
+    "overall": {
+      "count": 1,
+      "mean": 96.10118880756227,
+      "median": 96.10118880756227,
+      "std": 0.0,
+      "min": 96.10118880756227,
+      "max": 96.10118880756227,
+      "p10": 96.10118880756227,
+      "p25": 96.10118880756227,
+      "p50": 96.10118880756227,
+      "p75": 96.10118880756227,
+      "p90": 96.10118880756227
+    },
+    "metrics": {
+      "action_consistency": {
+        "status": "unsupported",
+        "available_count": 0,
+        "total_count": 1,
+        "reason": "Metric was unavailable for every episode.",
+        "unavailable_episodes": [
+          {
+            "episode_id": "episode_000.mp4",
+            "reason": "No actions aligned to predicted frames."
+          }
+        ]
+      },
+      "contact_realism": {
+        "status": "unsupported",
+        "available_count": 0,
+        "total_count": 1,
+        "reason": "Metric was unavailable for every episode.",
+        "unavailable_episodes": [
+          {
+            "episode_id": "episode_000.mp4",
+            "reason": "Reliable robot and object tracking are unavailable for this rollout."
+          }
+        ]
+      },
+      "object_permanence": {
+        "status": "unsupported",
+        "available_count": 0,
+        "total_count": 1,
+        "reason": "Metric was unavailable for every episode.",
+        "unavailable_episodes": [
+          {
+            "episode_id": "episode_000.mp4",
+            "reason": "Reliable object tracking is unavailable for this rollout."
+          }
+        ]
+      },
+      "temporal_stability": {
+        "count": 1,
+        "mean": 97.90063443885123,
+        "median": 97.90063443885123,
+        "std": 0.0,
+        "min": 97.90063443885123,
+        "max": 97.90063443885123,
+        "p10": 97.90063443885123,
+        "p25": 97.90063443885123,
+        "p50": 97.90063443885123,
+        "p75": 97.90063443885123,
+        "p90": 97.90063443885123,
+        "status": "available",
+        "available_count": 1,
+        "total_count": 1,
+        "unavailable_count": 0
+      },
+      "visual_similarity": {
+        "count": 1,
+        "mean": 94.6616323025311,
+        "median": 94.6616323025311,
+        "std": 0.0,
+        "min": 94.6616323025311,
+        "max": 94.6616323025311,
+        "p10": 94.6616323025311,
+        "p25": 94.6616323025311,
+        "p50": 94.6616323025311,
+        "p75": 94.6616323025311,
+        "p90": 94.6616323025311,
+        "status": "available",
+        "available_count": 1,
+        "total_count": 1,
+        "unavailable_count": 0
+      }
+    }
+  },
+  "coverage": {
+    "available_metrics": [
+      "visual_similarity",
+      "temporal_stability"
+    ],
+    "unsupported_metrics": [
+      "action_consistency",
+      "object_permanence",
+      "contact_realism"
+    ],
+    "configured_metrics": [
+      "visual_similarity",
+      "action_consistency",
+      "temporal_stability",
+      "object_permanence",
+      "contact_realism"
+    ],
+    "available_metric_count": 2,
+    "configured_metric_count": 5,
+    "metric_coverage": 0.4,
+    "configured_weight_coverage": 0.45,
+    "effective_normalized_weights": {
+      "visual_similarity": 0.5555555555555556,
+      "temporal_stability": 0.4444444444444445
+    }
+  },
+  "enabled_metrics": [
+    "visual_similarity",
+    "action_consistency",
+    "temporal_stability",
+    "object_permanence",
+    "contact_realism"
+  ],
+  "required_metrics": [
+    "visual_similarity",
+    "temporal_stability"
+  ],
+  "configured_weights": {
+    "visual_similarity": 0.25,
+    "action_consistency": 0.3,
+    "temporal_stability": 0.2,
+    "object_permanence": 0.15,
+    "contact_realism": 0.1
+  },
+  "effective_normalized_weights": {
+    "visual_similarity": 0.5555555555555556,
+    "temporal_stability": 0.4444444444444445
+  },
+  "configuration_hash": "9efc6fa61da4df5d701a5cd6338f4ad73ff3e50f661c6a9ed03bdb0032cf783e",
+  "horizon": {
+    "t+1": {
+      "horizon_index": 1,
+      "sample_count": 1,
+      "metrics": {
+        "visual_similarity": {
+          "count": 1,
+          "mean": 98.97492370472335,
+          "median": 98.97492370472335,
+          "std": 0.0,
+          "min": 98.97492370472335,
+          "max": 98.97492370472335,
+          "p10": 98.97492370472335,
+          "p25": 98.97492370472335,
+          "p50": 98.97492370472335,
+          "p75": 98.97492370472335,
+          "p90": 98.97492370472335
+        }
+      },
+      "unavailable_metrics": {
+        "action_consistency": {
+          "count": 1,
+          "reasons": [
+            "Need at least two predicted frames."
+          ]
+        },
+        "contact_realism": {
+          "count": 1,
+          "reasons": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        },
+        "object_permanence": {
+          "count": 1,
+          "reasons": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        },
+        "temporal_stability": {
+          "count": 1,
+          "reasons": [
+            "Temporal stability requires at least one future-frame transition."
+          ]
+        }
+      }
+    },
+    "t+2": {
+      "horizon_index": 2,
+      "sample_count": 1,
+      "metrics": {
+        "temporal_stability": {
+          "count": 1,
+          "mean": 100.0,
+          "median": 100.0,
+          "std": 0.0,
+          "min": 100.0,
+          "max": 100.0,
+          "p10": 100.0,
+          "p25": 100.0,
+          "p50": 100.0,
+          "p75": 100.0,
+          "p90": 100.0
+        },
+        "visual_similarity": {
+          "count": 1,
+          "mean": 98.4819510760804,
+          "median": 98.4819510760804,
+          "std": 0.0,
+          "min": 98.4819510760804,
+          "max": 98.4819510760804,
+          "p10": 98.4819510760804,
+          "p25": 98.4819510760804,
+          "p50": 98.4819510760804,
+          "p75": 98.4819510760804,
+          "p90": 98.4819510760804
+        }
+      },
+      "unavailable_metrics": {
+        "action_consistency": {
+          "count": 1,
+          "reasons": [
+            "No actions aligned to predicted frames."
+          ]
+        },
+        "contact_realism": {
+          "count": 1,
+          "reasons": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        },
+        "object_permanence": {
+          "count": 1,
+          "reasons": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        }
+      }
+    },
+    "t+3": {
+      "horizon_index": 3,
+      "sample_count": 1,
+      "metrics": {
+        "temporal_stability": {
+          "count": 1,
+          "mean": 99.73750014305115,
+          "median": 99.73750014305115,
+          "std": 0.0,
+          "min": 99.73750014305115,
+          "max": 99.73750014305115,
+          "p10": 99.73750014305115,
+          "p25": 99.73750014305115,
+          "p50": 99.73750014305115,
+          "p75": 99.73750014305115,
+          "p90": 99.73750014305115
+        },
+        "visual_similarity": {
+          "count": 1,
+          "mean": 98.31931531257052,
+          "median": 98.31931531257052,
+          "std": 0.0,
+          "min": 98.31931531257052,
+          "max": 98.31931531257052,
+          "p10": 98.31931531257052,
+          "p25": 98.31931531257052,
+          "p50": 98.31931531257052,
+          "p75": 98.31931531257052,
+          "p90": 98.31931531257052
+        }
+      },
+      "unavailable_metrics": {
+        "action_consistency": {
+          "count": 1,
+          "reasons": [
+            "No actions aligned to predicted frames."
+          ]
+        },
+        "contact_realism": {
+          "count": 1,
+          "reasons": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        },
+        "object_permanence": {
+          "count": 1,
+          "reasons": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        }
+      }
+    },
+    "t+4": {
+      "horizon_index": 4,
+      "sample_count": 1,
+      "metrics": {
+        "temporal_stability": {
+          "count": 1,
+          "mean": 97.26627764400351,
+          "median": 97.26627764400351,
+          "std": 0.0,
+          "min": 97.26627764400351,
+          "max": 97.26627764400351,
+          "p10": 97.26627764400351,
+          "p25": 97.26627764400351,
+          "p50": 97.26627764400351,
+          "p75": 97.26627764400351,
+          "p90": 97.26627764400351
+        },
+        "visual_similarity": {
+          "count": 1,
+          "mean": 96.6593472305342,
+          "median": 96.6593472305342,
+          "std": 0.0,
+          "min": 96.6593472305342,
+          "max": 96.6593472305342,
+          "p10": 96.6593472305342,
+          "p25": 96.6593472305342,
+          "p50": 96.6593472305342,
+          "p75": 96.6593472305342,
+          "p90": 96.6593472305342
+        }
+      },
+      "unavailable_metrics": {
+        "action_consistency": {
+          "count": 1,
+          "reasons": [
+            "No actions aligned to predicted frames."
+          ]
+        },
+        "contact_realism": {
+          "count": 1,
+          "reasons": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        },
+        "object_permanence": {
+          "count": 1,
+          "reasons": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        }
+      }
+    },
+    "t+5": {
+      "horizon_index": 5,
+      "sample_count": 1,
+      "metrics": {
+        "temporal_stability": {
+          "count": 1,
+          "mean": 97.59492981120357,
+          "median": 97.59492981120357,
+          "std": 0.0,
+          "min": 97.59492981120357,
+          "max": 97.59492981120357,
+          "p10": 97.59492981120357,
+          "p25": 97.59492981120357,
+          "p50": 97.59492981120357,
+          "p75": 97.59492981120357,
+          "p90": 97.59492981120357
+        },
+        "visual_similarity": {
+          "count": 1,
+          "mean": 95.88413825925441,
+          "median": 95.88413825925441,
+          "std": 0.0,
+          "min": 95.88413825925441,
+          "max": 95.88413825925441,
+          "p10": 95.88413825925441,
+          "p25": 95.88413825925441,
+          "p50": 95.88413825925441,
+          "p75": 95.88413825925441,
+          "p90": 95.88413825925441
+        }
+      },
+      "unavailable_metrics": {
+        "action_consistency": {
+          "count": 1,
+          "reasons": [
+            "No actions aligned to predicted frames."
+          ]
+        },
+        "contact_realism": {
+          "count": 1,
+          "reasons": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        },
+        "object_permanence": {
+          "count": 1,
+          "reasons": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        }
+      }
+    },
+    "t+6": {
+      "horizon_index": 6,
+      "sample_count": 1,
+      "metrics": {
+        "temporal_stability": {
+          "count": 1,
+          "mean": 97.58885252676531,
+          "median": 97.58885252676531,
+          "std": 0.0,
+          "min": 97.58885252676531,
+          "max": 97.58885252676531,
+          "p10": 97.58885252676531,
+          "p25": 97.58885252676531,
+          "p50": 97.58885252676531,
+          "p75": 97.58885252676531,
+          "p90": 97.58885252676531
+        },
+        "visual_similarity": {
+          "count": 1,
+          "mean": 95.40518068349354,
+          "median": 95.40518068349354,
+          "std": 0.0,
+          "min": 95.40518068349354,
+          "max": 95.40518068349354,
+          "p10": 95.40518068349354,
+          "p25": 95.40518068349354,
+          "p50": 95.40518068349354,
+          "p75": 95.40518068349354,
+          "p90": 95.40518068349354
+        }
+      },
+      "unavailable_metrics": {
+        "action_consistency": {
+          "count": 1,
+          "reasons": [
+            "No actions aligned to predicted frames."
+          ]
+        },
+        "contact_realism": {
+          "count": 1,
+          "reasons": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        },
+        "object_permanence": {
+          "count": 1,
+          "reasons": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        }
+      }
+    },
+    "t+7": {
+      "horizon_index": 7,
+      "sample_count": 1,
+      "metrics": {
+        "temporal_stability": {
+          "count": 1,
+          "mean": 97.78758694039198,
+          "median": 97.78758694039198,
+          "std": 0.0,
+          "min": 97.78758694039198,
+          "max": 97.78758694039198,
+          "p10": 97.78758694039198,
+          "p25": 97.78758694039198,
+          "p50": 97.78758694039198,
+          "p75": 97.78758694039198,
+          "p90": 97.78758694039198
+        },
+        "visual_similarity": {
+          "count": 1,
+          "mean": 94.98476749518218,
+          "median": 94.98476749518218,
+          "std": 0.0,
+          "min": 94.98476749518218,
+          "max": 94.98476749518218,
+          "p10": 94.98476749518218,
+          "p25": 94.98476749518218,
+          "p50": 94.98476749518218,
+          "p75": 94.98476749518218,
+          "p90": 94.98476749518218
+        }
+      },
+      "unavailable_metrics": {
+        "action_consistency": {
+          "count": 1,
+          "reasons": [
+            "No actions aligned to predicted frames."
+          ]
+        },
+        "contact_realism": {
+          "count": 1,
+          "reasons": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        },
+        "object_permanence": {
+          "count": 1,
+          "reasons": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        }
+      }
+    },
+    "t+8": {
+      "horizon_index": 8,
+      "sample_count": 1,
+      "metrics": {
+        "temporal_stability": {
+          "count": 1,
+          "mean": 97.90063443885123,
+          "median": 97.90063443885123,
+          "std": 0.0,
+          "min": 97.90063443885123,
+          "max": 97.90063443885123,
+          "p10": 97.90063443885123,
+          "p25": 97.90063443885123,
+          "p50": 97.90063443885123,
+          "p75": 97.90063443885123,
+          "p90": 97.90063443885123
+        },
+        "visual_similarity": {
+          "count": 1,
+          "mean": 94.6616323025311,
+          "median": 94.6616323025311,
+          "std": 0.0,
+          "min": 94.6616323025311,
+          "max": 94.6616323025311,
+          "p10": 94.6616323025311,
+          "p25": 94.6616323025311,
+          "p50": 94.6616323025311,
+          "p75": 94.6616323025311,
+          "p90": 94.6616323025311
+        }
+      },
+      "unavailable_metrics": {
+        "action_consistency": {
+          "count": 1,
+          "reasons": [
+            "No actions aligned to predicted frames."
+          ]
+        },
+        "contact_realism": {
+          "count": 1,
+          "reasons": [
+            "Reliable robot and object tracking are unavailable for this rollout."
+          ]
+        },
+        "object_permanence": {
+          "count": 1,
+          "reasons": [
+            "Reliable object tracking is unavailable for this rollout."
+          ]
+        }
+      }
+    }
+  },
+  "worst_episodes": [
+    {
+      "episode_id": "episode_000.mp4",
+      "score": 96.10118880756227
+    }
+  ],
+  "configuration": {
+    "skip_context": 0,
+    "metrics": {
+      "visual_similarity": {
+        "enabled": true,
+        "required": true,
+        "weight": 0.25
+      },
+      "temporal_stability": {
+        "enabled": true,
+        "required": true,
+        "weight": 0.2
+      },
+      "action_consistency": {
+        "enabled": true,
+        "required": false,
+        "weight": 0.3
+      },
+      "object_permanence": {
+        "enabled": true,
+        "required": false,
+        "weight": 0.15
+      },
+      "contact_realism": {
+        "enabled": true,
+        "required": false,
+        "weight": 0.1
+      }
+    },
+    "gate": {
+      "min_composite_improvement": 0.0,
+      "max_episode_regressions": 1,
+      "max_metric_drop": 2.0,
+      "max_horizon_drop": 2.0,
+      "min_metric_coverage": 0.4,
+      "min_metric_count": 2,
+      "min_configured_weight_coverage": 0.45,
+      "strict_config_match": true
+    },
+    "output": {
+      "json_output": true,
+      "markdown_output": true
+    },
+    "unchanged_tolerance": 0.01
+  }
+}
