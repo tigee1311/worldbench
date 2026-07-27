@@ -17,7 +17,6 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-
 WIDTH = 1280
 HEIGHT = 720
 SCALE = 2
@@ -697,7 +696,7 @@ def _draw_trajectory(
         elif visible:
             points.append(cube)
     color = (94, 190, 235, 80) if kind == "robot" else (80, 230, 142, 76)
-    for a, b in zip(points, points[1:]):
+    for a, b in zip(points, points[1:], strict=False):
         painter.line((a[0], a[1], b[0], b[1]), fill=color, width=2)
 
 

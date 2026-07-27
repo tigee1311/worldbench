@@ -13,7 +13,6 @@ from worldbench.runners.comparator import (
     save_comparison_artifacts,
 )
 
-
 console = Console()
 comparison = compare_model_folders("examples/demo_dataset", "good_model", "bad_model")
 saved = save_comparison_artifacts(comparison)
