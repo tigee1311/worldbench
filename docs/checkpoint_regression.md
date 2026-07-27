@@ -198,6 +198,43 @@ Defaults:
 
 WorldBench uses a 0.01-point tolerance for unchanged episode scores and threshold comparisons to avoid floating-point noise.
 
+## Paired Uncertainty
+
+`worldbench gate` can optionally estimate uncertainty over the candidate-minus-baseline Composite Score change:
+
+```bash
+worldbench gate \
+  --baseline checkpoint_183.json \
+  --candidate checkpoint_184.json \
+  --bootstrap-samples 5000 \
+  --bootstrap-seed 42 \
+  --confidence-level 0.95
+```
+
+The interval is a paired bootstrap over episode deltas. For each bootstrap sample, WorldBench resamples episode identities with replacement, keeps each baseline/candidate pair together, computes the mean candidate-minus-baseline delta, and reports the percentile interval over those sampled means.
+
+Pairing matters because WorldBench's regression question is not "are these two unrelated score samples different?" It is "for the same episode, did the candidate get better or worse than the baseline?" Resampling paired deltas preserves that design.
+
+The interval can be used as an opt-in gate:
+
+```bash
+worldbench gate \
+  --baseline checkpoint_183.json \
+  --candidate checkpoint_184.json \
+  --bootstrap-samples 5000 \
+  --min-confidence-lower-bound 0.0
+```
+
+This fails if the lower interval bound is below the configured minimum. Existing gate behavior is unchanged unless bootstrap options are passed.
+
+Limitations:
+
+- The interval is computed from the evaluated episode deltas only.
+- It does not prove formal statistical significance.
+- It does not make a 10-episode slice broad evidence of model quality.
+- It does not correct metric validity issues, data leakage, multimodal future ambiguity, or mismatched evaluation protocols.
+- Small episode counts receive a warning. Ten episodes remains limited evidence because a few episodes can dominate the sampled distribution.
+
 ## Exit Codes
 
 | Outcome | Exit code |
