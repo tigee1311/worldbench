@@ -115,13 +115,10 @@ files = [
 check_untyped_defs = true
 ignore_missing_imports = true
 no_implicit_optional = true
+no_site_packages = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unused_configs = true
-
-[[tool.mypy.overrides]]
-module = ["numpy", "numpy.*"]
-follow_imports = "skip"
 
 [tool.bandit]
 exclude_dirs = ["tests", "examples", "scripts", "website", ".venv", "worldbench/.venv", "build", "dist"]

@@ -57,9 +57,8 @@ jobs:
           /tmp/worldbench-wheel/bin/worldbench verify-run --help
 
   dependency-review:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && vars.DEPENDENCY_REVIEW_ENABLED == 'true'
     runs-on: ubuntu-latest
-    continue-on-error: true
     permissions:
       contents: read
       pull-requests: read
