@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a reproducible WorldBench issue
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include commands, small fixtures, or a minimal result JSON when possible.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      value: |
+        - OS:
+        - Python:
+        - WorldBench version or commit:
+        - Install method:
+    validations:
+      required: true
+  - type: dropdown
+    id: workflow
+    attributes:
+      label: Affected workflow
+      options:
+        - saved video pair
+        - batch checkpoint evaluation
+        - gate comparison
+        - LeRobot import
+        - dashboard or report
+        - plugin or adapter
+        - packaging or CI
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or artifact excerpt
+      description: Do not paste credentials, private URLs, or full private paths.
+      render: text
