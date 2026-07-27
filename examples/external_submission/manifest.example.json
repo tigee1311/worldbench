@@ -1,0 +1,26 @@
+{
+  "schema_version": "external-submission-v1",
+  "team": "redacted",
+  "privacy": "public | private | mixed",
+  "dataset": {
+    "name": "dataset or internal suite name",
+    "license": "license or private-use note",
+    "episode_count": 10,
+    "episode_ids": ["episode_000"]
+  },
+  "videos": {
+    "ground_truth_root": "ground_truth",
+    "baseline_predictions_root": "baseline_predictions",
+    "candidate_predictions_root": "candidate_predictions",
+    "context_frames": 4,
+    "prediction_horizon_frames": 8
+  },
+  "checkpoints": {
+    "baseline": "checkpoint identifier",
+    "candidate": "checkpoint identifier"
+  },
+  "action_schema": {
+    "available": false,
+    "description": "Document action vector positions if available."
+  }
+}
