@@ -592,7 +592,7 @@ def _write_contact_sheet(
 
 def _demo_frame(index: int, *, delta: int) -> np.ndarray:
     width, height = 48, 32
-    frame = np.zeros((height, width, 3), dtype=np.uint8)
+    frame: np.ndarray = np.zeros((height, width, 3), dtype=np.uint8)
     frame[:, :, 0] = np.clip(35 + index * 9 + delta, 0, 255)
     frame[:, :, 1] = np.clip(70 + index * 5 + delta, 0, 255)
     frame[:, :, 2] = np.clip(110 + index * 3 + delta, 0, 255)
