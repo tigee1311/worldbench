@@ -56,7 +56,7 @@ def paired_bootstrap_interval(
 
     arr = np.asarray(deltas, dtype=float)
     rng = np.random.default_rng(bootstrap_seed)
-    means = np.empty(bootstrap_samples, dtype=float)
+    means: np.ndarray = np.empty(bootstrap_samples, dtype=float)
     count = int(arr.size)
     for index in range(bootstrap_samples):
         sample_indices = rng.integers(0, count, size=count)
