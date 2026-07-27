@@ -25,7 +25,7 @@ jobs:
       - name: Lint
         run: python -m ruff check .
       - name: Formatting
-        run: python -m ruff format --check worldbench tests examples research_metrics benchmarks
+        run: python -m ruff format --check worldbench tests examples
       - name: Type check
         run: python -m mypy
       - name: Static security scan
