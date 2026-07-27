@@ -1,0 +1,43 @@
+{
+  "status": "informational",
+  "strict_timing_gate": false,
+  "cases": {
+    "short_64": {
+      "wall_time_seconds": 0.224501,
+      "peak_tracemalloc_mb": 3.983,
+      "frame_count": 8,
+      "resolution": "64x64",
+      "frames_per_second": 35.63,
+      "score": 99.1702
+    },
+    "short_256": {
+      "wall_time_seconds": 0.19051,
+      "peak_tracemalloc_mb": 12.326,
+      "frame_count": 6,
+      "resolution": "256x256",
+      "frames_per_second": 31.49,
+      "score": 99.5892
+    },
+    "long_64": {
+      "wall_time_seconds": 0.369779,
+      "peak_tracemalloc_mb": 3.122,
+      "frame_count": 24,
+      "resolution": "64x64",
+      "frames_per_second": 64.9,
+      "score": 99.2624
+    },
+    "batch_episode_evaluation": {
+      "wall_time_seconds": 0.428029,
+      "peak_tracemalloc_mb": 1.69,
+      "episode_count": 3
+    },
+    "result_serialization": {
+      "wall_time_seconds": 0.00374,
+      "peak_tracemalloc_mb": 0.156
+    },
+    "comparison_image_generation": {
+      "wall_time_seconds": 0.038622,
+      "peak_tracemalloc_mb": 0.294
+    }
+  }
+}
