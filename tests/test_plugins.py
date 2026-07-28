@@ -55,6 +55,36 @@ class FailingMetric:
         raise RuntimeError("boom")
 
 
+class WrongNameMetric:
+    name = "custom_wrong_name"
+    version = "0.1.0"
+    requirements = MetricRequirements(input_modalities=("rgb_frames",))
+
+    def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
+        del episode, prediction_frames
+        return MetricResult(name="different_name", score=10.0)
+
+
+class MalformedReturnMetric:
+    name = "custom_malformed"
+    version = "0.1.0"
+    requirements = MetricRequirements(input_modalities=("rgb_frames",))
+
+    def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> object:
+        del episode, prediction_frames
+        return {"name": self.name, "score": "99.0"}
+
+
+class NanMetric:
+    name = "custom_nan"
+    version = "0.1.0"
+    requirements = MetricRequirements(input_modalities=("rgb_frames",))
+
+    def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
+        del episode, prediction_frames
+        return MetricResult(name=self.name, score=float("nan"))
+
+
 def test_metric_registry_orders_plugins_deterministically() -> None:
     registry = PluginRegistry()
     registry.register_metric(LaterMetric())
@@ -107,9 +137,62 @@ def test_metric_plugin_exceptions_are_isolated(tmp_path: Path) -> None:
     )
 
     metric = result.metrics["custom_failing"]
-    assert metric.status == "unsupported"
+    assert metric.status == "error"
+    assert metric.error_type == "RuntimeError"
     assert metric.score is None
-    assert "Metric plugin 'custom_failing' failed" in str(metric.reason)
+    assert "Metric plugin 'custom_failing' raised unexpected RuntimeError" in str(
+        metric.reason
+    )
+    assert (
+        result.episodes[0].horizon["t+1"]["unavailable_metrics"]["custom_failing"][
+            "status"
+        ]
+        == "error"
+    )
+
+
+def test_metric_plugin_fail_fast_policy_raises(tmp_path: Path) -> None:
+    with pytest.raises(RuntimeError, match="boom"):
+        EvaluationRunner(_dataset(tmp_path)).run(
+            metrics=[FailingMetric()],
+            weights={"custom_failing": 1.0},
+            plugin_error_policy="fail-fast",
+        )
+
+
+def test_metric_plugin_wrong_result_name_is_error(tmp_path: Path) -> None:
+    result = EvaluationRunner(_dataset(tmp_path)).run(
+        metrics=[WrongNameMetric()],
+        weights={"custom_wrong_name": 1.0},
+    )
+
+    metric = result.metrics["custom_wrong_name"]
+    assert metric.status == "error"
+    assert metric.error_type == "InvalidPluginResult"
+    assert "expected 'custom_wrong_name'" in str(metric.reason)
+
+
+def test_metric_plugin_malformed_return_is_error(tmp_path: Path) -> None:
+    result = EvaluationRunner(_dataset(tmp_path)).run(
+        metrics=[MalformedReturnMetric()],
+        weights={"custom_malformed": 1.0},
+    )
+
+    metric = result.metrics["custom_malformed"]
+    assert metric.status == "error"
+    assert metric.error_type == "InvalidPluginResult"
+    assert "expected MetricResult" in str(metric.reason)
+
+
+def test_metric_plugin_nonfinite_score_is_error(tmp_path: Path) -> None:
+    result = EvaluationRunner(_dataset(tmp_path)).run(
+        metrics=[NanMetric()],
+        weights={"custom_nan": 1.0},
+    )
+
+    metric = result.metrics["custom_nan"]
+    assert metric.status == "error"
+    assert metric.error_type == "ValidationError"
 
 
 def test_duplicate_explicit_metric_names_fail_before_evaluation(tmp_path: Path) -> None:
@@ -126,11 +209,17 @@ def test_public_api_exports_hardening_helpers() -> None:
 
 
 def _dataset(tmp_path: Path) -> RolloutDataset:
+    frame = tmp_path / "episode_001" / "frames" / "000.png"
+    prediction = tmp_path / "episode_001" / "predictions" / "000.png"
+    frame.parent.mkdir(parents=True, exist_ok=True)
+    prediction.parent.mkdir(parents=True, exist_ok=True)
+    frame.write_bytes(b"frame")
+    prediction.write_bytes(b"prediction")
     episode = Episode(
         name="episode_001",
         path=tmp_path / "episode_001",
-        frames=[],
-        predictions=[],
+        frames=[frame],
+        predictions=[prediction],
         actions=[],
         states=[],
         metadata=EpisodeMetadata(name="episode_001"),

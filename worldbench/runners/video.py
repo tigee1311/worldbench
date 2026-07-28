@@ -123,8 +123,8 @@ def evaluate_video_pair(
         input_file_record("ground_truth_video", gt_path),
         input_file_record("prediction_video", pred_path),
     ]
-    result.dataset_path = str(gt_path)
-    result.predictions_path = str(pred_path)
+    result.dataset_path = ground_truth_display
+    result.predictions_path = prediction_display
     result.provenance = {
         "source": "video_pair",
         "name": name,
@@ -592,7 +592,7 @@ def _write_contact_sheet(
 
 def _demo_frame(index: int, *, delta: int) -> np.ndarray:
     width, height = 48, 32
-    frame = np.zeros((height, width, 3), dtype=np.uint8)
+    frame: np.ndarray = np.zeros((height, width, 3), dtype=np.uint8)
     frame[:, :, 0] = np.clip(35 + index * 9 + delta, 0, 255)
     frame[:, :, 1] = np.clip(70 + index * 5 + delta, 0, 255)
     frame[:, :, 2] = np.clip(110 + index * 3 + delta, 0, 255)

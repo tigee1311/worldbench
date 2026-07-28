@@ -18,7 +18,7 @@
       "episode_id": "episode_000.mp4",
       "ground_truth_path": "tests/fixtures/v0_4_1/batch/ground_truth/episode_000.mp4",
       "prediction_path": "tests/fixtures/v0_4_1/batch/baseline_predictions/episode_000.mp4",
-      "result_path": "/Users/ayush/worldbench-review/v041-batch-artifacts/20260727-160700-016516/episodes/episode_000.mp4.json",
+      "result_path": "<review-root>/v041-batch-artifacts/20260727-160700-016516/episodes/episode_000.mp4.json",
       "score": 96.10118880756227,
       "metrics": {
         "visual_similarity": {

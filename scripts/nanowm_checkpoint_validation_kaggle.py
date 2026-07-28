@@ -8,11 +8,9 @@ only compact JSON artifacts.
 from __future__ import annotations
 
 import base64
-from datetime import datetime, timezone
 import io
 import json
 import os
-from pathlib import Path
 import random
 import shutil
 import subprocess
@@ -20,7 +18,8 @@ import sys
 import time
 import traceback
 import zipfile
-
+from datetime import datetime, timezone
+from pathlib import Path
 
 START_MONO = time.time()
 STARTED_AT = datetime.now(timezone.utc).isoformat()
@@ -328,7 +327,7 @@ def cfg_value(cfg: object, dotted: str) -> object:
         for part in dotted.split("."):
             cur = cur[part]
         return cur
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
 
 
@@ -811,7 +810,7 @@ def main() -> None:
 
 try:
     main()
-except Exception as exc:  # noqa: BLE001
+except Exception as exc:
     write_json(
         STATUS_PATH,
         {

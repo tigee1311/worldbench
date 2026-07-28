@@ -9,13 +9,13 @@ into the video-folder layout consumed by `worldbench eval-batch`.
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -24,7 +24,6 @@ from PIL import Image
 from worldbench.runners.video import VIDEO_EXTENSIONS
 from worldbench.utils import IMAGE_EXTENSIONS, write_json
 from worldbench.version import WORLD_BENCH_VERSION
-
 
 ADAPTER_NAME = "nanowm_rt1_prepare_worldbench_inputs"
 MANIFEST_SCHEMA_VERSION = "1"
@@ -100,7 +99,9 @@ def prepare_worldbench_inputs(
     if not baseline_checkpoint:
         raise AdapterError("--baseline-checkpoint is required.")
     if candidate is not None and not candidate_checkpoint:
-        raise AdapterError("--candidate-checkpoint is required when --candidate is set.")
+        raise AdapterError(
+            "--candidate-checkpoint is required when --candidate is set."
+        )
     if context_frames < 0:
         raise AdapterError("--context-frames must be non-negative.")
     if prediction_frames <= 0:
@@ -221,15 +222,22 @@ def _resolve_episodes(
     )
 
     selected_ids = episode_ids or sorted(gt_entries)
-    missing_gt = [episode_id for episode_id in selected_ids if episode_id not in gt_entries]
+    missing_gt = [
+        episode_id for episode_id in selected_ids if episode_id not in gt_entries
+    ]
     if missing_gt:
-        raise AdapterError(f"Missing ground truth for episode(s): {', '.join(missing_gt)}")
+        raise AdapterError(
+            f"Missing ground truth for episode(s): {', '.join(missing_gt)}"
+        )
 
     _validate_matching_ids("baseline", selected_ids, baseline_entries)
     if candidate is not None:
         _validate_matching_ids("candidate", selected_ids, candidate_entries)
 
-    output_names = [_output_relative_path(episode_id, gt_entries[episode_id]) for episode_id in selected_ids]
+    output_names = [
+        _output_relative_path(episode_id, gt_entries[episode_id])
+        for episode_id in selected_ids
+    ]
     if len({path.as_posix() for path in output_names}) != len(output_names):
         raise AdapterError("Episode identifiers map to duplicate output filenames.")
 
@@ -303,31 +311,25 @@ def _collect_media(root: Path, *, single_episode_ids: list[str]) -> dict[str, Pa
         if path.is_file() and path.suffix.lower() in VIDEO_EXTENSIONS
     )
     frame_dirs = sorted(
-        path
-        for path in root.rglob("*")
-        if path.is_dir() and _image_files(path)
+        path for path in root.rglob("*") if path.is_dir() and _image_files(path)
     )
     if video_files and frame_dirs:
         raise AdapterError(
             f"Mixed video files and frame directories are not supported under {root}."
         )
     if video_files:
-        entries = {
-            path.relative_to(root).as_posix(): path
-            for path in video_files
-        }
+        entries = {path.relative_to(root).as_posix(): path for path in video_files}
     elif frame_dirs:
-        entries = {
-            path.relative_to(root).as_posix(): path
-            for path in frame_dirs
-        }
+        entries = {path.relative_to(root).as_posix(): path for path in frame_dirs}
     else:
         raise AdapterError(
             f"No supported videos or frame directories found under {root}."
         )
 
     if single_episode_ids:
-        missing = [episode_id for episode_id in single_episode_ids if episode_id not in entries]
+        missing = [
+            episode_id for episode_id in single_episode_ids if episode_id not in entries
+        ]
         if missing:
             raise AdapterError(
                 f"Requested episode id(s) not found under {root}: {', '.join(missing)}"
@@ -388,7 +390,7 @@ def _inspect_video(
         reader.close()
     except AdapterError:
         raise
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise AdapterError(f"{label} video is unreadable: {source} ({exc})") from exc
 
     if width is None or height is None or frame_count == 0:
@@ -478,13 +480,18 @@ def _validate_matching_ids(
         raise AdapterError("; ".join(parts))
 
 
-def _validate_compatible(episode_id: str, ground_truth: MediaInfo, prediction: MediaInfo) -> None:
+def _validate_compatible(
+    episode_id: str, ground_truth: MediaInfo, prediction: MediaInfo
+) -> None:
     if ground_truth.frame_count != prediction.frame_count:
         raise AdapterError(
             f"{episode_id} frame count mismatch: ground truth has "
             f"{ground_truth.frame_count}, prediction has {prediction.frame_count}."
         )
-    if (ground_truth.width, ground_truth.height) != (prediction.width, prediction.height):
+    if (ground_truth.width, ground_truth.height) != (
+        prediction.width,
+        prediction.height,
+    ):
         raise AdapterError(
             f"{episode_id} resolution mismatch: ground truth is "
             f"{ground_truth.width}x{ground_truth.height}, prediction is "
@@ -511,7 +518,9 @@ def _validate_fps(label: str, actual: float, expected: float) -> None:
 def _output_relative_path(episode_id: str, source: Path) -> Path:
     safe = Path(episode_id)
     if safe.is_absolute() or ".." in safe.parts:
-        raise AdapterError(f"Episode id must be relative and stay inside output: {episode_id}")
+        raise AdapterError(
+            f"Episode id must be relative and stay inside output: {episode_id}"
+        )
     if source.is_file() and safe.suffix.lower() in VIDEO_EXTENSIONS:
         output = safe
     elif safe.suffix.lower() in VIDEO_EXTENSIONS:
@@ -568,14 +577,16 @@ def _load_metadata(path: Path | None) -> dict[str, Any]:
     try:
         with path.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise AdapterError(f"Could not parse metadata JSON {path}: {exc}") from exc
     if not isinstance(data, dict):
         raise AdapterError(f"Metadata JSON must be an object: {path}")
     return data
 
 
-def _metadata_path(metadata: dict[str, Any], key: str, fallback: Path | None) -> Path | None:
+def _metadata_path(
+    metadata: dict[str, Any], key: str, fallback: Path | None
+) -> Path | None:
     value = metadata.get(key)
     if fallback is not None or value is None:
         return fallback
@@ -648,7 +659,7 @@ def _worldbench_commit() -> str | None:
             capture_output=True,
             text=True,
         )
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     return result.stdout.strip() or None
 

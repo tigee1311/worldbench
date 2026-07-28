@@ -6,7 +6,6 @@ This example uses the deterministic development fixture. Generate it first with:
 
 from worldbench import WorldBench
 
-
 bench = WorldBench("examples/demo_dataset")
 result = bench.evaluate(predictions="examples/demo_dataset/good_model")
 result.print_summary()

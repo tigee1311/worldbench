@@ -5,7 +5,6 @@ from rich.console import Console
 from worldbench.backends.benchmark import BenchmarkBackend
 from worldbench.runners.benchmark import run_benchmark_suite, save_benchmark_artifacts
 
-
 console = Console()
 benchmark_root = BenchmarkBackend().create("benchmarks")
 payload = run_benchmark_suite(benchmark_root)

@@ -16,6 +16,7 @@ from worldbench.utils import read_json, write_json
 from worldbench.version import RESULT_SCHEMA_VERSION, WORLD_BENCH_VERSION
 
 UNCHANGED_TOLERANCE = 0.01
+SUPPORTED_BATCH_SCHEMA_VERSIONS = {"1", RESULT_SCHEMA_VERSION}
 
 
 def evaluate_video_batch(
@@ -201,6 +202,7 @@ def load_batch_result(path: str | Path) -> dict[str, Any]:
     payload = read_json(candidate)
     if payload.get("result_type") != "batch_evaluation":
         raise ValueError(f"Expected a batch evaluation result: {candidate}")
+    _validate_supported_batch_schema(payload)
     return _with_legacy_compatibility(payload)
 
 
@@ -477,6 +479,7 @@ def _gate_markdown(payload: dict[str, Any]) -> str:
 def _with_legacy_compatibility(payload: dict[str, Any]) -> dict[str, Any]:
     """Add schema-v2 comparison metadata without rewriting a loaded artifact."""
 
+    _validate_supported_batch_schema(payload)
     migrated = dict(payload)
     aggregate = dict(migrated.get("aggregate", {}))
     if "composite_score" not in aggregate and "overall" in aggregate:
@@ -689,7 +692,9 @@ def _aggregate_batch_metrics(episodes: list[dict[str, Any]]) -> dict[str, Any]:
                 unavailable.append(
                     {
                         "episode_id": episode["episode_id"],
+                        "status": metric.get("status"),
                         "reason": metric.get("reason"),
+                        "error_type": metric.get("error_type"),
                     }
                 )
         if values:
@@ -700,15 +705,27 @@ def _aggregate_batch_metrics(episodes: list[dict[str, Any]]) -> dict[str, Any]:
                     "available_count": len(values),
                     "total_count": len(episodes),
                     "unavailable_count": len(unavailable),
+                    "error_count": sum(
+                        1 for item in unavailable if item.get("status") == "error"
+                    ),
+                    "unavailable_episodes": unavailable[:20],
                 }
             )
             aggregate[name] = stats
         else:
+            error_count = sum(
+                1 for item in unavailable if item.get("status") == "error"
+            )
             aggregate[name] = {
-                "status": "unsupported",
+                "status": "error" if error_count else "unsupported",
                 "available_count": 0,
                 "total_count": len(episodes),
-                "reason": "Metric was unavailable for every episode.",
+                "error_count": error_count,
+                "reason": (
+                    "Metric errored for every episode."
+                    if error_count
+                    else "Metric was unavailable for every episode."
+                ),
                 "unavailable_episodes": unavailable[:20],
             }
     return aggregate
@@ -759,8 +776,12 @@ def _validate_gate_compatibility(
         warnings.append(
             "This result predates schema v2, so full configuration compatibility could not be verified."
         )
-    baseline_ids = set(_episode_ids(baseline))
-    candidate_ids = set(_episode_ids(candidate))
+    baseline_id_list = _episode_ids(baseline)
+    candidate_id_list = _episode_ids(candidate)
+    _reject_duplicate_episode_ids(baseline_id_list, "baseline")
+    _reject_duplicate_episode_ids(candidate_id_list, "candidate")
+    baseline_ids = set(baseline_id_list)
+    candidate_ids = set(candidate_id_list)
     if baseline_ids != candidate_ids:
         missing = sorted(baseline_ids - candidate_ids)
         extra = sorted(candidate_ids - baseline_ids)
@@ -801,6 +822,19 @@ def _episode_ids(payload: dict[str, Any]) -> list[str]:
     if isinstance(ids, list):
         return [str(item) for item in ids]
     return [str(episode["episode_id"]) for episode in payload.get("episodes", [])]
+
+
+def _reject_duplicate_episode_ids(ids: list[str], label: str) -> None:
+    seen: set[str] = set()
+    duplicates: list[str] = []
+    for episode_id in ids:
+        if episode_id in seen and episode_id not in duplicates:
+            duplicates.append(episode_id)
+        seen.add(episode_id)
+    if duplicates:
+        raise ValueError(
+            f"{label.capitalize()} contains duplicate episode IDs: {duplicates[:10]}."
+        )
 
 
 def _metric_deltas(
@@ -891,6 +925,8 @@ def _horizon_deltas(
 def _episode_deltas(
     baseline: dict[str, Any], candidate: dict[str, Any]
 ) -> dict[str, Any]:
+    _reject_duplicate_episode_ids(_episode_ids(baseline), "baseline")
+    _reject_duplicate_episode_ids(_episode_ids(candidate), "candidate")
     baseline_map = {episode["episode_id"]: episode for episode in baseline["episodes"]}
     candidate_map = {
         episode["episode_id"]: episode for episode in candidate["episodes"]
@@ -931,6 +967,16 @@ def _stat_mean(payload: dict[str, Any]) -> float:
     if not isinstance(value, (int, float)):
         raise ValueError("Cannot compare aggregate without a numeric mean.")
     return float(value)
+
+
+def _validate_supported_batch_schema(payload: dict[str, Any]) -> None:
+    version = payload.get("schema_version")
+    if version is not None and str(version) not in SUPPORTED_BATCH_SCHEMA_VERSIONS:
+        raise ValueError(
+            f"Unsupported batch schema_version '{version}'. "
+            f"This version supports schema versions "
+            f"{sorted(SUPPORTED_BATCH_SCHEMA_VERSIONS)}."
+        )
 
 
 def _horizon_key(label: str) -> int:
