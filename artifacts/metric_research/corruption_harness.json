@@ -1,0 +1,312 @@
+{
+  "status": "research_only",
+  "production_metrics_changed": false,
+  "severities": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "repeats": 2,
+  "metrics": {
+    "current_visual_similarity": {
+      "mean_runtime_ms": 0.046,
+      "practical_on_cpu": true,
+      "likely_multimodal_future_risk": true
+    },
+    "temporal_motion_similarity": {
+      "mean_runtime_ms": 0.0667,
+      "practical_on_cpu": true,
+      "likely_multimodal_future_risk": false
+    },
+    "frame_difference_trajectory_similarity": {
+      "mean_runtime_ms": 0.0819,
+      "practical_on_cpu": true,
+      "likely_multimodal_future_risk": false
+    },
+    "object_track_displacement_similarity": {
+      "mean_runtime_ms": 0.4778,
+      "practical_on_cpu": true,
+      "likely_multimodal_future_risk": true
+    }
+  },
+  "corruptions": {
+    "frame_freeze": {
+      "current_visual_similarity": {
+        "scores": [
+          100.0,
+          99.8142,
+          99.5707,
+          99.0739,
+          96.5579
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 3.4421
+      },
+      "temporal_motion_similarity": {
+        "scores": [
+          100.0,
+          99.6743,
+          99.3649,
+          98.9275,
+          99.0952
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.9048
+      },
+      "frame_difference_trajectory_similarity": {
+        "scores": [
+          100.0,
+          67.475,
+          36.7072,
+          0.0,
+          4.3197
+        ],
+        "monotonic_under_severity": false,
+        "sensitivity": 95.6803
+      },
+      "object_track_displacement_similarity": {
+        "scores": [
+          100.0,
+          99.0793,
+          97.7903,
+          95.0282,
+          75.6932
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 24.3068
+      }
+    },
+    "temporal_scramble": {
+      "current_visual_similarity": {
+        "scores": [
+          100.0,
+          99.5255,
+          98.4494,
+          97.7652,
+          96.8035
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 3.1965
+      },
+      "temporal_motion_similarity": {
+        "scores": [
+          100.0,
+          99.1178,
+          97.4448,
+          97.0415,
+          97.8279
+        ],
+        "monotonic_under_severity": false,
+        "sensitivity": 2.1721
+      },
+      "frame_difference_trajectory_similarity": {
+        "scores": [
+          100.0,
+          40.0255,
+          0.0,
+          0.0,
+          43.2358
+        ],
+        "monotonic_under_severity": false,
+        "sensitivity": 56.7642
+      },
+      "object_track_displacement_similarity": {
+        "scores": [
+          100.0,
+          97.0537,
+          89.3197,
+          84.532,
+          77.9029
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 22.0971
+      }
+    },
+    "blur": {
+      "current_visual_similarity": {
+        "scores": [
+          100.0,
+          99.9161,
+          99.7882,
+          99.685,
+          99.5993
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.4007
+      },
+      "temporal_motion_similarity": {
+        "scores": [
+          100.0,
+          99.8747,
+          99.6998,
+          99.5934,
+          99.533
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.467
+      },
+      "frame_difference_trajectory_similarity": {
+        "scores": [
+          100.0,
+          99.5729,
+          97.9028,
+          93.6997,
+          88.8174
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 11.1826
+      },
+      "object_track_displacement_similarity": {
+        "scores": [
+          100.0,
+          100.0,
+          100.0,
+          100.0,
+          100.0
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.0
+      }
+    },
+    "dropped_frames": {
+      "current_visual_similarity": {
+        "scores": [
+          100.0,
+          99.8492,
+          99.623,
+          99.623,
+          99.623
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.377
+      },
+      "temporal_motion_similarity": {
+        "scores": [
+          100.0,
+          99.671,
+          99.1774,
+          99.1774,
+          99.1774
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.8226
+      },
+      "frame_difference_trajectory_similarity": {
+        "scores": [
+          100.0,
+          65.3642,
+          13.4106,
+          13.4106,
+          13.4106
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 86.5894
+      },
+      "object_track_displacement_similarity": {
+        "scores": [
+          100.0,
+          99.2634,
+          98.1586,
+          98.1586,
+          98.1586
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 1.8414
+      }
+    },
+    "speed_changes": {
+      "current_visual_similarity": {
+        "scores": [
+          100.0,
+          99.4627,
+          99.0068,
+          98.728,
+          98.4526
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 1.5474
+      },
+      "temporal_motion_similarity": {
+        "scores": [
+          100.0,
+          99.3847,
+          99.1544,
+          99.0623,
+          98.9052
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 1.0948
+      },
+      "frame_difference_trajectory_similarity": {
+        "scores": [
+          100.0,
+          81.8967,
+          63.9505,
+          46.1614,
+          28.5294
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 71.4706
+      },
+      "object_track_displacement_similarity": {
+        "scores": [
+          100.0,
+          97.422,
+          95.2123,
+          93.3709,
+          91.5295
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 8.4705
+      }
+    },
+    "spatial_shifts": {
+      "current_visual_similarity": {
+        "scores": [
+          100.0,
+          99.8029,
+          99.6058,
+          99.4087,
+          99.2116
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.7884
+      },
+      "temporal_motion_similarity": {
+        "scores": [
+          100.0,
+          99.6058,
+          99.2116,
+          99.2075,
+          99.2034
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.7966
+      },
+      "frame_difference_trajectory_similarity": {
+        "scores": [
+          100.0,
+          100.0,
+          100.0,
+          100.0,
+          100.0
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 0.0
+      },
+      "object_track_displacement_similarity": {
+        "scores": [
+          100.0,
+          97.7903,
+          95.5806,
+          93.3709,
+          91.1612
+        ],
+        "monotonic_under_severity": true,
+        "sensitivity": 8.8388
+      }
+    }
+  }
+}

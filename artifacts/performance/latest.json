@@ -1,0 +1,50 @@
+{
+  "status": "informational",
+  "strict_timing_gate": false,
+  "environment": {
+    "worldbench_version": "0.4.1",
+    "python_version": "3.11.15",
+    "platform": "macOS-26.3.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm"
+  },
+  "cases": {
+    "short_64": {
+      "wall_time_seconds": 0.155916,
+      "peak_tracemalloc_mb": 3.876,
+      "frame_count": 8,
+      "resolution": "64x64",
+      "frames_per_second": 51.31,
+      "score": 99.1702
+    },
+    "short_256": {
+      "wall_time_seconds": 0.181999,
+      "peak_tracemalloc_mb": 12.331,
+      "frame_count": 6,
+      "resolution": "256x256",
+      "frames_per_second": 32.97,
+      "score": 99.5892
+    },
+    "long_64": {
+      "wall_time_seconds": 0.366405,
+      "peak_tracemalloc_mb": 3.133,
+      "frame_count": 24,
+      "resolution": "64x64",
+      "frames_per_second": 65.5,
+      "score": 99.2624
+    },
+    "batch_episode_evaluation": {
+      "wall_time_seconds": 0.419154,
+      "peak_tracemalloc_mb": 1.687,
+      "episode_count": 3
+    },
+    "result_serialization": {
+      "wall_time_seconds": 0.003564,
+      "peak_tracemalloc_mb": 0.155
+    },
+    "comparison_image_generation": {
+      "wall_time_seconds": 0.037577,
+      "peak_tracemalloc_mb": 0.294
+    }
+  }
+}
