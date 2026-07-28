@@ -40,6 +40,23 @@ def test_paired_bootstrap_zero_episodes_is_rejected() -> None:
         paired_bootstrap_interval([])
 
 
+def test_paired_bootstrap_rejects_nonfinite_deltas() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        paired_bootstrap_interval([1.0, float("nan")])
+    with pytest.raises(ValueError, match="finite"):
+        paired_bootstrap_interval([1.0, float("inf")])
+
+
+def test_paired_bootstrap_rejects_invalid_sample_count() -> None:
+    with pytest.raises(ValueError, match="greater than zero"):
+        paired_bootstrap_interval([1.0], bootstrap_samples=0)
+
+
+def test_paired_bootstrap_rejects_invalid_confidence_level() -> None:
+    with pytest.raises(ValueError, match="between 0 and 1"):
+        paired_bootstrap_interval([1.0], confidence_level=1.0)
+
+
 def test_paired_bootstrap_confidence_level_changes_interval_width() -> None:
     narrow = paired_bootstrap_interval(
         [-2.0, -1.0, 1.0, 2.0, 4.0],
@@ -113,6 +130,28 @@ def test_confidence_lower_bound_requires_bootstrap_samples() -> None:
             _batch([81]),
             min_confidence_lower_bound=0.0,
         )
+
+
+def test_gate_rejects_duplicate_episode_ids_before_bootstrap() -> None:
+    baseline = _batch([90.0, 10.0])
+    candidate = _batch([90.0, 90.0])
+    for payload in (baseline, candidate):
+        payload["episode_ids"] = ["duplicate.mp4", "duplicate.mp4"]
+        for episode in payload["episodes"]:
+            episode["episode_id"] = "duplicate.mp4"
+
+    with pytest.raises(ValueError, match="duplicate episode IDs"):
+        build_gate_comparison(baseline, candidate, bootstrap_samples=100)
+
+
+def test_gate_rejects_mismatched_episode_sets() -> None:
+    baseline = _batch([90.0])
+    candidate = _batch([90.0])
+    candidate["episode_ids"] = ["other.mp4"]
+    candidate["episodes"][0]["episode_id"] = "other.mp4"
+
+    with pytest.raises(ValueError, match="different episode sets"):
+        build_gate_comparison(baseline, candidate)
 
 
 def _batch(scores: list[float]) -> dict:

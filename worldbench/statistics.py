@@ -49,12 +49,26 @@ def paired_bootstrap_interval(
 
     if not deltas:
         raise ValueError("At least one paired episode delta is required.")
+    if isinstance(bootstrap_samples, bool) or not isinstance(bootstrap_samples, int):
+        raise ValueError("bootstrap_samples must be an integer.")
     if bootstrap_samples <= 0:
         raise ValueError("bootstrap_samples must be greater than zero.")
+    if isinstance(small_sample_threshold, bool) or not isinstance(
+        small_sample_threshold, int
+    ):
+        raise ValueError("small_sample_threshold must be an integer.")
+    if small_sample_threshold < 1:
+        raise ValueError("small_sample_threshold must be at least one.")
+    if not isinstance(confidence_level, (int, float)) or not np.isfinite(
+        confidence_level
+    ):
+        raise ValueError("confidence_level must be a finite number between 0 and 1.")
     if not 0.0 < confidence_level < 1.0:
         raise ValueError("confidence_level must be between 0 and 1.")
 
     arr = np.asarray(deltas, dtype=float)
+    if not np.all(np.isfinite(arr)):
+        raise ValueError("Paired episode deltas must be finite numbers.")
     rng = np.random.default_rng(bootstrap_seed)
     means = np.empty(bootstrap_samples, dtype=float)
     count = int(arr.size)
