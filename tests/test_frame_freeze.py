@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 from worldbench.backends.frame_freeze import freeze_frames, freeze_rollout_predictions
 

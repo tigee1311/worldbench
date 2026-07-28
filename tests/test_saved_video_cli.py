@@ -3,10 +3,10 @@ from __future__ import annotations
 import builtins
 from pathlib import Path
 
-from click.testing import CliRunner
 import imageio.v2 as imageio
 import numpy as np
 import pytest
+from click.testing import CliRunner
 
 from worldbench.cli import app
 from worldbench.runners.video import VideoEvaluationError, evaluate_video_pair

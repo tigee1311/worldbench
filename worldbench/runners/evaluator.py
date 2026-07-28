@@ -17,6 +17,13 @@ from worldbench.metrics import (
     TemporalStabilityMetric,
     VisualSimilarityMetric,
 )
+from worldbench.plugins import (
+    MetricRequirements,
+    PluginErrorPolicy,
+    evaluate_metric_plugin,
+    metric_plugin_provenance,
+)
+from worldbench.provenance import environment_provenance, safe_display_path, sha256_json
 from worldbench.schemas import EpisodeResult, EvaluationResult, MetricResult
 from worldbench.utils import clamp, list_image_files, write_json
 from worldbench.version import RESULT_SCHEMA_VERSION, WORLD_BENCH_VERSION
@@ -26,6 +33,8 @@ DEFAULT_WEIGHTS = default_config().configured_weights
 
 class EvaluatorMetric(Protocol):
     name: str
+    version: str
+    requirements: MetricRequirements
 
     def evaluate(
         self, episode: Episode, prediction_frames: list[Path]
@@ -60,6 +69,7 @@ class EvaluationRunner:
         metrics: list[EvaluatorMetric] | None = None,
         weights: dict[str, float] | None = None,
         config: WorldBenchConfig | None = None,
+        plugin_error_policy: PluginErrorPolicy = "record",
     ) -> EvaluationResult:
         effective_config = config or default_config()
         configured_metrics = effective_config.enabled_metrics
@@ -71,6 +81,7 @@ class EvaluationRunner:
             ]
         else:
             selected_metrics = metrics
+            _validate_metric_plugins(selected_metrics)
             configured_metrics = [metric.name for metric in selected_metrics]
         selected_weights = weights or {
             name: effective_config.configured_weights.get(
@@ -100,7 +111,12 @@ class EvaluationRunner:
                 global_issues.append(issue)
 
             for metric in selected_metrics:
-                result = metric.evaluate(episode, prediction_frames)
+                result = evaluate_metric_plugin(
+                    metric,
+                    episode,
+                    prediction_frames,
+                    error_policy=plugin_error_policy,
+                )
                 metric_results[metric.name] = result
                 episode_issues.extend(result.issues)
                 if not result.is_available and result.reason:
@@ -113,6 +129,7 @@ class EvaluationRunner:
                 prediction_frames,
                 selected_metrics,
                 selected_weights,
+                plugin_error_policy=plugin_error_policy,
             )
             episode_results.append(
                 EpisodeResult(
@@ -131,12 +148,16 @@ class EvaluationRunner:
         ]
         coverage = coverage_for(configured_metrics, selected_weights, available_metrics)
         main_failure = infer_main_failure(aggregate_metrics)
+        dataset_path, _ = safe_display_path(self.dataset.path)
+        predictions_path = (
+            safe_display_path(self.predictions)[0]
+            if self.predictions is not None
+            else None
+        )
         return EvaluationResult(
             schema_version=RESULT_SCHEMA_VERSION,
-            dataset_path=str(self.dataset.path),
-            predictions_path=str(self.predictions)
-            if self.predictions is not None
-            else None,
+            dataset_path=dataset_path,
+            predictions_path=predictions_path,
             created_at=datetime.now(timezone.utc).isoformat(),
             score=overall,
             composite_score=overall,
@@ -156,6 +177,14 @@ class EvaluationRunner:
             configuration=effective_config.model_dump(mode="json", by_alias=True),
             configuration_hash=effective_config.configuration_hash,
             worldbench_version=WORLD_BENCH_VERSION,
+            provenance={
+                "metric_plugins": metric_plugin_provenance(selected_metrics),
+                "adapter_plugins": {},
+                "environment": environment_provenance(),
+                "report_configuration_sha256": sha256_json(
+                    effective_config.model_dump(mode="json", by_alias=True)
+                ),
+            },
             issues=global_issues,
             main_failure=main_failure,
         )
@@ -217,26 +246,30 @@ def resolve_prediction_frames(episode: Episode, predictions: Path | None) -> lis
     return []
 
 
+def _validate_metric_plugins(metrics: list[EvaluatorMetric]) -> None:
+    seen: set[str] = set()
+    for metric in metrics:
+        if not metric.name:
+            raise ValueError("Metric plugin name must be a non-empty string.")
+        if metric.name in seen:
+            raise ValueError(f"Duplicate metric plugin name: {metric.name}")
+        seen.add(metric.name)
+
+
 def weighted_score(
     results: dict[str, MetricResult], weights: dict[str, float]
 ) -> float:
-    total_weight = sum(
-        weight
-        for name, weight in weights.items()
-        if name in results and results[name].is_available
-    )
+    total_weight = 0.0
+    weighted_total = 0.0
+    for name, weight in weights.items():
+        result = results.get(name)
+        if result is None or not result.is_available or result.score is None:
+            continue
+        total_weight += weight
+        weighted_total += float(result.score) * weight
     if total_weight <= 0:
         return 0.0
-    return clamp(
-        sum(
-            float(results[name].score) * weights[name]
-            for name in results
-            if name in weights
-            and results[name].is_available
-            and results[name].score is not None
-        )
-        / total_weight
-    )
+    return clamp(weighted_total / total_weight)
 
 
 def aggregate_metric_results(
@@ -250,9 +283,12 @@ def aggregate_metric_results(
             if metric.name in episode.metrics
         ]
         values = [
-            result.score
+            float(result.score)
             for result in metric_results
             if result.is_available and result.score is not None
+        ]
+        error_results = [
+            result for result in metric_results if result.status == "error"
         ]
         if not values or any(not result.is_available for result in metric_results):
             reasons = []
@@ -264,21 +300,28 @@ def aggregate_metric_results(
                     and metric_result.reason
                 ):
                     reasons.append(f"{episode.episode}: {metric_result.reason}")
+            status = "error" if error_results else "unsupported"
             aggregate[metric.name] = MetricResult(
                 name=metric.name,
                 score=None,
-                status="unsupported",
+                status=status,
+                error_type=error_results[0].error_type if error_results else None,
                 reason=reasons[0].split(": ", 1)[1]
                 if reasons
-                else "Unsupported metric for one or more episodes.",
+                else (
+                    "Metric errored for one or more episodes."
+                    if error_results
+                    else "Unsupported metric for one or more episodes."
+                ),
                 details={
                     "available_episode_scores": values,
                     "unsupported_episodes": reasons,
+                    "error_count": len(error_results),
                 },
                 issues=reasons[:20],
             )
             continue
-        issues = []
+        issues: list[str] = []
         for episode in episode_results:
             metric_result = episode.metrics.get(metric.name)
             if metric_result is not None:
@@ -305,11 +348,12 @@ def infer_main_failure(metrics: dict[str, MetricResult]) -> str:
     ]
     if not available_metrics:
         return "No available metrics were scored."
-    lowest = min(available_metrics, key=lambda result: result.score)
+    lowest = min(available_metrics, key=_metric_score)
     unsupported_count = len(
         [result for result in metrics.values() if not result.is_available]
     )
-    if float(lowest.score) >= 85:
+    lowest_score = 0.0 if lowest.score is None else float(lowest.score)
+    if lowest_score >= 85:
         if unsupported_count:
             return f"No dominant failure among available metrics; {unsupported_count} metrics were unsupported."
         return "No dominant failure detected; the run is strong across core world-model checks."
@@ -323,11 +367,17 @@ def infer_main_failure(metrics: dict[str, MetricResult]) -> str:
     return messages.get(lowest.name, f"The weakest metric is {lowest.name}.")
 
 
+def _metric_score(result: MetricResult) -> float:
+    return float(result.score) if result.score is not None else 0.0
+
+
 def compute_episode_horizon(
     episode: Episode,
     prediction_frames: list[Path],
     metrics: list[EvaluatorMetric],
     weights: dict[str, float],
+    *,
+    plugin_error_policy: PluginErrorPolicy = "record",
 ) -> dict[str, dict[str, object]]:
     """Evaluate honest per-horizon metric prefixes for one episode.
 
@@ -355,7 +405,10 @@ def compute_episode_horizon(
         metric_results: dict[str, MetricResult] = {}
         for metric in metrics:
             result = _evaluate_horizon_metric(
-                metric, prefix_episode, prefix_predictions
+                metric,
+                prefix_episode,
+                prefix_predictions,
+                plugin_error_policy=plugin_error_policy,
             )
             metric_results[metric.name] = result
             if result.is_available:
@@ -364,6 +417,7 @@ def compute_episode_horizon(
                 unavailable[metric.name] = {
                     "status": result.status,
                     "reason": result.reason,
+                    "error_type": result.error_type,
                     "issues": result.issues,
                 }
 
@@ -383,6 +437,8 @@ def _evaluate_horizon_metric(
     metric: EvaluatorMetric,
     episode: Episode,
     prediction_frames: list[Path],
+    *,
+    plugin_error_policy: PluginErrorPolicy = "record",
 ) -> MetricResult:
     if metric.name == "temporal_stability" and len(prediction_frames) < 2:
         return MetricResult(
@@ -394,7 +450,12 @@ def _evaluate_horizon_metric(
                 "Temporal stability requires at least one future-frame transition."
             ],
         )
-    return metric.evaluate(episode, prediction_frames)
+    return evaluate_metric_plugin(
+        metric,
+        episode,
+        prediction_frames,
+        error_policy=plugin_error_policy,
+    )
 
 
 def aggregate_horizon_results(

@@ -1,0 +1,251 @@
+{
+  "schema_version": "2",
+  "result_type": "gate_comparison",
+  "worldbench_version": "0.4.1",
+  "created_at": "2026-07-27T23:07:09.203236+00:00",
+  "status": "PASS",
+  "passed": true,
+  "baseline": {
+    "checkpoint_name": "baseline_v041",
+    "score": 96.10118880756227,
+    "episode_count": 1
+  },
+  "candidate": {
+    "checkpoint_name": "candidate_v041",
+    "score": 99.4238586597942,
+    "episode_count": 1
+  },
+  "thresholds": {
+    "max_overall_drop": 0.0,
+    "max_metric_drop": 2.0,
+    "max_horizon_drop": 2.0,
+    "required_metrics": [
+      "visual_similarity",
+      "temporal_stability"
+    ],
+    "min_metric_count": 2,
+    "min_metric_coverage": 0.4,
+    "min_configured_weight_coverage": 0.45,
+    "strict_config_match": true,
+    "max_episode_regressions": 1,
+    "min_composite_improvement": 0.0,
+    "unchanged_tolerance": 0.01
+  },
+  "overall": {
+    "baseline": 96.10118880756227,
+    "candidate": 99.4238586597942,
+    "change": 3.3226698522319396
+  },
+  "metrics": [
+    {
+      "metric": "temporal_stability",
+      "baseline": 97.90063443885123,
+      "candidate": 98.70368198453698,
+      "change": 0.8030475456857573,
+      "available_count_baseline": 1,
+      "available_count_candidate": 1
+    },
+    {
+      "metric": "visual_similarity",
+      "baseline": 94.6616323025311,
+      "candidate": 100.0,
+      "change": 5.338367697468897,
+      "available_count_baseline": 1,
+      "available_count_candidate": 1
+    }
+  ],
+  "horizon": [
+    {
+      "horizon": "t+1",
+      "metric": "visual_similarity",
+      "baseline": 98.97492370472335,
+      "candidate": 100.0,
+      "change": 1.025076295276648,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+2",
+      "metric": "temporal_stability",
+      "baseline": 100.0,
+      "candidate": 100.0,
+      "change": 0.0,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+2",
+      "metric": "visual_similarity",
+      "baseline": 98.4819510760804,
+      "candidate": 100.0,
+      "change": 1.5180489239195936,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+3",
+      "metric": "temporal_stability",
+      "baseline": 99.73750014305115,
+      "candidate": 99.1421875,
+      "change": -0.5953126430511446,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+3",
+      "metric": "visual_similarity",
+      "baseline": 98.31931531257052,
+      "candidate": 100.0,
+      "change": 1.6806846874294763,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+4",
+      "metric": "temporal_stability",
+      "baseline": 97.26627764400351,
+      "candidate": 98.77376657599726,
+      "change": 1.5074889319937483,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+4",
+      "metric": "visual_similarity",
+      "baseline": 96.6593472305342,
+      "candidate": 100.0,
+      "change": 3.3406527694658052,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+5",
+      "metric": "temporal_stability",
+      "baseline": 97.59492981120357,
+      "candidate": 98.36676693099582,
+      "change": 0.7718371197922522,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+5",
+      "metric": "visual_similarity",
+      "baseline": 95.88413825925441,
+      "candidate": 100.0,
+      "change": 4.115861740745586,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+6",
+      "metric": "temporal_stability",
+      "baseline": 97.58885252676531,
+      "candidate": 98.50468709560228,
+      "change": 0.9158345688369707,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+6",
+      "metric": "visual_similarity",
+      "baseline": 95.40518068349354,
+      "candidate": 100.0,
+      "change": 4.5948193165064595,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+7",
+      "metric": "temporal_stability",
+      "baseline": 97.78758694039198,
+      "candidate": 98.62791370716403,
+      "change": 0.8403267667720513,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+7",
+      "metric": "visual_similarity",
+      "baseline": 94.98476749518218,
+      "candidate": 100.0,
+      "change": 5.015232504817817,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+8",
+      "metric": "temporal_stability",
+      "baseline": 97.90063443885123,
+      "candidate": 98.70368198453698,
+      "change": 0.8030475456857573,
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "horizon": "t+8",
+      "metric": "visual_similarity",
+      "baseline": 94.6616323025311,
+      "candidate": 100.0,
+      "change": 5.338367697468897,
+      "baseline_count": 1,
+      "candidate_count": 1
+    }
+  ],
+  "episodes": {
+    "improved_count": 1,
+    "regressed_count": 0,
+    "unchanged_count": 0,
+    "deltas": [
+      {
+        "episode_id": "episode_000.mp4",
+        "baseline": 96.10118880756227,
+        "candidate": 99.4238586597942,
+        "change": 3.3226698522319396
+      }
+    ],
+    "worst_regressions": [
+      {
+        "episode_id": "episode_000.mp4",
+        "baseline": 96.10118880756227,
+        "candidate": 99.4238586597942,
+        "change": 3.3226698522319396
+      }
+    ],
+    "best_improvements": [
+      {
+        "episode_id": "episode_000.mp4",
+        "baseline": 96.10118880756227,
+        "candidate": 99.4238586597942,
+        "change": 3.3226698522319396
+      }
+    ]
+  },
+  "coverage": {
+    "available_metrics": [
+      "visual_similarity",
+      "temporal_stability"
+    ],
+    "unsupported_metrics": [
+      "action_consistency",
+      "object_permanence",
+      "contact_realism"
+    ],
+    "configured_metrics": [
+      "visual_similarity",
+      "action_consistency",
+      "temporal_stability",
+      "object_permanence",
+      "contact_realism"
+    ],
+    "available_metric_count": 2,
+    "configured_metric_count": 5,
+    "metric_coverage": 0.4,
+    "configured_weight_coverage": 0.45,
+    "effective_normalized_weights": {
+      "visual_similarity": 0.5555555555555556,
+      "temporal_stability": 0.4444444444444445
+    }
+  },
+  "warnings": [],
+  "failure_reasons": []
+}

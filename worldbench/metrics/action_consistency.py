@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from worldbench.dataset import Episode
+from worldbench.plugins import MetricRequirements
 from worldbench.schemas import ActionRecord, MetricResult
 from worldbench.utils import (
     clamp,
@@ -21,6 +22,13 @@ class ActionConsistencyMetric:
     """Check whether predicted visual motion follows logged robot actions."""
 
     name = "action_consistency"
+    version = "1.0"
+    requirements = MetricRequirements(
+        input_modalities=("rgb_frames", "actions"),
+        requires_actions=True,
+        supports_video_pairs=False,
+        notes="Requires string actions or explicit dx/dy; raw numeric vectors need an action adapter.",
+    )
 
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
         if len(prediction_frames) < 2:

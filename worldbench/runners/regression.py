@@ -2,19 +2,21 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from worldbench.config import WorldBenchConfig, coverage_for, default_config
+from worldbench.provenance import environment_provenance, safe_display_path, sha256_json
 from worldbench.runners.evaluator import aggregate_horizon_results, numeric_summary
 from worldbench.runners.video import collect_video_files, evaluate_video_pair
+from worldbench.statistics import paired_bootstrap_interval
 from worldbench.utils import read_json, write_json
 from worldbench.version import RESULT_SCHEMA_VERSION, WORLD_BENCH_VERSION
 
-
 UNCHANGED_TOLERANCE = 0.01
+SUPPORTED_BATCH_SCHEMA_VERSIONS = {"1", RESULT_SCHEMA_VERSION}
 
 
 def evaluate_video_batch(
@@ -63,8 +65,9 @@ def evaluate_video_batch(
         episode_payloads.append(
             {
                 "episode_id": episode_id,
-                "ground_truth_path": str(ground_truth[episode_id]),
-                "prediction_path": str(predictions[episode_id]),
+                "ground_truth_path": safe_display_path(ground_truth[episode_id])[0],
+                "prediction_path": safe_display_path(predictions[episode_id])[0],
+                "input_files": result.provenance.get("input_files", []),
                 "result_path": str(episode_result_path),
                 "score": result.score,
                 "metrics": {
@@ -89,19 +92,23 @@ def evaluate_video_batch(
         effective_config.configured_weights,
         available_metrics,
     )
+    provenance = _batch_provenance(episode_payloads)
     payload = {
         "schema_version": RESULT_SCHEMA_VERSION,
         "result_type": "batch_evaluation",
         "worldbench_version": WORLD_BENCH_VERSION,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "checkpoint_name": checkpoint_name,
-        "ground_truth_root": str(gt_root),
-        "predictions_root": str(pred_root),
+        "ground_truth_root": safe_display_path(gt_root)[0],
+        "predictions_root": safe_display_path(pred_root)[0],
         "skip_context": skip_context,
         "pairing_rule": "Videos are paired by relative POSIX path under each root.",
         "episode_count": len(episode_payloads),
         "episode_ids": matched,
         "dataset_identifier": _dataset_identifier(ground_truth),
+        "provenance": provenance,
+        "metric_plugins": provenance["metric_plugins"],
+        "adapter_plugins": provenance["adapter_plugins"],
         "episodes": episode_payloads,
         "aggregate": {
             "composite_score": numeric_summary(
@@ -118,6 +125,9 @@ def evaluate_video_batch(
         "configured_weights": effective_config.configured_weights,
         "effective_normalized_weights": coverage["effective_normalized_weights"],
         "configuration_hash": effective_config.configuration_hash,
+        "report_configuration_sha256": sha256_json(
+            effective_config.model_dump(mode="json", by_alias=True)
+        ),
         "horizon": aggregate_horizon_results(episode_results),
         "worst_episodes": sorted(
             (
@@ -129,6 +139,9 @@ def evaluate_video_batch(
         "configuration": {
             "skip_context": skip_context,
             **effective_config.model_dump(mode="json"),
+            "report_configuration_sha256": sha256_json(
+                effective_config.model_dump(mode="json", by_alias=True)
+            ),
             "unchanged_tolerance": UNCHANGED_TOLERANCE,
         },
     }
@@ -170,6 +183,7 @@ def save_batch_artifacts(
     paths["markdown"].write_text(_batch_markdown(payload), encoding="utf-8")
     paths["latest_markdown"].parent.mkdir(parents=True, exist_ok=True)
     paths["latest_markdown"].write_text(_batch_markdown(payload), encoding="utf-8")
+    output_path: Path | None
     if output is not None:
         output_path = Path(output)
     else:
@@ -188,6 +202,7 @@ def load_batch_result(path: str | Path) -> dict[str, Any]:
     payload = read_json(candidate)
     if payload.get("result_type") != "batch_evaluation":
         raise ValueError(f"Expected a batch evaluation result: {candidate}")
+    _validate_supported_batch_schema(payload)
     return _with_legacy_compatibility(payload)
 
 
@@ -205,6 +220,10 @@ def build_gate_comparison(
     strict_config_match: bool = True,
     max_episode_regressions: int | None = None,
     min_composite_improvement: float | None = None,
+    bootstrap_samples: int = 0,
+    bootstrap_seed: int = 42,
+    confidence_level: float = 0.95,
+    min_confidence_lower_bound: float | None = None,
 ) -> dict[str, Any]:
     """Compare two batch results and return a PASS/FAIL gate payload."""
 
@@ -254,6 +273,37 @@ def build_gate_comparison(
         failures=failures,
     )
     episode_deltas = _episode_deltas(baseline, candidate)
+    uncertainty = None
+    if min_confidence_lower_bound is not None and bootstrap_samples <= 0:
+        raise ValueError(
+            "--min-confidence-lower-bound requires --bootstrap-samples greater than 0."
+        )
+    if bootstrap_samples > 0:
+        interval = paired_bootstrap_interval(
+            [float(item["change"]) for item in episode_deltas["deltas"]],
+            bootstrap_samples=bootstrap_samples,
+            bootstrap_seed=bootstrap_seed,
+            confidence_level=confidence_level,
+        )
+        uncertainty = interval.to_dict()
+        if interval.small_sample_warning:
+            warnings.append(
+                "Paired bootstrap interval is based on a small episode count; treat it as an uncertainty estimate, not proof of formal significance."
+            )
+        if (
+            min_confidence_lower_bound is not None
+            and interval.confidence_interval[0] < min_confidence_lower_bound
+        ):
+            failures.append(
+                {
+                    "kind": "confidence_lower_bound",
+                    "lower_bound": interval.confidence_interval[0],
+                    "required_lower_bound": min_confidence_lower_bound,
+                    "confidence_level": confidence_level,
+                    "bootstrap_samples": bootstrap_samples,
+                    "bootstrap_seed": bootstrap_seed,
+                }
+            )
     if (
         max_episode_regressions is not None
         and episode_deltas["regressed_count"] > max_episode_regressions
@@ -307,6 +357,10 @@ def build_gate_comparison(
             "strict_config_match": strict_config_match,
             "max_episode_regressions": max_episode_regressions,
             "min_composite_improvement": min_composite_improvement,
+            "bootstrap_samples": bootstrap_samples,
+            "bootstrap_seed": bootstrap_seed,
+            "confidence_level": confidence_level,
+            "min_confidence_lower_bound": min_confidence_lower_bound,
             "unchanged_tolerance": UNCHANGED_TOLERANCE,
         },
         "overall": {
@@ -317,6 +371,7 @@ def build_gate_comparison(
         "metrics": metric_deltas,
         "horizon": horizon_deltas,
         "episodes": episode_deltas,
+        "uncertainty": uncertainty,
         "coverage": candidate["coverage"],
         "warnings": warnings,
         "failure_reasons": failures,
@@ -382,6 +437,23 @@ def _gate_markdown(payload: dict[str, Any]) -> str:
     overall = payload["overall"]
     episodes = payload["episodes"]
     coverage = payload.get("coverage", {})
+    uncertainty = payload.get("uncertainty")
+    uncertainty_lines: list[str] = []
+    if isinstance(uncertainty, dict):
+        interval = uncertainty.get("confidence_interval", [])
+        if isinstance(interval, list) and len(interval) == 2:
+            uncertainty_lines = [
+                "## Paired Uncertainty",
+                "",
+                f"- Method: `{uncertainty.get('method')}`",
+                f"- Paired delta mean: {float(uncertainty.get('paired_delta_mean', 0.0)):+.2f}",
+                f"- {float(uncertainty.get('confidence_level', 0.0)):.0%} interval: [{float(interval[0]):+.2f}, {float(interval[1]):+.2f}]",
+                f"- Bootstrap samples: {uncertainty.get('bootstrap_samples')}",
+                f"- Bootstrap seed: {uncertainty.get('bootstrap_seed')}",
+                f"- Episode count: {uncertainty.get('episode_count')}",
+                f"- Small-sample warning: {uncertainty.get('small_sample_warning')}",
+                "",
+            ]
     return "\n".join(
         [
             f"# WorldBench Gate: {payload['status']}",
@@ -399,6 +471,7 @@ def _gate_markdown(payload: dict[str, Any]) -> str:
             ),
             *(["- None"] if not payload.get("failure_reasons") else []),
             "",
+            *uncertainty_lines,
         ]
     )
 
@@ -406,6 +479,7 @@ def _gate_markdown(payload: dict[str, Any]) -> str:
 def _with_legacy_compatibility(payload: dict[str, Any]) -> dict[str, Any]:
     """Add schema-v2 comparison metadata without rewriting a loaded artifact."""
 
+    _validate_supported_batch_schema(payload)
     migrated = dict(payload)
     aggregate = dict(migrated.get("aggregate", {}))
     if "composite_score" not in aggregate and "overall" in aggregate:
@@ -618,29 +692,77 @@ def _aggregate_batch_metrics(episodes: list[dict[str, Any]]) -> dict[str, Any]:
                 unavailable.append(
                     {
                         "episode_id": episode["episode_id"],
+                        "status": metric.get("status"),
                         "reason": metric.get("reason"),
+                        "error_type": metric.get("error_type"),
                     }
                 )
         if values:
-            stats = numeric_summary(values)
+            stats: dict[str, Any] = dict(numeric_summary(values))
             stats.update(
                 {
                     "status": "available",
                     "available_count": len(values),
                     "total_count": len(episodes),
                     "unavailable_count": len(unavailable),
+                    "error_count": sum(
+                        1 for item in unavailable if item.get("status") == "error"
+                    ),
+                    "unavailable_episodes": unavailable[:20],
                 }
             )
             aggregate[name] = stats
         else:
+            error_count = sum(
+                1 for item in unavailable if item.get("status") == "error"
+            )
             aggregate[name] = {
-                "status": "unsupported",
+                "status": "error" if error_count else "unsupported",
                 "available_count": 0,
                 "total_count": len(episodes),
-                "reason": "Metric was unavailable for every episode.",
+                "error_count": error_count,
+                "reason": (
+                    "Metric errored for every episode."
+                    if error_count
+                    else "Metric was unavailable for every episode."
+                ),
                 "unavailable_episodes": unavailable[:20],
             }
     return aggregate
+
+
+def _batch_provenance(episodes: list[dict[str, Any]]) -> dict[str, Any]:
+    metric_plugins: dict[str, str] = {}
+    adapter_plugins: dict[str, str] = {}
+    input_files: list[dict[str, Any]] = []
+    for episode in episodes:
+        episode_inputs = episode.get("input_files", [])
+        if isinstance(episode_inputs, list):
+            input_files.extend(
+                item for item in episode_inputs if isinstance(item, dict)
+            )
+        result = episode.get("result", {})
+        if not isinstance(result, dict):
+            continue
+        provenance = result.get("provenance", {})
+        if not isinstance(provenance, dict):
+            continue
+        for name, version in _string_mapping(provenance.get("metric_plugins")).items():
+            metric_plugins.setdefault(name, version)
+        for name, version in _string_mapping(provenance.get("adapter_plugins")).items():
+            adapter_plugins.setdefault(name, version)
+    return {
+        "metric_plugins": dict(sorted(metric_plugins.items())),
+        "adapter_plugins": dict(sorted(adapter_plugins.items())),
+        "input_files": input_files,
+        "environment": environment_provenance(decoder_backend="imageio.v2"),
+    }
+
+
+def _string_mapping(value: object) -> dict[str, str]:
+    if not isinstance(value, dict):
+        return {}
+    return {str(key): str(item) for key, item in value.items()}
 
 
 def _validate_gate_compatibility(
@@ -654,8 +776,12 @@ def _validate_gate_compatibility(
         warnings.append(
             "This result predates schema v2, so full configuration compatibility could not be verified."
         )
-    baseline_ids = set(_episode_ids(baseline))
-    candidate_ids = set(_episode_ids(candidate))
+    baseline_id_list = _episode_ids(baseline)
+    candidate_id_list = _episode_ids(candidate)
+    _reject_duplicate_episode_ids(baseline_id_list, "baseline")
+    _reject_duplicate_episode_ids(candidate_id_list, "candidate")
+    baseline_ids = set(baseline_id_list)
+    candidate_ids = set(candidate_id_list)
     if baseline_ids != candidate_ids:
         missing = sorted(baseline_ids - candidate_ids)
         extra = sorted(candidate_ids - baseline_ids)
@@ -696,6 +822,19 @@ def _episode_ids(payload: dict[str, Any]) -> list[str]:
     if isinstance(ids, list):
         return [str(item) for item in ids]
     return [str(episode["episode_id"]) for episode in payload.get("episodes", [])]
+
+
+def _reject_duplicate_episode_ids(ids: list[str], label: str) -> None:
+    seen: set[str] = set()
+    duplicates: list[str] = []
+    for episode_id in ids:
+        if episode_id in seen and episode_id not in duplicates:
+            duplicates.append(episode_id)
+        seen.add(episode_id)
+    if duplicates:
+        raise ValueError(
+            f"{label.capitalize()} contains duplicate episode IDs: {duplicates[:10]}."
+        )
 
 
 def _metric_deltas(
@@ -786,6 +925,8 @@ def _horizon_deltas(
 def _episode_deltas(
     baseline: dict[str, Any], candidate: dict[str, Any]
 ) -> dict[str, Any]:
+    _reject_duplicate_episode_ids(_episode_ids(baseline), "baseline")
+    _reject_duplicate_episode_ids(_episode_ids(candidate), "candidate")
     baseline_map = {episode["episode_id"]: episode for episode in baseline["episodes"]}
     candidate_map = {
         episode["episode_id"]: episode for episode in candidate["episodes"]
@@ -826,6 +967,16 @@ def _stat_mean(payload: dict[str, Any]) -> float:
     if not isinstance(value, (int, float)):
         raise ValueError("Cannot compare aggregate without a numeric mean.")
     return float(value)
+
+
+def _validate_supported_batch_schema(payload: dict[str, Any]) -> None:
+    version = payload.get("schema_version")
+    if version is not None and str(version) not in SUPPORTED_BATCH_SCHEMA_VERSIONS:
+        raise ValueError(
+            f"Unsupported batch schema_version '{version}'. "
+            f"This version supports schema versions "
+            f"{sorted(SUPPORTED_BATCH_SCHEMA_VERSIONS)}."
+        )
 
 
 def _horizon_key(label: str) -> int:

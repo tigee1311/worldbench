@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw
 import pytest
+from PIL import Image, ImageDraw
 
 from worldbench.backends.demo import DemoBackend
 from worldbench.dataset import Episode

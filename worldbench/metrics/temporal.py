@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from worldbench.dataset import Episode
+from worldbench.plugins import MetricRequirements
 from worldbench.schemas import MetricResult
 from worldbench.utils import clamp, load_rgb
 
@@ -15,6 +16,12 @@ class TemporalStabilityMetric:
     """Penalize flicker, high variance, and sudden frame jumps."""
 
     name = "temporal_stability"
+    version = "1.0"
+    requirements = MetricRequirements(
+        input_modalities=("rgb_frames",),
+        supports_video_pairs=True,
+        notes="Requires at least two predicted future frames.",
+    )
 
     def evaluate(self, episode: Episode, prediction_frames: list[Path]) -> MetricResult:
         del episode

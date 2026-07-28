@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from worldbench.runners.evaluator import EvaluationRunner
 from worldbench.utils import markdown_table, write_json
-
 
 FAILURE_MODE_LABELS = {
     "action_consistency": "action mismatch",
@@ -109,9 +109,9 @@ def generate_benchmark_markdown(payload: dict[str, object]) -> str:
         rows.append(
             [
                 str(scenario["name"]),
-                f"{float(good['score']):.1f}/100",
-                f"{float(bad['score']):.1f}/100",
-                f"{float(scenario['delta']):+.1f}",
+                f"{_as_float(good.get('score')):.1f}/100",
+                f"{_as_float(bad.get('score')):.1f}/100",
+                f"{_as_float(scenario.get('delta')):+.1f}",
             ]
         )
 
@@ -121,9 +121,9 @@ def generate_benchmark_markdown(payload: dict[str, object]) -> str:
         [
             "# WorldBench Demo Benchmark",
             "",
-            f"**good_model average:** {float(payload['good_model_average']):.1f}/100",
-            f"**bad_model average:** {float(payload['bad_model_average']):.1f}/100",
-            f"**overall delta:** +{float(payload['overall_delta']):.1f}",
+            f"**good_model average:** {_as_float(payload.get('good_model_average')):.1f}/100",
+            f"**bad_model average:** {_as_float(payload.get('bad_model_average')):.1f}/100",
+            f"**overall delta:** +{_as_float(payload.get('overall_delta')):.1f}",
             "",
             "## Scenario Scores",
             "",
@@ -135,6 +135,10 @@ def generate_benchmark_markdown(payload: dict[str, object]) -> str:
             "",
         ]
     )
+
+
+def _as_float(value: Any) -> float:
+    return float(value) if isinstance(value, (int, float)) else 0.0
 
 
 def _largest_failure_modes(

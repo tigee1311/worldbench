@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image
 import pytest
+from PIL import Image
 
 from worldbench.backends.frame_scramble import (
     scramble_frames,

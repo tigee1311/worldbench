@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw
 import pytest
+from PIL import Image, ImageDraw
 
 from worldbench.dataset import Episode
 from worldbench.metrics.action_consistency import ActionConsistencyMetric

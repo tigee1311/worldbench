@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+from worldbench.version import RESULT_SCHEMA_VERSION
+
+SUPPORTED_EVALUATION_SCHEMA_VERSIONS = {"1", RESULT_SCHEMA_VERSION}
 
 
 class ActionRecord(BaseModel):
@@ -86,10 +91,30 @@ class MetricResult(BaseModel):
 
     name: str
     score: float | None = None
-    status: Literal["available", "unsupported"] = "available"
+    status: Literal["available", "unsupported", "error"] = "available"
     reason: str | None = None
+    error_type: str | None = None
     details: dict[str, Any] = Field(default_factory=dict)
     issues: list[str] = Field(default_factory=list)
+
+    @field_validator("score", mode="before")
+    @classmethod
+    def reject_non_numeric_scores(cls, value: object) -> object:
+        if value is None:
+            return value
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("Metric score must be a finite number or null.")
+        return value
+
+    @model_validator(mode="after")
+    def validate_status_and_score(self) -> "MetricResult":
+        if self.score is not None and not math.isfinite(self.score):
+            raise ValueError("Metric score must be finite.")
+        if self.status == "available" and self.score is None:
+            raise ValueError("Available metric results require a finite score.")
+        if self.status in {"unsupported", "error"} and self.score is not None:
+            raise ValueError("Unavailable metric results must not include a score.")
+        return self
 
     @property
     def is_available(self) -> bool:
@@ -97,6 +122,8 @@ class MetricResult(BaseModel):
 
     @property
     def display_score(self) -> str:
+        if self.status == "error":
+            return "ERROR"
         return "N/A" if not self.is_available else f"{self.score:.1f}"
 
 
@@ -138,6 +165,12 @@ class EvaluationResult(BaseModel):
 
     @model_validator(mode="after")
     def populate_compatibility_fields(self) -> "EvaluationResult":
+        if self.schema_version not in SUPPORTED_EVALUATION_SCHEMA_VERSIONS:
+            raise ValueError(
+                f"Unsupported evaluation schema_version '{self.schema_version}'. "
+                f"This version supports schema versions "
+                f"{sorted(SUPPORTED_EVALUATION_SCHEMA_VERSIONS)}."
+            )
         if self.composite_score is None:
             self.composite_score = self.score
         if not self.configured_weights:
@@ -189,6 +222,14 @@ class EvaluationResult(BaseModel):
         console.rule("[bold]WorldBench Evaluation Report[/bold]")
         console.print(f"[bold]Composite Score:[/bold] {self.score:.2f}/100")
         if self.coverage:
+            available = [
+                str(name).replace("_", " ").title()
+                for name in self.coverage.get("available_metrics", [])
+            ]
+            unavailable = [
+                str(name).replace("_", " ").title()
+                for name in self.coverage.get("unsupported_metrics", [])
+            ]
             console.print(
                 f"[bold]Metric coverage:[/bold] {self.coverage.get('available_metric_count', 0)} of "
                 f"{self.coverage.get('configured_metric_count', 0)} configured metrics"
@@ -197,6 +238,18 @@ class EvaluationResult(BaseModel):
                 f"[bold]Configured weight coverage:[/bold] "
                 f"{float(self.coverage.get('configured_weight_coverage', 0.0)):.0%}"
             )
+            console.print(
+                f"[bold]Available metrics:[/bold] {', '.join(available) or 'None'}"
+            )
+            console.print(
+                f"[bold]Unavailable metrics:[/bold] {', '.join(unavailable) or 'None'}"
+            )
+            if self.coverage.get("available_metric_count", 0) < self.coverage.get(
+                "configured_metric_count", 0
+            ):
+                console.print(
+                    "[yellow]Composite Score uses available metrics only; unavailable metrics are N/A, not zero.[/yellow]"
+                )
         console.print(f"[bold]Main failure:[/bold] {self.main_failure}")
 
         table = Table(title="Metric Scores", show_lines=False)

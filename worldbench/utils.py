@@ -28,6 +28,16 @@ def read_json(path: str | Path) -> Any:
         return json.load(handle)
 
 
+def read_json_limited(path: str | Path, *, max_bytes: int) -> Any:
+    candidate = Path(path)
+    if candidate.stat().st_size > max_bytes:
+        raise ValueError(
+            f"JSON file is too large to read safely: {candidate} "
+            f"({candidate.stat().st_size} bytes > {max_bytes} bytes)"
+        )
+    return read_json(candidate)
+
+
 def write_json(path: str | Path, data: Any) -> Path:
     output = Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -59,7 +69,7 @@ def load_aligned_pairs(
     ground_truth: Iterable[Path], predictions: Iterable[Path]
 ) -> list[tuple[np.ndarray, np.ndarray]]:
     pairs: list[tuple[np.ndarray, np.ndarray]] = []
-    for gt_path, pred_path in zip(ground_truth, predictions):
+    for gt_path, pred_path in zip(ground_truth, predictions, strict=False):
         gt = load_rgb(gt_path)
         pred = load_rgb(pred_path, size=(gt.shape[1], gt.shape[0]))
         pairs.append((gt, pred))

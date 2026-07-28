@@ -6,11 +6,11 @@ native Hugging Face LeRobotDataset importer for real robot datasets.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import importlib
 import inspect
 import math
 import shutil
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
@@ -20,7 +20,6 @@ from PIL import Image, ImageDraw
 from worldbench.dataset import validate_dataset
 from worldbench.schemas import ValidationReport
 from worldbench.utils import ensure_dir, list_image_files, write_json
-
 
 REQUIRED_JSON_FILES = ("actions.json", "states.json", "metadata.json")
 CAMERA_PREFIX = "observation.images."

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import random
 import shutil
+from dataclasses import dataclass
 from pathlib import Path
 
 from worldbench.utils import ensure_dir, list_image_files
@@ -134,7 +134,7 @@ def _scrambled_source_order(frame_count: int, severity: float, seed: int) -> lis
         return source_order
 
     shuffled = candidate_windows[:]
-    random.Random(seed).shuffle(shuffled)
+    random.Random(seed).shuffle(shuffled)  # nosec B311
     selected = sorted(shuffled[:target_windows])
     for start in selected:
         source_order[start : start + 3] = [

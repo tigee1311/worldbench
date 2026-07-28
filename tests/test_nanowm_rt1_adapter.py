@@ -2,18 +2,17 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
-from pathlib import Path
 import socket
 import sys
+from pathlib import Path
 from typing import Any
 
 import imageio.v2 as imageio
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 from worldbench.utils import read_json
-
 
 MODULE_PATH = (
     Path(__file__).resolve().parents[1]
