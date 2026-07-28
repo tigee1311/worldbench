@@ -11,8 +11,11 @@ Split branches:
 - `hardening/research-performance`
 - `hardening/docs-governance`
 
-No release was created, no tag was created or overwritten, no PR was merged, and
-the original hardening branch was preserved.
+As of the PR #13 documentation review on 2026-07-28, `hardening/core-statistics`
+and `hardening/quality-security` have been merged into `main`.
+`hardening/research-performance` remains open and research-only. No release was
+created, no tag was created or overwritten, and the original hardening branch
+was preserved.
 
 ## Completed
 
@@ -67,9 +70,9 @@ Detailed split validation is recorded in
 
 Highlights:
 
-- PR 1: `pytest -q` passed with 157 tests; v0.4.1 fixture loading passed; recursive numerical comparison found 0 protected numerical differences.
-- PR 2: coverage passed at 81.15% against an 80% threshold; mypy passed for 9 checked source files; configured Bandit passed; clean-environment pip-audit passed.
-- PR 3: research/performance tests passed; documented research and benchmark commands ran successfully; production metrics remained unchanged.
+- PR 1: `pytest -q` passed after merge with 174 tests; v0.4.1 fixture loading passed; recursive numerical comparison found 0 protected numerical differences.
+- PR 2: post-merge coverage passed at 81.29% against an 80% threshold; mypy passed for 9 checked source files; configured Bandit passed; clean CI pip-audit passed.
+- PR 3: research/performance checks passed in branch CI; documented research and benchmark commands ran during the split; production metrics remained unchanged.
 - PR 4: documentation-only validation is limited to link/content review, `git diff --check`, and README accuracy checks.
 
 ## Compatibility Notes

@@ -1,12 +1,12 @@
 # PR Validation Matrix
 
-Status values reflect local validation during the split plus GitHub status
-after the PR branches were pushed.
+Status values reflect local validation during the split, GitHub status after the
+PR branches were pushed, and post-merge validation where a PR has already landed.
 
 | Check | PR 1 core-statistics | PR 2 quality-security | PR 3 research-performance | PR 4 docs-governance |
 | --- | --- | --- | --- | --- |
-| pytest | passed: 157 tests | passed: 157 tests | passed: 159 tests | not applicable locally; docs-only |
-| coverage | not applicable | passed: 81.15%, threshold 80% | passed through inherited CI check | not applicable |
+| pytest | passed after merge: 174 tests | passed after merge: 174 tests | passed in branch CI | not applicable locally; docs-only |
+| coverage | not applicable | passed after merge: 81.29%, threshold 80% | passed through inherited CI check | not applicable |
 | Ruff | passed | passed | passed | passed |
 | format | workflow surface passed; broad check deferred to PR 2 | passed: `worldbench tests examples` | passed: `worldbench tests examples benchmarks` | not applicable locally; docs-only |
 | mypy | not applicable | passed: 9 files checked | passed through inherited CI check | not applicable |
@@ -26,9 +26,9 @@ after the PR branches were pushed.
 Known local caveats:
 
 - The existing developer venv contains unrelated packages, so
-  `.venv/bin/python -m pip_audit --local --progress-spinner off` reports issues
-  in packages not installed by WorldBench's clean CI environment. A clean
-  project audit environment passed.
+  `.venv/bin/python -m pip_audit` can report issues in packages not installed
+  by WorldBench's clean CI environment. The clean CI dependency vulnerability
+  scan passed.
 - The unconfigured `bandit -r worldbench` scans an ignored nested
   `worldbench/.venv`; the configured workflow command excludes local venvs and
   passed.

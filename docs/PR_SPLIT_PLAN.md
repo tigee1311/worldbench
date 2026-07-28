@@ -7,7 +7,16 @@ Base branch: `main`
 Goal: split the original 103-file hardening branch into focused, independently
 reviewable PRs without merging the large branch directly.
 
-## Dependency Graph
+## Current Status
+
+As of the PR #13 documentation review on 2026-07-28:
+
+- PR #10 / PR 1, `hardening/core-statistics`, has been merged into `main`.
+- PR #11 / PR 2, `hardening/quality-security`, has been merged into `main`.
+- PR #12 / PR 3, `hardening/research-performance`, has been retargeted to `main` and remains open for review.
+- PR #13 / PR 4, `hardening/docs-governance`, targets `main` and contains this documentation/governance update.
+
+## Original Dependency Graph
 
 ```text
 PR 1: hardening/core-statistics
@@ -25,12 +34,14 @@ PR 2: hardening/quality-security
     ↓
 
 PR 3: hardening/research-performance
-  base: hardening/quality-security
+  original base: hardening/quality-security
+  current base: main after PR 2 merged
   reason: research/performance tests use PR 2 dev tooling and format paths
   includes: research-only metrics, corruption harness, performance benchmarks
 
 PR 4: hardening/docs-governance
-  base: hardening/core-statistics
+  original base: hardening/core-statistics
+  current base: main after PR 1 and PR 2 merged
   reason: docs can reference PR 1 features without depending on PR 2/3 tooling
   includes: README rewrite, governance, validation protocols, brand/compat docs
 ```
