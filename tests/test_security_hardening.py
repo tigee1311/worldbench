@@ -45,5 +45,5 @@ def test_verify_run_does_not_follow_parent_directory_traversal(
 
     verification = verify_result_file(result)
 
-    assert verification.status == "FAIL"
+    assert verification.status == "verification_failed"
     assert any("does not exist" in issue.message for issue in verification.errors)

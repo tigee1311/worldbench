@@ -34,7 +34,7 @@ def test_video_result_records_hashes_versions_and_decoder_metadata(
     assert provenance["input_files"][0]["path_redacted"] is False
 
     verification = verify_result_file(saved)
-    assert verification.status == "PASS"
+    assert verification.status == "verified"
     assert verification.checked_input_files == 2
 
 
@@ -52,7 +52,7 @@ def test_verify_run_detects_hash_mismatch(
 
     verification = verify_result_file(saved)
 
-    assert verification.status == "FAIL"
+    assert verification.status == "verification_failed"
     assert any("hash mismatch" in issue.message for issue in verification.errors)
 
 
@@ -70,7 +70,7 @@ def test_verify_run_detects_missing_input_file(
 
     verification = verify_result_file(saved)
 
-    assert verification.status == "FAIL"
+    assert verification.status == "verification_failed"
     assert any("does not exist" in issue.message for issue in verification.errors)
 
 
@@ -84,6 +84,8 @@ def test_absolute_paths_are_redacted_by_default(tmp_path: Path) -> None:
 
     assert result.provenance["ground_truth_path"] == "ground_truth.mp4"
     assert result.provenance["prediction_path"] == "prediction.mp4"
+    assert result.dataset_path == "ground_truth.mp4"
+    assert result.predictions_path == "prediction.mp4"
     assert str(tmp_path) not in result.provenance["ground_truth_path"]
     assert result.provenance["input_files"][0]["path_redacted"] is True
 
@@ -99,9 +101,24 @@ def test_verify_run_warns_when_paths_were_redacted(tmp_path: Path) -> None:
 
     verification = verify_result_file(saved)
 
-    assert verification.status == "PASS"
+    assert verification.status == "partially_verified"
     assert verification.checked_input_files == 0
     assert any("path was redacted" in issue.message for issue in verification.warnings)
+
+
+def test_saved_video_reports_do_not_serialize_private_paths(tmp_path: Path) -> None:
+    ground_truth = tmp_path / "ground truth.mp4"
+    prediction = tmp_path / "prediction future.mp4"
+    _write_video(ground_truth, _frames(4))
+    _write_video(prediction, _frames(4, delta=1))
+    result = evaluate_video_pair(ground_truth, prediction)
+    json_path = result.save_json(tmp_path / "result.json")
+    md_path = result.save_report(tmp_path / "summary.md")
+
+    for path in (json_path, md_path):
+        text = path.read_text(encoding="utf-8")
+        assert str(tmp_path) not in text
+        assert "/Users/" not in text
 
 
 def test_verify_run_detects_configuration_hash_mismatch(tmp_path: Path) -> None:
@@ -112,7 +129,7 @@ def test_verify_run_detects_configuration_hash_mismatch(tmp_path: Path) -> None:
 
     verification = verify_result_file(result_path)
 
-    assert verification.status == "FAIL"
+    assert verification.status == "verification_failed"
     assert any(
         "configuration hash mismatch" in issue.message.lower()
         for issue in verification.errors
@@ -127,7 +144,7 @@ def test_verify_run_detects_metric_version_mismatch(tmp_path: Path) -> None:
 
     verification = verify_result_file(result_path)
 
-    assert verification.status == "FAIL"
+    assert verification.status == "verification_failed"
     assert any("version mismatch" in issue.message for issue in verification.errors)
 
 
@@ -137,8 +154,50 @@ def test_verify_run_rejects_malformed_json(tmp_path: Path) -> None:
 
     verification = verify_result_file(result_path)
 
-    assert verification.status == "FAIL"
+    assert verification.status == "not_verifiable"
     assert any("Could not read JSON" in issue.message for issue in verification.errors)
+
+
+def test_verify_run_detects_malformed_input_hash(tmp_path: Path) -> None:
+    result_path = _saved_relative_result(tmp_path)
+    payload = _read_json(result_path)
+    payload["provenance"]["input_files"][0]["path"] = "ground_truth.mp4"
+    payload["provenance"]["input_files"][0]["path_redacted"] = False
+    payload["provenance"]["input_files"][0]["sha256"] = "not-a-sha256"
+    write_json(result_path, payload)
+
+    verification = verify_result_file(result_path)
+
+    assert verification.status == "verification_failed"
+    assert any("hash is malformed" in issue.message for issue in verification.errors)
+
+
+def test_verify_run_warns_when_input_hash_is_missing(tmp_path: Path) -> None:
+    result_path = _saved_relative_result(tmp_path)
+    payload = _read_json(result_path)
+    payload["provenance"]["input_files"][0]["path"] = "ground_truth.mp4"
+    payload["provenance"]["input_files"][0]["path_redacted"] = False
+    payload["provenance"]["input_files"][0].pop("sha256")
+    write_json(result_path, payload)
+
+    verification = verify_result_file(result_path)
+
+    assert verification.status == "partially_verified"
+    assert any("hash is missing" in issue.message for issue in verification.warnings)
+
+
+def test_verify_run_rejects_future_schema_version(tmp_path: Path) -> None:
+    result_path = _saved_relative_result(tmp_path)
+    payload = _read_json(result_path)
+    payload["schema_version"] = "999"
+    write_json(result_path, payload)
+
+    verification = verify_result_file(result_path)
+
+    assert verification.status == "not_verifiable"
+    assert any(
+        "Unsupported schema_version" in issue.message for issue in verification.errors
+    )
 
 
 def test_limited_json_reader_rejects_oversized_files(tmp_path: Path) -> None:
@@ -155,9 +214,24 @@ def test_verify_run_cli_reports_failures(tmp_path: Path) -> None:
 
     result = CliRunner().invoke(app, ["verify-run", str(result_path)])
 
-    assert result.exit_code == 1
-    assert "FAIL" in result.output
+    assert result.exit_code == 2
+    assert "NOT VERIFIABLE" in result.output
     assert "Result JSON must be an object" in result.output
+
+
+def test_verify_run_cli_reports_partial_verification(tmp_path: Path) -> None:
+    ground_truth = tmp_path / "ground_truth.mp4"
+    prediction = tmp_path / "prediction.mp4"
+    _write_video(ground_truth, _frames(4))
+    _write_video(prediction, _frames(4, delta=1))
+    saved = evaluate_video_pair(ground_truth, prediction).save_json(
+        tmp_path / "result.json"
+    )
+
+    result = CliRunner().invoke(app, ["verify-run", str(saved)])
+
+    assert result.exit_code == 3
+    assert "PARTIALLY VERIFIED" in result.output
 
 
 def _saved_relative_result(tmp_path: Path) -> Path:

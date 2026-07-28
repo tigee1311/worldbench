@@ -9,7 +9,7 @@ Fixtures live under `tests/fixtures/v0_4_1/` and were generated with the
 published package in:
 
 ```text
-/Users/ayush/worldbench-review/v041-fixture-env-py311
+<review-root>/v041-fixture-env-py311
 ```
 
 The fixture environment used Python 3.11 because `worldbench==0.4.1` declares
@@ -36,7 +36,7 @@ Compatibility tests assert that:
 - v0.4.1 batch results load through `load_batch_result`.
 - v0.4.1 gate semantics remain unchanged by default.
 - Missing new provenance fields remain missing evidence and are reported by
-  `verify-run` as warnings where applicable.
+  `verify-run` as partial verification with warnings where applicable.
 - Missing bootstrap fields do not affect old gates.
 - The old `eval-videos --reference` alias still works.
 - Non-batch results are not silently treated as batch results.
@@ -47,20 +47,20 @@ Representative evaluation:
 
 ```bash
 worldbench eval-videos \
-  --ground-truth /Users/ayush/worldbench/tests/fixtures/v0_4_1/saved_video/demo_inputs/ground_truth.mp4 \
-  --prediction /Users/ayush/worldbench/tests/fixtures/v0_4_1/saved_video/demo_inputs/predicted_future.mp4 \
-  --output /Users/ayush/worldbench-review/output-comparison/<side> \
+  --ground-truth tests/fixtures/v0_4_1/saved_video/demo_inputs/ground_truth.mp4 \
+  --prediction tests/fixtures/v0_4_1/saved_video/demo_inputs/predicted_future.mp4 \
+  --output <review-root>/output-comparison/<side> \
   --no-save-comparison
 ```
 
-The v0.4.1 side was run from `/Users/ayush/worldbench-review` to avoid importing
+The v0.4.1 side was run from an external review directory to avoid importing
 the checkout from the repository working directory. The core branch side was run
-with `PYTHONPATH=/Users/ayush/worldbench` from the same review directory.
+with `PYTHONPATH=<repo-root>` from the same review directory.
 
 Machine-readable comparison:
 
 ```text
-/Users/ayush/worldbench-review/output-comparison/comparison.json
+<review-root>/output-comparison/comparison.json
 ```
 
 Summary:
