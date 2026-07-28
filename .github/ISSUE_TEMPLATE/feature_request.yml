@@ -1,0 +1,47 @@
+name: Feature request
+description: Suggest a WorldBench capability
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Regression-testing problem
+      description: What saved-video world-model regression workflow would this improve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Keep the proposal tied to same-episode baseline-versus-candidate evaluation.
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - CLI or Python API
+        - metric transparency
+        - provenance or verification
+        - plugin or adapter
+        - documentation
+        - CI or packaging
+        - research-only metric experiment
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence or validation needed
+      description: Note whether this can be implemented directly or needs comparative research evidence.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This does not require WorldBench to run real robots or claim task success.
+          required: true
+        - label: This does not require changing production metric formulas without evidence.
+          required: true

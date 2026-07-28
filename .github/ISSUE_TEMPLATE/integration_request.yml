@@ -1,0 +1,49 @@
+name: Integration request
+description: Request help adapting saved predictions, actions, or datasets to WorldBench
+title: "[Integration] "
+labels: ["integration"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Regression question
+      description: What baseline-versus-candidate checkpoint question should WorldBench answer?
+    validations:
+      required: true
+  - type: textarea
+    id: model_output
+    attributes:
+      label: Model output format
+      description: Describe videos, frames, latent outputs, states, actions, or simulator renders.
+    validations:
+      required: true
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Expected compatibility
+      options:
+        - Direct RGB video or frame predictions
+        - Adapter required
+        - Unsure
+        - Likely unsupported
+    validations:
+      required: true
+  - type: input
+    id: episode_count
+    attributes:
+      label: Episode count
+      placeholder: "Example: 10 fixed episodes"
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy and sharing limits
+      description: Do not post credentials or private download links. State whether data is public, private, or mixed.
+    validations:
+      required: true
+  - type: checkboxes
+    id: authorization
+    attributes:
+      label: Authorization
+      options:
+        - label: I am authorized to share the described data or format details for integration planning.
+          required: true
