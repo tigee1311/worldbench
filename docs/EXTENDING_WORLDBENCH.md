@@ -45,7 +45,7 @@ MetricResult(
 )
 ```
 
-It may also raise `UnsupportedPluginResult`; WorldBench converts that into N/A. Unexpected plugin exceptions are isolated and reported as unsupported for that metric instead of crashing the whole run.
+It may also raise `UnsupportedPluginResult`; WorldBench converts that into N/A. Unexpected plugin exceptions are isolated by default as `status="error"` with a sanitized `error_type` and reason, not as ordinary unsupported metrics. Strict callers can request fail-fast plugin execution when programming errors should stop the run.
 
 ## Explicit Registration
 
