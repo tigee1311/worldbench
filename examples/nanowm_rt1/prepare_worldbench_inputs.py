@@ -9,13 +9,13 @@ into the video-folder layout consumed by `worldbench eval-batch`.
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -24,7 +24,6 @@ from PIL import Image
 from worldbench.runners.video import VIDEO_EXTENSIONS
 from worldbench.utils import IMAGE_EXTENSIONS, write_json
 from worldbench.version import WORLD_BENCH_VERSION
-
 
 ADAPTER_NAME = "nanowm_rt1_prepare_worldbench_inputs"
 MANIFEST_SCHEMA_VERSION = "1"
@@ -391,7 +390,7 @@ def _inspect_video(
         reader.close()
     except AdapterError:
         raise
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise AdapterError(f"{label} video is unreadable: {source} ({exc})") from exc
 
     if width is None or height is None or frame_count == 0:
@@ -578,7 +577,7 @@ def _load_metadata(path: Path | None) -> dict[str, Any]:
     try:
         with path.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise AdapterError(f"Could not parse metadata JSON {path}: {exc}") from exc
     if not isinstance(data, dict):
         raise AdapterError(f"Metadata JSON must be an object: {path}")
@@ -660,7 +659,7 @@ def _worldbench_commit() -> str | None:
             capture_output=True,
             text=True,
         )
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     return result.stdout.strip() or None
 

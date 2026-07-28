@@ -1,7 +1,7 @@
 """Convert a tiny LeRobot-style local folder into WorldBench format."""
 
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 from rich.console import Console
 
@@ -9,7 +9,6 @@ from worldbench.backends.lerobot import (
     create_lerobot_style_demo_source,
     import_lerobot_style,
 )
-
 
 console = Console()
 output_path = Path("examples/lerobot_push_cube")

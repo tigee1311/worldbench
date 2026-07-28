@@ -14,7 +14,6 @@ from worldbench.schemas import EvaluationResult
 from worldbench.utils import read_json
 from worldbench.verification import verify_result_file
 
-
 FIXTURES = Path(__file__).parent / "fixtures" / "v0_4_1"
 
 
