@@ -123,8 +123,8 @@ def evaluate_video_pair(
         input_file_record("ground_truth_video", gt_path),
         input_file_record("prediction_video", pred_path),
     ]
-    result.dataset_path = str(gt_path)
-    result.predictions_path = str(pred_path)
+    result.dataset_path = ground_truth_display
+    result.predictions_path = prediction_display
     result.provenance = {
         "source": "video_pair",
         "name": name,

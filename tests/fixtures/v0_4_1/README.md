@@ -2,18 +2,18 @@
 
 These fixtures were generated from the published `worldbench[video]==0.4.1`
 package in a clean Python 3.11 virtual environment under
-`/Users/ayush/worldbench-review/v041-fixture-env-py311`.
+`<review-root>/v041-fixture-env-py311`.
 
 Commands used:
 
 ```bash
-/opt/homebrew/bin/python3.11 -m venv /Users/ayush/worldbench-review/v041-fixture-env-py311
-/Users/ayush/worldbench-review/v041-fixture-env-py311/bin/python -m pip install --upgrade pip
-/Users/ayush/worldbench-review/v041-fixture-env-py311/bin/pip install "worldbench[video]==0.4.1"
-/Users/ayush/worldbench-review/v041-fixture-env-py311/bin/worldbench eval-videos --demo --output tests/fixtures/v0_4_1/saved_video --no-save-comparison
-/Users/ayush/worldbench-review/v041-fixture-env-py311/bin/worldbench eval-batch --ground-truth tests/fixtures/v0_4_1/batch/ground_truth --predictions tests/fixtures/v0_4_1/batch/baseline_predictions --name baseline_v041 --output tests/fixtures/v0_4_1/batch/baseline_batch_result.json --output-root /Users/ayush/worldbench-review/v041-batch-artifacts
-/Users/ayush/worldbench-review/v041-fixture-env-py311/bin/worldbench eval-batch --ground-truth tests/fixtures/v0_4_1/batch/ground_truth --predictions tests/fixtures/v0_4_1/batch/candidate_predictions --name candidate_v041 --output tests/fixtures/v0_4_1/batch/candidate_batch_result.json --output-root /Users/ayush/worldbench-review/v041-batch-artifacts
-/Users/ayush/worldbench-review/v041-fixture-env-py311/bin/worldbench gate --baseline tests/fixtures/v0_4_1/batch/baseline_batch_result.json --candidate tests/fixtures/v0_4_1/batch/candidate_batch_result.json --output-root tests/fixtures/v0_4_1/gate
+python3.11 -m venv <review-root>/v041-fixture-env-py311
+<review-root>/v041-fixture-env-py311/bin/python -m pip install --upgrade pip
+<review-root>/v041-fixture-env-py311/bin/pip install "worldbench[video]==0.4.1"
+<review-root>/v041-fixture-env-py311/bin/worldbench eval-videos --demo --output tests/fixtures/v0_4_1/saved_video --no-save-comparison
+<review-root>/v041-fixture-env-py311/bin/worldbench eval-batch --ground-truth tests/fixtures/v0_4_1/batch/ground_truth --predictions tests/fixtures/v0_4_1/batch/baseline_predictions --name baseline_v041 --output tests/fixtures/v0_4_1/batch/baseline_batch_result.json --output-root <review-root>/v041-batch-artifacts
+<review-root>/v041-fixture-env-py311/bin/worldbench eval-batch --ground-truth tests/fixtures/v0_4_1/batch/ground_truth --predictions tests/fixtures/v0_4_1/batch/candidate_predictions --name candidate_v041 --output tests/fixtures/v0_4_1/batch/candidate_batch_result.json --output-root <review-root>/v041-batch-artifacts
+<review-root>/v041-fixture-env-py311/bin/worldbench gate --baseline tests/fixtures/v0_4_1/batch/baseline_batch_result.json --candidate tests/fixtures/v0_4_1/batch/candidate_batch_result.json --output-root tests/fixtures/v0_4_1/gate
 ```
 
 Fixture purpose:

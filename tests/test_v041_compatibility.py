@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
+from pydantic import ValidationError
 
 from worldbench.cli import app
 from worldbench.config import load_config
@@ -102,13 +103,14 @@ def test_v041_nanowm_artifact_loads_as_legacy_evaluation_result() -> None:
 def test_v041_missing_provenance_is_reported_not_fabricated() -> None:
     verification = verify_result_file(FIXTURES / "saved_video" / "result.json")
 
-    assert verification.status == "PASS"
+    assert verification.status == "partially_verified"
     assert verification.checked_input_files == 0
     messages = [issue.message for issue in verification.warnings]
     assert any("Metric plugin versions are not recorded" in item for item in messages)
     assert any(
         "report_configuration_sha256 is not recorded" in item for item in messages
     )
+    assert any("Input file provenance is not recorded" in item for item in messages)
 
 
 def test_v041_cli_reference_alias_still_works(tmp_path: Path) -> None:
@@ -150,3 +152,32 @@ def test_old_result_type_is_not_silently_misinterpreted(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="Expected a batch evaluation result"):
         load_batch_result(malformed)
+
+
+def test_future_evaluation_schema_version_fails_clearly() -> None:
+    payload = read_json(FIXTURES / "saved_video" / "result.json")
+    payload["schema_version"] = "999"
+
+    with pytest.raises(ValidationError, match="Unsupported evaluation schema_version"):
+        EvaluationResult.model_validate(payload)
+
+
+def test_future_batch_schema_version_fails_clearly(tmp_path: Path) -> None:
+    payload = read_json(FIXTURES / "batch" / "baseline_batch_result.json")
+    payload["schema_version"] = "999"
+    result_path = tmp_path / "batch.json"
+    result_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Unsupported batch schema_version"):
+        load_batch_result(result_path)
+
+
+def test_v041_fixtures_do_not_contain_private_local_paths() -> None:
+    forbidden = ("/Users/", "worldbench-review")
+    checked = 0
+    for path in FIXTURES.rglob("*"):
+        if path.is_file() and path.suffix.lower() in {".json", ".md", ".yml"}:
+            checked += 1
+            text = path.read_text(encoding="utf-8")
+            assert not any(fragment in text for fragment in forbidden), path
+    assert checked > 0

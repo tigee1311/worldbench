@@ -102,4 +102,4 @@ for issue in verification.issues:
     print(issue.severity, issue.message)
 ```
 
-`verify_result_file` checks bounded JSON structure, input-file existence and hashes when paths are available, package-version compatibility, configuration hash consistency, and built-in metric plugin versions.
+`verify_result_file` checks bounded JSON structure, input-file existence and hashes when paths are available, package-version compatibility, configuration hash consistency, and built-in metric plugin versions. Status is one of `verified`, `partially_verified`, `verification_failed`, or `not_verifiable`; redacted paths and legacy reports with missing hashes are partial, not fully verified.
