@@ -22,7 +22,7 @@ WorldBench `0.4.1` is the current repository version. Do not create a release un
 python -m pytest
 python -m pytest --cov=worldbench --cov-branch --cov-report=term-missing
 python -m ruff check .
-python -m ruff format --check worldbench tests examples research_metrics benchmarks
+python -m ruff format --check worldbench tests examples
 python -m mypy
 python -m bandit -q -c pyproject.toml -r worldbench --exclude worldbench/.venv
 python -m build

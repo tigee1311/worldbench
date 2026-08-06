@@ -34,14 +34,13 @@ was preserved.
 - Added governance files, issue templates, PR template, support/security policy, and roadmap/triage docs.
 - Shortened the README into a focused landing page and moved deeper material to linked docs.
 - Added compatibility matrix, brand assessment, external pilot protocol, human evaluation protocol, and second-model validation plan.
-- Added performance benchmark harness and documentation.
+- Proposed a performance benchmark harness (pending in the open `hardening/research-performance` PR; not yet merged).
 - Added security tests for verifier JSON limits and parent-directory traversal in recorded paths.
 - Updated release checklist for version `0.4.1`.
 
 ## Experimental Only
 
-- Added `research_metrics/` corruption harness for candidate metric experiments.
-- Generated small research artifacts in `artifacts/metric_research/`.
+- Proposed a `research_metrics/` corruption harness and `artifacts/metric_research/` artifacts (pending in the open `hardening/research-performance` PR; not yet merged and not present on `main`).
 - Production metric formulas and weights were not changed.
 - Streaming/chunked video decoding was documented but not implemented because it needs golden-result equivalence evidence.
 

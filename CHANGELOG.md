@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Visual Similarity now returns N/A (`status="unsupported"`) instead of `0.0` when no aligned frame pairs exist, so a missing-input condition can no longer enter the weighted composite as a real score
+- Temporal Stability now returns N/A (`status="unsupported"`) instead of `0.0` when fewer than two predicted frames exist, matching the N/A discipline used by every other metric
+
+### Added
+
+- Reusable composite GitHub Action (`tigee1311/worldbench@main`) so any repository can gate world-model checkpoints in CI with a few lines of workflow YAML
+
+### Changed
+
+- Docs no longer describe unmerged research/performance harnesses as completed work
+- Removed stray build clutter (orphaned bytecode, nested virtualenv, empty result directories) from the working tree
+
 ## [0.4.1] - 2026-07-23
 
 ### Added
