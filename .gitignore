@@ -19,4 +19,6 @@ scripts/make_launch_demo.py
 website/assets/demo/
 website/scripts/sync-assets.mjs
 quickstart_report.md
+demo-results/
+scripts/dev/
 .DS_Store

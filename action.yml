@@ -1,0 +1,121 @@
+name: "WorldBench Checkpoint Gate"
+description: >-
+  Evaluate a candidate world-model checkpoint's saved prediction videos against
+  ground truth and gate the result against an approved baseline. Fails the job
+  when the candidate regresses.
+author: "WorldBench contributors"
+branding:
+  icon: "check-circle"
+  color: "green"
+
+inputs:
+  ground-truth:
+    description: "Directory of ground-truth episode videos (the fixed eval suite)."
+    required: true
+  predictions:
+    description: "Directory of candidate prediction videos matching the ground-truth relative paths."
+    required: true
+  baseline:
+    description: "Path to the approved baseline batch result JSON."
+    required: true
+  candidate-name:
+    description: "Name recorded for the candidate checkpoint."
+    required: false
+    default: "candidate"
+  skip-context:
+    description: "Number of leading context frames to exclude from every episode."
+    required: false
+    default: "0"
+  config:
+    description: "Optional path to worldbench.yml."
+    required: false
+    default: ""
+  max-episode-regressions:
+    description: "Maximum candidate episodes allowed to regress."
+    required: false
+    default: "0"
+  strict-config-match:
+    description: "Fail on different metric profiles, weights, or horizons (true/false)."
+    required: false
+    default: "true"
+  bootstrap-samples:
+    description: "Enable paired bootstrap confidence intervals with this sample count (0 disables)."
+    required: false
+    default: "0"
+  extra-gate-args:
+    description: "Extra arguments appended verbatim to `worldbench gate`."
+    required: false
+    default: ""
+  worldbench-version:
+    description: "worldbench version spec to install, e.g. ==0.4.1. Empty installs the latest release."
+    required: false
+    default: ""
+  python-version:
+    description: "Python version used to run WorldBench."
+    required: false
+    default: "3.12"
+
+outputs:
+  result:
+    description: "PASS or FAIL."
+    value: ${{ steps.gate.outputs.result }}
+  candidate-json:
+    description: "Path to the candidate batch result JSON."
+    value: ${{ steps.eval.outputs.candidate-json }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install WorldBench
+      shell: bash
+      run: python -m pip install --disable-pip-version-check "worldbench[video]${{ inputs.worldbench-version }}"
+
+    - name: Evaluate candidate checkpoint
+      id: eval
+      shell: bash
+      run: |
+        args=(
+          --ground-truth "${{ inputs.ground-truth }}"
+          --predictions "${{ inputs.predictions }}"
+          --name "${{ inputs.candidate-name }}"
+          --skip-context "${{ inputs.skip-context }}"
+          --output worldbench-candidate.json
+        )
+        if [ -n "${{ inputs.config }}" ]; then
+          args+=(--config "${{ inputs.config }}")
+        fi
+        worldbench eval-batch "${args[@]}"
+        echo "candidate-json=worldbench-candidate.json" >> "$GITHUB_OUTPUT"
+
+    - name: Gate candidate against baseline
+      id: gate
+      shell: bash
+      run: |
+        args=(
+          --baseline "${{ inputs.baseline }}"
+          --candidate worldbench-candidate.json
+          --max-episode-regressions "${{ inputs.max-episode-regressions }}"
+        )
+        if [ "${{ inputs.strict-config-match }}" = "true" ]; then
+          args+=(--strict-config-match)
+        fi
+        if [ "${{ inputs.bootstrap-samples }}" != "0" ]; then
+          args+=(--bootstrap-samples "${{ inputs.bootstrap-samples }}")
+        fi
+        if [ -n "${{ inputs.config }}" ]; then
+          args+=(--config "${{ inputs.config }}")
+        fi
+        if [ -n "${{ inputs.extra-gate-args }}" ]; then
+          # shellcheck disable=SC2206
+          args+=(${{ inputs.extra-gate-args }})
+        fi
+        if worldbench gate "${args[@]}"; then
+          echo "result=PASS" >> "$GITHUB_OUTPUT"
+        else
+          echo "result=FAIL" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi

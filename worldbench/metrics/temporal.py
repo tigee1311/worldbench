@@ -28,7 +28,9 @@ class TemporalStabilityMetric:
         if len(prediction_frames) < 2:
             return MetricResult(
                 name=self.name,
-                score=0.0,
+                score=None,
+                status="unsupported",
+                reason="Need at least two predicted frames.",
                 issues=["Need at least two predicted frames."],
             )
 
