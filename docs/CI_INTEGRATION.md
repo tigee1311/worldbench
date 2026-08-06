@@ -1,5 +1,35 @@
 # CI Integration
 
+## Drop-in GitHub Action
+
+The fastest way to gate checkpoints in CI is the reusable action defined at the repository root ([action.yml](../action.yml)):
+
+```yaml
+name: WorldBench checkpoint gate
+
+on: [pull_request]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Run your model-specific inference here to produce
+      # candidate_predictions/ matching eval_suite/ relative paths.
+
+      - uses: tigee1311/worldbench@main
+        with:
+          ground-truth: eval_suite
+          predictions: candidate_predictions
+          baseline: artifacts/worldbench/approved-baseline.json
+          config: worldbench.yml
+```
+
+The action installs WorldBench, evaluates the candidate predictions, gates them against the approved baseline, exposes `result` (`PASS`/`FAIL`) and `candidate-json` outputs, and fails the job on regression. Pin a release tag (for example `tigee1311/worldbench@v0.4.1`) for reproducible CI once the tag containing `action.yml` exists.
+
+## Manual workflow
+
 Commit an approved baseline batch artifact at `artifacts/worldbench/approved-baseline.json` or retrieve an immutable version from your artifact store. Do not regenerate the baseline during each candidate run. Update it only after a candidate passes, rollout changes are reviewed, and the team explicitly approves the new checkpoint.
 
 The CI workflow is for saved video-based world-model predictions on a team's own fixed episode suite. It answers whether the candidate checkpoint regressed relative to the approved baseline; it is not a general robot-policy or task-success benchmark.
