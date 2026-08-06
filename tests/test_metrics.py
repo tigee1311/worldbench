@@ -5,6 +5,7 @@ from worldbench.dataset import load_dataset
 from worldbench.metrics import (
     ActionConsistencyMetric,
     ObjectPermanenceMetric,
+    TemporalStabilityMetric,
     VisualSimilarityMetric,
 )
 from worldbench.runners.evaluator import resolve_prediction_frames
@@ -47,3 +48,28 @@ def test_bad_predictions_penalize_object_permanence(tmp_path: Path) -> None:
 
     assert good.score > bad.score
     assert "disappearance_percentage" in bad.details
+
+
+def test_visual_similarity_without_pairs_is_unsupported(tmp_path: Path) -> None:
+    dataset_path = DemoBackend().create(tmp_path / "demo")
+    dataset = load_dataset(dataset_path)
+    episode = dataset.episodes[0]
+
+    result = VisualSimilarityMetric().evaluate(episode, [])
+
+    assert result.status == "unsupported"
+    assert result.score is None
+    assert result.reason == "No aligned frame pairs available."
+
+
+def test_temporal_stability_single_frame_is_unsupported(tmp_path: Path) -> None:
+    dataset_path = DemoBackend().create(tmp_path / "demo")
+    dataset = load_dataset(dataset_path)
+    episode = dataset.episodes[0]
+    predictions = resolve_prediction_frames(episode, dataset_path / "good_model")
+
+    result = TemporalStabilityMetric().evaluate(episode, predictions[:1])
+
+    assert result.status == "unsupported"
+    assert result.score is None
+    assert result.reason == "Need at least two predicted frames."

@@ -31,8 +31,7 @@ Availability rule:
 
 Unavailable behavior:
 
-- this metric currently does not return N/A for missing frame pairs
-- if no aligned pairs exist, it returns `0.0` with issue `No aligned frame pairs available.`
+- if no aligned pairs exist, it returns N/A (`status="unsupported"`) with reason `No aligned frame pairs available.`
 
 Known limitations:
 
@@ -55,7 +54,7 @@ Availability rule:
 
 Unavailable behavior:
 
-- the full metric currently returns `0.0` with issue `Need at least two predicted frames.` when fewer than two frames exist
+- the full metric returns N/A (`status="unsupported"`) with reason `Need at least two predicted frames.` when fewer than two frames exist
 - the per-horizon wrapper returns N/A with reason `Temporal stability requires at least one future-frame transition.`
 
 Known limitations:

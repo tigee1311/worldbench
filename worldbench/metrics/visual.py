@@ -28,7 +28,11 @@ class VisualSimilarityMetric:
         pairs = load_aligned_pairs(episode.frames, prediction_frames)
         if not pairs:
             return MetricResult(
-                name=self.name, score=0.0, issues=["No aligned frame pairs available."]
+                name=self.name,
+                score=None,
+                status="unsupported",
+                reason="No aligned frame pairs available.",
+                issues=["No aligned frame pairs available."],
             )
 
         mses: list[float] = []

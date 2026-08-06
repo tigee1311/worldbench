@@ -50,7 +50,7 @@ Version: `visual_similarity` plugin version `1.0`.
 
 Supported situations: aligned RGB ground truth and prediction frames.
 
-Unsupported situations: no aligned frame pairs. Current compatibility behavior returns `0.0` with an issue rather than N/A.
+Unsupported situations: no aligned frame pairs. The metric returns N/A (`status="unsupported"`) rather than a score.
 
 Known failure modes: visually plausible but action-wrong predictions may score well; perceptual quality can differ from pixel/SSIM similarity; multimodal valid futures can be penalized.
 
@@ -82,7 +82,7 @@ Version: `temporal_stability` plugin version `1.0`.
 
 Supported situations: two or more predicted future frames.
 
-Unsupported situations: one predicted frame has no temporal transition. Current full-run compatibility behavior returns `0.0` with an issue; per-horizon `t+1` reports N/A.
+Unsupported situations: one predicted frame has no temporal transition. Both the full run and per-horizon `t+1` report N/A (`status="unsupported"`).
 
 Known failure modes: a smooth but wrong video can score well; severe temporal scrambling has shown smaller deltas than frame freezing in existing corruption artifacts.
 
